@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: kalkulator-kredit-bot
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python telegram_bot.py
+    plan: free
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: TELEGRAM_BOT_TOKEN
+        value: 8928690453:AAEQqWXm0ll5rya0PrRyEgo7ZseIHdV7NJQ
