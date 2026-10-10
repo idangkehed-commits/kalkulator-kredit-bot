@@ -266,6 +266,32 @@ def jalankan_bot():
     )
     print(f"   -> Biaya Notaris: {format_rupiah(biaya_notaris)}\n")
 
+    biaya_bpjstk = 0.0
+    punya_bpjstk = None
+    if jenis_kredit == "KUR" and limit > 100_000_000:
+        def validate_bpjstk(inp: str):
+            val = inp.strip().lower()
+            if val in ["1", "ya", "punya", "ada", "y", "sudah"]:
+                return True
+            if val in ["2", "tidak", "belum", "tidak punya", "ga", "t", "n"]:
+                return False
+            return None
+
+        print("👉 Apakah calon debitur punya kartu BPJSTK (BPJS Ketenagakerjaan)?")
+        print("   [1] Punya (Bebas Biaya Rp 0)")
+        print("   [2] Tidak Punya (Biaya Rp 168.000)")
+        punya_bpjstk = tanya_dengan_validasi(
+            "👉 Pilih (1 untuk Punya / 2 untuk Tidak Punya): ",
+            validate_bpjstk,
+            "Pilihan tidak valid! Ketik 1 (Punya) atau 2 (Tidak Punya)."
+        )
+        if not punya_bpjstk:
+            biaya_bpjstk = 168_000.0
+            print("   -> Calon debitur tidak punya kartu BPJSTK (Biaya Rp 168.000 ditambahkan).\n")
+        else:
+            biaya_bpjstk = 0.0
+            print("   -> Calon debitur sudah punya kartu BPJSTK (Bebas Biaya Rp 0).\n")
+
     print("\n" + "=" * 70)
     print("   📊 HASIL KALKULASI KREDIT")
     print("=" * 70)
@@ -281,7 +307,9 @@ def jalankan_bot():
         "tipe_bunga": tipe_bunga,
         "tanggal_lahir": tgl_lahir,
         "nama": nama_debitur,
-        "biaya_notaris": biaya_notaris
+        "biaya_notaris": biaya_notaris,
+        "biaya_bpjstk": biaya_bpjstk,
+        "punya_bpjstk": punya_bpjstk
     }
 
     excel_reader = ExcelInsuranceReader(data_folder="E:\\kalkulator-kredit-bot\\excel_data")

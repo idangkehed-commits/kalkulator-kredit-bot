@@ -83,8 +83,9 @@ def start_health_server():
     STATE_TENOR,
     STATE_NAMA,
     STATE_TGL_LAHIR,
-    STATE_NOTARIS
-) = range(9)
+    STATE_NOTARIS,
+    STATE_BPJSTK
+) = range(10)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 EXCEL_DIR = os.path.join(os.path.dirname(__file__), "excel_data")
@@ -157,10 +158,19 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
         f"3. Asuransi Kerugian : {kerugian_fmt}",
         f"4. Biaya Notaris : {notaris_fmt}",
         f"5. Asuransi Sijitu : {sijitu_fmt} <i>({ket_sijitu_esc})</i>",
+    ]
+
+    if hasil.get("biaya_bpjstk", 0) > 0:
+        bpjstk_fmt = format_rupiah(hasil['biaya_bpjstk'])
+        lines.append(f"6. BPJSTK : {bpjstk_fmt}")
+    elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
+        lines.append("6. BPJSTK : Rp 0 <i>(Sudah punya kartu)</i>")
+
+    lines.extend([
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         f"<b>Total Biaya yang Disiapkan : {total_fmt}*</b>",
         f"<i>*(Catatan: Calon Debitur: {nama_esc}, Umur: {hasil['umur']} tahun)</i>"
-    ]
+    ])
 
     if hasil.get("is_topup"):
         sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))
@@ -521,7 +531,7 @@ async def handle_notaris_callback(update: Update, context: ContextTypes.DEFAULT_
     await query.answer()
 
     context.user_data["biaya_notaris"] = 0.0
-    return await proses_kalkulasi_dan_kirim(query, context, is_callback=True)
+    return await proses_setelah_notaris(query, context, is_callback=True)
 
 
 async def handle_notaris_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -532,6 +542,63 @@ async def handle_notaris_text(update: Update, context: ContextTypes.DEFAULT_TYPE
         nom = 0.0
 
     context.user_data["biaya_notaris"] = nom
+    return await proses_setelah_notaris(update, context, is_callback=False)
+
+
+async def proses_setelah_notaris(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
+    """Mengecek apakah pengajuan adalah KUR > 100jt untuk menanyakan kartu BPJSTK."""
+    jenis = context.user_data.get("jenis_kredit", "KUR")
+    limit = context.user_data.get("limit", 0.0)
+
+    if jenis == "KUR" and limit > 100_000_000:
+        keyboard = [
+            [
+                InlineKeyboardButton("Punya (Bebas Biaya)", callback_data="BPJSTK_ADA"),
+                InlineKeyboardButton("Tidak Punya (+ Rp 168.000)", callback_data="BPJSTK_TIDAK")
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        pesan = (
+            "👉 <b>Apakah calon debitur punya kartu BPJSTK (BPJS Ketenagakerjaan)?</b>\n\n"
+            "<i>(Untuk pengajuan KUR di atas 100 juta, jika calon debitur belum memiliki kartu BPJSTK akan dikenakan biaya kepesertaan sebesar Rp 168.000)</i>"
+        )
+        if is_callback:
+            await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+        else:
+            await event_source.message.reply_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+        return STATE_BPJSTK
+    else:
+        context.user_data["biaya_bpjstk"] = 0.0
+        context.user_data["punya_bpjstk"] = None
+        return await proses_kalkulasi_dan_kirim(event_source, context, is_callback=is_callback)
+
+
+async def handle_bpjstk_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani pemilihan tombol BPJSTK."""
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+    if data == "BPJSTK_ADA":
+        context.user_data["punya_bpjstk"] = True
+        context.user_data["biaya_bpjstk"] = 0.0
+    else:
+        context.user_data["punya_bpjstk"] = False
+        context.user_data["biaya_bpjstk"] = 168_000.0
+
+    return await proses_kalkulasi_dan_kirim(query, context, is_callback=True)
+
+
+async def handle_bpjstk_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani input teks untuk BPJSTK."""
+    text = update.message.text.strip().lower()
+    if any(k in text for k in ["punya", "ada", "ya", "y", "sudah", "1"]):
+        context.user_data["punya_bpjstk"] = True
+        context.user_data["biaya_bpjstk"] = 0.0
+    else:
+        context.user_data["punya_bpjstk"] = False
+        context.user_data["biaya_bpjstk"] = 168_000.0
+
     return await proses_kalkulasi_dan_kirim(update, context, is_callback=False)
 
 
@@ -644,6 +711,10 @@ def main():
             STATE_NOTARIS: [
                 CallbackQueryHandler(handle_notaris_callback, pattern="^NOTARIS_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_notaris_text)
+            ],
+            STATE_BPJSTK: [
+                CallbackQueryHandler(handle_bpjstk_callback, pattern="^BPJSTK_"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_bpjstk_text)
             ]
         },
         fallbacks=[

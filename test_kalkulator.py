@@ -150,5 +150,47 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("- Total Biaya Disiapkan     : Rp 1.819.640", teks)
         self.assertIn("Estimasi Dana Diterima Bersih : Rp 58.180.360", teks)
 
+    def test_kur_bpjstk(self):
+        # KUR 110jt, tidak punya BPJSTK -> + Rp 168.000
+        data_tidak = {
+            "jenis_kredit": "KUR",
+            "limit": 110_000_000,
+            "tenor": 36,
+            "bunga": 6.0,
+            "tipe_bunga": "efektif",
+            "tanggal_lahir": date(1988, 3, 15),
+            "nama": "Budi Santoso",
+            "biaya_notaris": 1_250_000,
+            "punya_bpjstk": False
+        }
+        hasil_tidak = kalkulasi_lengkap(data_tidak, self.reader)
+        self.assertEqual(hasil_tidak["biaya_bpjstk"], 168_000)
+        self.assertEqual(hasil_tidak["total_biaya"], 4_889_020)
+        teks_tidak = generate_hasil_teks(hasil_tidak)
+        print("\n--- OUTPUT TEST KUR BPJSTK TIDAK PUNYA ---")
+        print(teks_tidak)
+        self.assertIn("6. BPJSTK                : Rp 168.000", teks_tidak)
+        self.assertIn("Rp 4.889.020", teks_tidak)
+
+        # KUR 110jt, punya BPJSTK -> Rp 0
+        data_punya = {
+            "jenis_kredit": "KUR",
+            "limit": 110_000_000,
+            "tenor": 36,
+            "bunga": 6.0,
+            "tipe_bunga": "efektif",
+            "tanggal_lahir": date(1988, 3, 15),
+            "nama": "Budi Santoso",
+            "biaya_notaris": 1_250_000,
+            "punya_bpjstk": True
+        }
+        hasil_punya = kalkulasi_lengkap(data_punya, self.reader)
+        self.assertEqual(hasil_punya["biaya_bpjstk"], 0)
+        self.assertEqual(hasil_punya["total_biaya"], 4_721_020)
+        teks_punya = generate_hasil_teks(hasil_punya)
+        print("\n--- OUTPUT TEST KUR BPJSTK PUNYA ---")
+        print(teks_punya)
+        self.assertIn("6. BPJSTK                : Rp 0 (Sudah punya kartu)", teks_punya)
+
 if __name__ == "__main__":
     unittest.main()

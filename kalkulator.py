@@ -343,8 +343,26 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     # 5. Asuransi Sijitu (otomatis usia)
     biaya_sijitu, ket_sijitu = hitung_asuransi_sijitu(umur)
 
+    # 6. BPJSTK (khusus KUR > 100jt jika tidak punya kartu)
+    punya_bpjstk = data_pengajuan.get("punya_bpjstk")
+    biaya_bpjstk_in = float(data_pengajuan.get("biaya_bpjstk", 0.0))
+
+    if base_jenis == "KUR" and limit > 100_000_000:
+        if punya_bpjstk is False or biaya_bpjstk_in > 0:
+            biaya_bpjstk = 168_000.0
+            ket_bpjstk = "Rp 168.000 (Tidak punya kartu BPJSTK)"
+        elif punya_bpjstk is True:
+            biaya_bpjstk = 0.0
+            ket_bpjstk = "Rp 0 (Sudah punya kartu BPJSTK)"
+        else:
+            biaya_bpjstk = 0.0
+            ket_bpjstk = "Rp 0"
+    else:
+        biaya_bpjstk = 0.0
+        ket_bpjstk = "Rp 0"
+
     # Total Biaya
-    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu
+    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk
 
     # Perhitungan Top Up (Penerimaan Bersih): Limit - Sisa Bade - Total Biaya
     dana_cair_bersih = limit - sisa_bade - total_biaya if is_topup else 0.0
@@ -374,6 +392,9 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         "ket_notaris": ket_notaris,
         "biaya_sijitu": biaya_sijitu,
         "ket_sijitu": ket_sijitu,
+        "biaya_bpjstk": biaya_bpjstk,
+        "ket_bpjstk": ket_bpjstk,
+        "punya_bpjstk": punya_bpjstk,
         "total_biaya": total_biaya
     }
 
@@ -386,7 +407,7 @@ def format_rupiah(angka: float) -> str:
 def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
     """
     Format hasil teks sesuai instruksi:
-    Baris pertama: **Pengajuan [KUR/KUM/Top Up KUR/Top Up KUM] limit [nominal] tenor [n] bulan**
+    Baris pertama: **Pengajuan [KUR/KUM/Top Up KUM] limit [nominal] tenor [n] bulan**
     Baris kedua: Angsuran: Rp ...
     Baris ketiga dst: Rincian biaya-biaya
     Jika Top Up: ditambahkan rincian dana diterima bersih (Limit - Sisa Bade - Total Biaya)
@@ -417,10 +438,18 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
         f"3. Asuransi Kerugian     : {kerugian_fmt}",
         f"4. Biaya Notaris         : {notaris_fmt}",
         f"5. Asuransi Sijitu       : {sijitu_fmt} (Keterangan: {hasil['ket_sijitu']})",
+    ]
+
+    if hasil.get("biaya_bpjstk", 0) > 0:
+        lines.append(f"6. BPJSTK                : {format_rupiah(hasil['biaya_bpjstk'])}")
+    elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
+        lines.append("6. BPJSTK                : Rp 0 (Sudah punya kartu)")
+
+    lines.extend([
         "----------------------------------------------------------------------",
         f"Total Biaya yang Disiapkan : {total_fmt}*",
         f"*(Catatan: Calon Debitur: {hasil['nama']}, Umur: {hasil['umur']} tahun)"
-    ]
+    ])
 
     if hasil.get("is_topup"):
         sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))

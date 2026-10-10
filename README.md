@@ -115,6 +115,11 @@ Ada 2 cara mudah:
 - Rumus Penerimaan Bersih:
   $$\text{Dana Diterima Bersih} = \text{Limit Pengajuan Baru} - \text{Sisa Pokok Hutang} - \text{Total Biaya Disiapkan}$$
 
+### 8. Biaya BPJSTK (Khusus KUR > 100 Juta)
+- Ditanyakan setelah input biaya notaris: apakah calon debitur memiliki kartu BPJSTK (BPJS Ketenagakerjaan).
+- Jika **Tidak Punya**: ditambahkan biaya sebesar **Rp 168.000** pada poin 6 rincian biaya.
+- Jika **Punya**: **Rp 0** (bebas biaya).
+
 ---
 
 ## 📤 Upload File Excel Asuransi
