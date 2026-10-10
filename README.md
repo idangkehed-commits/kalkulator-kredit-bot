@@ -86,9 +86,11 @@ Ada 2 cara mudah:
 ### 2. Biaya Admin & Provisi
 - **KUR**:
   - Limit 10 juta s/d 100 juta: **2%** dari limit pengajuan.
+  - Limit di atas 100 juta: **1.9%** dari limit pengajuan.
+  - Limit di bawah 10 juta: **0%** (bebas biaya admin/provisi).
 - **KUM**:
   - Limit s/d 100 juta: **1%** dari limit pengajuan.
-  - Limit > 100 juta: **1.5%** dari limit pengajuan.
+  - Limit > 100 juta: **1.9%** dari limit pengajuan.
 
 ### 3. Asuransi Jiwa Kredit
 - Dipengaruhi oleh: **Umur, Tenor, dan Limit Pengajuan**.

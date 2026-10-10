@@ -80,16 +80,16 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
             biaya = 0.0
             ket = "0% (Plafond di bawah 10jt bebas biaya admin & provisi)"
         else:
-            biaya = 0.02 * limit
-            ket = "2% dari limit pengajuan"
+            biaya = 0.019 * limit
+            ket = "1.9% dari limit pengajuan (> 100jt)"
         return round(biaya), ket
     elif jenis == "KUM":
         if limit <= 100_000_000:
             biaya = 0.01 * limit
             ket = "1% dari limit pengajuan (s/d 100jt)"
         else:
-            biaya = 0.015 * limit
-            ket = "1.5% dari limit pengajuan (> 100jt)"
+            biaya = 0.019 * limit
+            ket = "1.9% dari limit pengajuan (> 100jt)"
         return round(biaya), ket
     else:
         return 0.0, "Jenis kredit tidak dikenal"

@@ -40,12 +40,17 @@ class TestKalkulatorKredit(unittest.TestCase):
         biaya_100, _ = hitung_admin_provisi("KUR", 100_000_000)
         self.assertEqual(biaya_100, 2_000_000)
 
+        # > 100jt -> 1.9%
+        biaya_110, _ = hitung_admin_provisi("KUR", 110_000_000)
+        self.assertEqual(biaya_110, 2_090_000)
+
     def test_admin_provisi_kum(self):
         biaya, _ = hitung_admin_provisi("KUM", 80_000_000)
         self.assertEqual(biaya, 800_000)
 
+        # > 100jt -> 1.9%
         biaya_120, _ = hitung_admin_provisi("KUM", 120_000_000)
-        self.assertEqual(biaya_120, 1_800_000)
+        self.assertEqual(biaya_120, 2_280_000)
 
     def test_asuransi_sijitu(self):
         biaya_35, _ = hitung_asuransi_sijitu(35)
@@ -106,9 +111,11 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("**Pengajuan KUR limit 110.000.000 tenor 36 bulan**", teks)
         self.assertIn("Angsuran:", teks)
         self.assertIn("1. Admin & Provisi", teks)
+        self.assertIn("Rp 2.090.000", teks)
         self.assertIn("Rp 649.000", teks)
         self.assertIn("Rp 132.020", teks)
         self.assertIn("5. Asuransi Sijitu", teks)
+        self.assertIn("Rp 4.721.020", teks)
 
 if __name__ == "__main__":
     unittest.main()
