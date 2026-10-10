@@ -110,6 +110,11 @@ Ada 2 cara mudah:
 - Umur < 50 tahun: **Rp 600.000**
 - Umur $\ge$ 50 tahun: **Rp 50.000**
 
+### 7. Fitur Pengajuan Top Up (Top Up KUR & Top Up KUM)
+- Mendukung simulasi pengajuan Top Up dengan input **Sisa Pokok Hutang / Baki Debet (Bade)**.
+- Rumus Penerimaan Bersih:
+  $$\text{Dana Diterima Bersih} = \text{Limit Pengajuan Baru} - \text{Sisa Pokok Hutang} - \text{Total Biaya Disiapkan}$$
+
 ---
 
 ## 📤 Upload File Excel Asuransi

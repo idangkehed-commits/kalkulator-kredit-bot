@@ -102,26 +102,51 @@ def jalankan_bot():
     # 1. Jenis Pengajuan
     def validate_jenis(inp: str):
         val = inp.upper()
-        if "KUR" in val or val == "1":
+        if val == "1" or val == "KUR":
             return "KUR"
-        if "KUM" in val or val == "2":
+        if val == "2" or "TOP UP KUR" in val or "TOPUP KUR" in val:
+            return "Top Up KUR"
+        if val == "3" or val == "KUM":
             return "KUM"
+        if val == "4" or "TOP UP KUM" in val or "TOPUP KUM" in val:
+            return "Top Up KUM"
         return None
 
     print("1. Haloo, mau pengajuan apa nih?")
     print("   [1] KUR (Kredit Usaha Rakyat)")
-    print("   [2] KUM (Kredit Usaha Mikro)")
+    print("   [2] Top Up KUR")
+    print("   [3] KUM (Kredit Usaha Mikro)")
+    print("   [4] Top Up KUM")
     jenis_kredit = tanya_dengan_validasi(
-        "👉 Pilih (1 untuk KUR / 2 untuk KUM): ",
+        "👉 Pilih (1 s/d 4): ",
         validate_jenis,
-        "Pilihan tidak valid! Silakan ketik 1 (KUR) atau 2 (KUM)."
+        "Pilihan tidak valid! Silakan ketik angka 1 s/d 4."
     )
     print(f"   -> Anda memilih: {jenis_kredit}\n")
+
+    is_topup = "Top Up" in jenis_kredit
+    sisa_bade = 0.0
+    if is_topup:
+        def validate_sisa(inp: str):
+            nom = parse_nominal(inp)
+            if nom is not None and nom >= 0:
+                return nom
+            return None
+
+        sisa_bade = tanya_dengan_validasi(
+            "👉 Berapa Sisa Bade / Pokok hutangnya? (contoh: 25jt atau 25.000.000): ",
+            validate_sisa,
+            "Format nominal sisa pokok hutang tidak valid!"
+        )
+        print(f"   -> Sisa pokok / bade: {format_rupiah(sisa_bade)}\n")
 
     # Limit Pengajuan
     def validate_limit(inp: str):
         nom = parse_nominal(inp)
         if nom and nom > 0:
+            if is_topup and nom <= sisa_bade:
+                print(f"⚠️ Limit pengajuan baru harus lebih besar dari sisa hutang ({format_rupiah(sisa_bade)}).")
+                return None
             return nom
         return None
 
@@ -134,7 +159,7 @@ def jalankan_bot():
 
     # 2. Tipe Bunga (Flat perbulan atau Efektif per tahun)
     tipe_bunga = "efektif"
-    if jenis_kredit == "KUR":
+    if "KUR" in jenis_kredit:
         tipe_bunga = "efektif"
         print("2. Tipe Bunga: Otomatis 'Efektif per tahun' (Ketentuan baku KUR).\n")
     else:
@@ -251,6 +276,8 @@ def jalankan_bot():
     # Lakukan kalkulasi
     data_input = {
         "jenis_kredit": jenis_kredit,
+        "is_topup": is_topup,
+        "sisa_bade": sisa_bade,
         "limit": limit,
         "tenor": tenor,
         "bunga": bunga,

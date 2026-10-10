@@ -72,7 +72,7 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
         Di atas 100 juta (> 100 jt): 1.5% dari limit pengajuan.
     """
     jenis = jenis_kredit.strip().upper()
-    if jenis == "KUR":
+    if "KUR" in jenis:
         if 10_000_000 <= limit <= 100_000_000:
             biaya = 0.02 * limit
             ket = "2% dari limit pengajuan (10jt s/d 100jt)"
@@ -83,7 +83,7 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
             biaya = 0.019 * limit
             ket = "1.9% dari limit pengajuan (> 100jt)"
         return round(biaya), ket
-    elif jenis == "KUM":
+    elif "KUM" in jenis:
         if limit <= 100_000_000:
             biaya = 0.01 * limit
             ket = "1% dari limit pengajuan (s/d 100jt)"
@@ -114,12 +114,12 @@ def is_asuransi_kerugian_dibebankan(jenis_kredit: str, limit: float) -> Tuple[bo
     - KUM: Dibebankan jika pengajuan di 50 juta dan lebih dari 50 juta (>= 50jt).
     """
     jenis = jenis_kredit.strip().upper()
-    if jenis == "KUR":
+    if "KUR" in jenis:
         if limit > 100_000_000:
             return True, "Dibebankan (KUR > 100jt)"
         else:
             return False, "Tidak dibebankan (KUR <= 100jt)"
-    elif jenis == "KUM":
+    elif "KUM" in jenis:
         if limit >= 50_000_000:
             return True, "Dibebankan (KUM >= 50jt)"
         else:
@@ -298,7 +298,13 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     if excel_reader is None:
         excel_reader = ExcelInsuranceReader()
 
-    jenis = data_pengajuan.get("jenis_kredit", "KUR").upper()
+    jenis_input = str(data_pengajuan.get("jenis_kredit", "KUR")).strip()
+    jenis_upper = jenis_input.upper()
+
+    is_topup = "TOP UP" in jenis_upper or "TOPUP" in jenis_upper or bool(data_pengajuan.get("is_topup", False))
+    base_jenis = "KUR" if "KUR" in jenis_upper else "KUM"
+    sisa_bade = float(data_pengajuan.get("sisa_bade", 0.0))
+
     limit = float(data_pengajuan.get("limit", 0))
     tenor = int(data_pengajuan.get("tenor", 12))
     bunga = float(data_pengajuan.get("bunga", 6.0))
@@ -310,8 +316,8 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     # Hitung umur
     umur = hitung_umur(tgl_lahir) if isinstance(tgl_lahir, (date, datetime)) else int(data_pengajuan.get("umur", 30))
 
-    # Hitung Angsuran
-    if jenis == "KUR":
+    # Hitung Angsuran berdasarkan base_jenis
+    if base_jenis == "KUR":
         angsuran = hitung_angsuran_efektif(limit, bunga, tenor)
         info_bunga = f"Bunga Efektif {bunga:.2f}% per tahun"
     else:
@@ -323,13 +329,13 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
             info_bunga = f"Bunga Efektif {bunga:.2f}% per tahun"
 
     # 1. Admin & Provisi
-    biaya_admin, ket_admin = hitung_admin_provisi(jenis, limit)
+    biaya_admin, ket_admin = hitung_admin_provisi(base_jenis, limit)
 
     # 2. Asuransi Jiwa Kredit (otomatis dari Excel)
     biaya_jiwa, ket_jiwa = excel_reader.hitung_asuransi_jiwa(umur, tenor, limit)
 
     # 3. Asuransi Kerugian (otomatis dari Excel jika memenuhi syarat plafon)
-    biaya_kerugian, ket_kerugian = excel_reader.hitung_asuransi_kerugian(jenis, limit, tenor)
+    biaya_kerugian, ket_kerugian = excel_reader.hitung_asuransi_kerugian(base_jenis, limit, tenor)
 
     # 4. Biaya Notaris (input manual)
     ket_notaris = "Input manual"
@@ -340,8 +346,16 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     # Total Biaya
     total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu
 
+    # Perhitungan Top Up (Penerimaan Bersih): Limit - Sisa Bade - Total Biaya
+    dana_cair_bersih = limit - sisa_bade - total_biaya if is_topup else 0.0
+    jenis_label = f"Top Up {base_jenis}" if is_topup else base_jenis
+
     return {
-        "jenis_kredit": jenis,
+        "jenis_kredit": jenis_label,
+        "base_jenis": base_jenis,
+        "is_topup": is_topup,
+        "sisa_bade": sisa_bade,
+        "dana_cair_bersih": dana_cair_bersih,
         "nama": nama,
         "limit": limit,
         "tenor": tenor,
@@ -372,15 +386,16 @@ def format_rupiah(angka: float) -> str:
 def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
     """
     Format hasil teks sesuai instruksi:
-    Baris pertama: **Pengajuan [KUR/KUM] limit [nominal] tenor [n] bulan**
+    Baris pertama: **Pengajuan [KUR/KUM/Top Up KUR/Top Up KUM] limit [nominal] tenor [n] bulan**
     Baris kedua: Angsuran: Rp ...
     Baris ketiga dst: Rincian biaya-biaya
+    Jika Top Up: ditambahkan rincian dana diterima bersih (Limit - Sisa Bade - Total Biaya)
     """
     limit_fmt = f"{int(hasil['limit']):,}".replace(",", ".")
     angsuran_fmt = format_rupiah(hasil['angsuran'])
     admin_fmt = format_rupiah(hasil['biaya_admin'])
     jiwa_fmt = format_rupiah(hasil['biaya_jiwa'])
-    if "Diskon" in hasil['ket_jiwa']:
+    if "Diskon" in hasil.get('ket_jiwa', ''):
         jiwa_fmt = f"{jiwa_fmt} ({hasil['ket_jiwa'].split('(', 1)[1]}"
 
     if hasil['biaya_kerugian'] > 0:
@@ -406,4 +421,18 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
         f"Total Biaya yang Disiapkan : {total_fmt}*",
         f"*(Catatan: Calon Debitur: {hasil['nama']}, Umur: {hasil['umur']} tahun)"
     ]
+
+    if hasil.get("is_topup"):
+        sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))
+        dana_cair_fmt = format_rupiah(hasil.get("dana_cair_bersih", 0))
+        lines.extend([
+            "----------------------------------------------------------------------",
+            "Perhitungan Penerimaan Bersih (Top Up):",
+            f"- Limit Pengajuan Baru      : Rp {limit_fmt}",
+            f"- Sisa Pokok / Bade Hutang  : {sisa_bade_fmt}",
+            f"- Total Biaya Disiapkan     : {total_fmt}",
+            "----------------------------------------------------------------------",
+            f"Estimasi Dana Diterima Bersih : {dana_cair_fmt}"
+        ])
+
     return "\n".join(lines)

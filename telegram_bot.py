@@ -76,6 +76,7 @@ def start_health_server():
 # Definisi State Percakapan
 (
     STATE_JENIS,
+    STATE_SISA_BADE,
     STATE_LIMIT,
     STATE_BUNGA,
     STATE_TIPE_BUNGA,
@@ -83,7 +84,7 @@ def start_health_server():
     STATE_NAMA,
     STATE_TGL_LAHIR,
     STATE_NOTARIS
-) = range(8)
+) = range(9)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 EXCEL_DIR = os.path.join(os.path.dirname(__file__), "excel_data")
@@ -160,6 +161,20 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
         f"<b>Total Biaya yang Disiapkan : {total_fmt}*</b>",
         f"<i>*(Catatan: Calon Debitur: {nama_esc}, Umur: {hasil['umur']} tahun)</i>"
     ]
+
+    if hasil.get("is_topup"):
+        sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))
+        dana_cair_fmt = format_rupiah(hasil.get("dana_cair_bersih", 0))
+        lines.extend([
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "<b>Perhitungan Penerimaan Bersih (Top Up):</b>",
+            f"• Limit Pengajuan Baru      : <b>Rp {limit_fmt}</b>",
+            f"• Sisa Pokok / Bade Hutang  : <b>{sisa_bade_fmt}</b>",
+            f"• Total Biaya Disiapkan     : <b>{total_fmt}</b>",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            f"💰 <b>Estimasi Dana Diterima Bersih : {dana_cair_fmt}</b>"
+        ])
+
     return "\n".join(lines)
 
 
@@ -171,8 +186,12 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     keyboard = [
         [
-            InlineKeyboardButton("KUR (Kredit Usaha Rakyat)", callback_data="JENIS_KUR"),
-            InlineKeyboardButton("KUM (Kredit Usaha Mikro)", callback_data="JENIS_KUM")
+            InlineKeyboardButton("KUR", callback_data="JENIS_KUR"),
+            InlineKeyboardButton("Top Up KUR", callback_data="JENIS_TOPUP_KUR")
+        ],
+        [
+            InlineKeyboardButton("KUM", callback_data="JENIS_KUM"),
+            InlineKeyboardButton("Top Up KUM", callback_data="JENIS_TOPUP_KUM")
         ]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
@@ -194,17 +213,66 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 async def jenis_kredit_selected(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Menangani pemilihan KUR atau KUM via tombol inline."""
+    """Menangani pemilihan jenis kredit (KUR, Top Up KUR, KUM, Top Up KUM)."""
     query = update.callback_query
     await query.answer()
 
     data = query.data
-    jenis = "KUR" if data == "JENIS_KUR" else "KUM"
-    context.user_data["jenis_kredit"] = jenis
+    if data == "JENIS_KUR":
+        jenis = "KUR"
+        is_topup = False
+    elif data == "JENIS_TOPUP_KUR":
+        jenis = "Top Up KUR"
+        is_topup = True
+    elif data == "JENIS_KUM":
+        jenis = "KUM"
+        is_topup = False
+    elif data == "JENIS_TOPUP_KUM":
+        jenis = "Top Up KUM"
+        is_topup = True
+    else:
+        jenis = "KUR"
+        is_topup = False
 
-    await query.edit_message_text(
-        f"✅ Jenis Kredit: <b>{jenis}</b>\n\n"
-        "👉 <b>Berapa limit pengajuan yang diinginkan?</b>\n"
+    context.user_data["jenis_kredit"] = jenis
+    context.user_data["is_topup"] = is_topup
+
+    if is_topup:
+        await query.edit_message_text(
+            f"✅ Jenis Kredit: <b>{jenis}</b>\n\n"
+            "👉 <b>Berapa Sisa Bade atau Pokok hutangnya saat ini?</b>\n"
+            "<i>(Contoh: ketik 25jt, 25.000.000, atau 30000000)</i>",
+            parse_mode="HTML"
+        )
+        return STATE_SISA_BADE
+    else:
+        context.user_data["sisa_bade"] = 0.0
+        await query.edit_message_text(
+            f"✅ Jenis Kredit: <b>{jenis}</b>\n\n"
+            "👉 <b>Berapa limit pengajuan yang diinginkan?</b>\n"
+            "<i>(Contoh: ketik 110jt, 110.000.000, atau 50000000)</i>",
+            parse_mode="HTML"
+        )
+        return STATE_LIMIT
+
+
+async def handle_sisa_bade(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani input Sisa Bade / Pokok Hutang untuk Top Up."""
+    text = update.message.text
+    sisa = parse_nominal(text)
+
+    if sisa is None or sisa < 0:
+        await update.message.reply_text(
+            "⚠️ Nominal Sisa Pokok Hutang / Bade tidak valid. Silakan ketik kembali:\n"
+            "<i>(Contoh: 25jt atau 25.000.000)</i>",
+            parse_mode="HTML"
+        )
+        return STATE_SISA_BADE
+
+    context.user_data["sisa_bade"] = sisa
+    await update.message.reply_text(
+        f"✅ Sisa Pokok / Bade: <b>{format_rupiah(sisa)}</b>\n\n"
+        "👉 <b>Berapa Limit Pengajuan baru yang diinginkan?</b>\n"
         "<i>(Contoh: ketik 110jt, 110.000.000, atau 50000000)</i>",
         parse_mode="HTML"
     )
@@ -224,11 +292,21 @@ async def handle_limit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         )
         return STATE_LIMIT
 
+    is_topup = context.user_data.get("is_topup", False)
+    sisa_bade = context.user_data.get("sisa_bade", 0.0)
+    if is_topup and limit <= sisa_bade:
+        await update.message.reply_text(
+            f"⚠️ Untuk pengajuan Top Up, limit pengajuan baru harus lebih besar dari sisa pokok hutang ({format_rupiah(sisa_bade)}).\n"
+            "Silakan ketik kembali nominal limit baru:",
+            parse_mode="HTML"
+        )
+        return STATE_LIMIT
+
     context.user_data["limit"] = limit
     jenis = context.user_data.get("jenis_kredit", "KUR")
 
-    if jenis == "KUR":
-        # Untuk KUR tipe bunga sudah pasti Efektif per tahun
+    if "KUR" in jenis:
+        # Untuk KUR / Top Up KUR tipe bunga sudah pasti Efektif per tahun
         context.user_data["tipe_bunga"] = "efektif"
         keyboard = [
             [
@@ -247,7 +325,7 @@ async def handle_limit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         )
         return STATE_BUNGA
     else:
-        # Untuk KUM: tanyakan dulu mau Flat perbulan apa Efektif per tahun
+        # Untuk KUM / Top Up KUM: tanyakan dulu mau Flat perbulan apa Efektif per tahun
         keyboard = [
             [
                 InlineKeyboardButton("Flat per bulan", callback_data="TIPE_FLAT"),
@@ -546,6 +624,9 @@ def main():
         states={
             STATE_JENIS: [
                 CallbackQueryHandler(jenis_kredit_selected, pattern="^JENIS_")
+            ],
+            STATE_SISA_BADE: [
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_sisa_bade)
             ],
             STATE_LIMIT: [
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_limit)
