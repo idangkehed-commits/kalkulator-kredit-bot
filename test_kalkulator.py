@@ -48,9 +48,9 @@ class TestKalkulatorKredit(unittest.TestCase):
         biaya, _ = hitung_admin_provisi("KUM", 80_000_000)
         self.assertEqual(biaya, 800_000)
 
-        # > 100jt -> 1.9%
+        # > 100jt -> tetap 1.5%
         biaya_120, _ = hitung_admin_provisi("KUM", 120_000_000)
-        self.assertEqual(biaya_120, 2_280_000)
+        self.assertEqual(biaya_120, 1_800_000)
 
     def test_asuransi_sijitu(self):
         biaya_35, _ = hitung_asuransi_sijitu(35)
