@@ -104,23 +104,20 @@ def jalankan_bot():
         val = inp.upper()
         if val == "1" or val == "KUR":
             return "KUR"
-        if val == "2" or "TOP UP KUR" in val or "TOPUP KUR" in val:
-            return "Top Up KUR"
-        if val == "3" or val == "KUM":
+        if val == "2" or val == "KUM":
             return "KUM"
-        if val == "4" or "TOP UP KUM" in val or "TOPUP KUM" in val:
+        if val == "3" or "TOP UP" in val or "TOPUP" in val:
             return "Top Up KUM"
         return None
 
     print("1. Haloo, mau pengajuan apa nih?")
     print("   [1] KUR (Kredit Usaha Rakyat)")
-    print("   [2] Top Up KUR")
-    print("   [3] KUM (Kredit Usaha Mikro)")
-    print("   [4] Top Up KUM")
+    print("   [2] KUM (Kredit Usaha Mikro)")
+    print("   [3] Top Up KUM")
     jenis_kredit = tanya_dengan_validasi(
-        "👉 Pilih (1 s/d 4): ",
+        "👉 Pilih (1 s/d 3): ",
         validate_jenis,
-        "Pilihan tidak valid! Silakan ketik angka 1 s/d 4."
+        "Pilihan tidak valid! Silakan ketik angka 1, 2, atau 3."
     )
     print(f"   -> Anda memilih: {jenis_kredit}\n")
 

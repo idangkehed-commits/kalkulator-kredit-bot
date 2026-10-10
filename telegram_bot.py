@@ -187,10 +187,9 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     keyboard = [
         [
             InlineKeyboardButton("KUR", callback_data="JENIS_KUR"),
-            InlineKeyboardButton("Top Up KUR", callback_data="JENIS_TOPUP_KUR")
+            InlineKeyboardButton("KUM", callback_data="JENIS_KUM")
         ],
         [
-            InlineKeyboardButton("KUM", callback_data="JENIS_KUM"),
             InlineKeyboardButton("Top Up KUM", callback_data="JENIS_TOPUP_KUM")
         ]
     ]
@@ -213,7 +212,7 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 
 async def jenis_kredit_selected(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-    """Menangani pemilihan jenis kredit (KUR, Top Up KUR, KUM, Top Up KUM)."""
+    """Menangani pemilihan jenis kredit (KUR, KUM, atau Top Up KUM)."""
     query = update.callback_query
     await query.answer()
 
@@ -221,17 +220,11 @@ async def jenis_kredit_selected(update: Update, context: ContextTypes.DEFAULT_TY
     if data == "JENIS_KUR":
         jenis = "KUR"
         is_topup = False
-    elif data == "JENIS_TOPUP_KUR":
-        jenis = "Top Up KUR"
-        is_topup = True
-    elif data == "JENIS_KUM":
-        jenis = "KUM"
-        is_topup = False
     elif data == "JENIS_TOPUP_KUM":
         jenis = "Top Up KUM"
         is_topup = True
     else:
-        jenis = "KUR"
+        jenis = "KUM"
         is_topup = False
 
     context.user_data["jenis_kredit"] = jenis

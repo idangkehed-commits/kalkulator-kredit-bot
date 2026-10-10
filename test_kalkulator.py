@@ -117,38 +117,38 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("5. Asuransi Sijitu", teks)
         self.assertIn("Rp 4.721.020", teks)
 
-    def test_topup_kur(self):
+    def test_topup_kum(self):
         data = {
-            "jenis_kredit": "Top Up KUR",
+            "jenis_kredit": "Top Up KUM",
             "is_topup": True,
-            "sisa_bade": 25_000_000,
-            "limit": 100_000_000,
+            "sisa_bade": 20_000_000,
+            "limit": 80_000_000,
             "tenor": 24,
-            "bunga": 6.0,
-            "tipe_bunga": "efektif",
+            "bunga": 1.0,
+            "tipe_bunga": "flat",
             "tanggal_lahir": date(1988, 3, 15),
             "nama": "Ahmad Topup",
             "biaya_notaris": 0
         }
         hasil = kalkulasi_lengkap(data, self.reader)
         self.assertTrue(hasil["is_topup"])
-        self.assertEqual(hasil["sisa_bade"], 25_000_000)
-        self.assertEqual(hasil["biaya_admin"], 2_000_000)
-        self.assertEqual(hasil["biaya_jiwa"], 422_000)
-        self.assertEqual(hasil["biaya_kerugian"], 0)
+        self.assertEqual(hasil["sisa_bade"], 20_000_000)
+        self.assertEqual(hasil["biaya_admin"], 800_000)  # 1% untuk KUM <= 100jt
+        self.assertEqual(hasil["biaya_jiwa"], 337_600)
+        self.assertEqual(hasil["biaya_kerugian"], 82_040)  # KUM >= 50jt dibebankan
         self.assertEqual(hasil["biaya_sijitu"], 600_000)
-        self.assertEqual(hasil["total_biaya"], 3_022_000)
-        # Dana cair = 100jt - 25jt - 3.022.000 = 71.978.000
-        self.assertEqual(hasil["dana_cair_bersih"], 71_978_000)
+        self.assertEqual(hasil["total_biaya"], 1_819_640)
+        # Dana cair = 80jt - 20jt - 1.819.640 = 58.180.360
+        self.assertEqual(hasil["dana_cair_bersih"], 58_180_360)
 
         teks = generate_hasil_teks(hasil)
-        print("\n--- OUTPUT TEST TOP UP KUR ---")
+        print("\n--- OUTPUT TEST TOP UP KUM ---")
         print(teks)
-        self.assertIn("**Pengajuan Top Up KUR limit 100.000.000 tenor 24 bulan**", teks)
+        self.assertIn("**Pengajuan Top Up KUM limit 80.000.000 tenor 24 bulan**", teks)
         self.assertIn("Perhitungan Penerimaan Bersih (Top Up):", teks)
-        self.assertIn("- Sisa Pokok / Bade Hutang  : Rp 25.000.000", teks)
-        self.assertIn("- Total Biaya Disiapkan     : Rp 3.022.000", teks)
-        self.assertIn("Estimasi Dana Diterima Bersih : Rp 71.978.000", teks)
+        self.assertIn("- Sisa Pokok / Bade Hutang  : Rp 20.000.000", teks)
+        self.assertIn("- Total Biaya Disiapkan     : Rp 1.819.640", teks)
+        self.assertIn("Estimasi Dana Diterima Bersih : Rp 58.180.360", teks)
 
 if __name__ == "__main__":
     unittest.main()
