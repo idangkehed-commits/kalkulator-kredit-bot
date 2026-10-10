@@ -94,6 +94,7 @@ Ada 2 cara mudah:
 
 ### 3. Asuransi Jiwa Kredit
 - Dipengaruhi oleh: **Umur, Tenor, dan Limit Pengajuan**.
+- Menggunakan perhitungan **Premi Dasar** murni (tanpa diskon 18%).
 - Siap membaca tabel rumus dari file Excel yang diunggah ke folder `E:\kalkulator-kredit-bot\excel_data\`.
 
 ### 4. Asuransi Kerugian

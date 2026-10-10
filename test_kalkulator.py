@@ -80,9 +80,9 @@ class TestKalkulatorKredit(unittest.TestCase):
         premi, ket = self.reader.hitung_asuransi_jiwa(38, 36, 110_000_000)
         self.assertEqual(premi, 649_000)
 
-        # Age 54 (diskon 18%), Tenor 24 bulan (2 tahun), Limit 75jt -> Rate 20.24 -> 1.518.000 * 0.82 = 1.244.760
+        # Age 54 (premi dasar, tanpa diskon 18%), Tenor 24 bulan (2 tahun), Limit 75jt -> Rate 20.24 -> 1.518.000
         premi_54, ket_54 = self.reader.hitung_asuransi_jiwa(54, 24, 75_000_000)
-        self.assertEqual(premi_54, 1_244_760)
+        self.assertEqual(premi_54, 1_518_000)
 
     def test_excel_asuransi_kerugian(self):
         # KUR 110jt (dibebankan): Tenor 3 tahun: 3 * (110jt * 0.294/1000) = 97.020 + 25.000 + 10.000 = 132.020

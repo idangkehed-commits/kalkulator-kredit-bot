@@ -225,8 +225,7 @@ class ExcelInsuranceReader:
         1. Rate diambil berdasarkan Umur (18-65) dan Tenor (1-5 tahun).
         2. Prorated rate jika tenor bukan kelipatan 12 bulan.
         3. Premi Dasar = round(Rate * Limit / 1000)
-        4. Diskon 18% untuk umur > 40 tahun (sesuai sheet Discount).
-        5. Premi Final = round(Premi Dasar * (1 - Diskon))
+        4. Premi Final menggunakan Premi Dasar (tanpa diskon 18%).
         """
         rates_table = self._load_jiwa_table(filepath)
         
@@ -254,14 +253,9 @@ class ExcelInsuranceReader:
         # Premi Dasar per mil (‰)
         premi_dasar = round(prorated_rate * limit / 1000.0)
 
-        # Diskon Premi: 18% jika umur > 40 tahun
-        discount = 0.18 if umur > 40 else 0.0
-        premi_final = round(premi_dasar * (1.0 - discount))
-
-        if discount > 0:
-            ket = f"Rp {premi_final:,} (Rate: {prorated_rate:.2f}‰, Diskon 18% dari Premi Dasar {format_rupiah(premi_dasar)})".replace(",", ".")
-        else:
-            ket = f"Rp {premi_final:,} (Rate: {prorated_rate:.2f}‰)".replace(",", ".")
+        # Menggunakan Premi Dasar murni (tanpa diskon 18%)
+        premi_final = premi_dasar
+        ket = f"Rp {premi_final:,} (Rate: {prorated_rate:.2f}‰)".replace(",", ".")
 
         return float(premi_final), ket
 
