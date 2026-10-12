@@ -361,17 +361,15 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         biaya_bpjstk = 0.0
         ket_bpjstk = "Rp 0"
 
-    # 7. Blokir 2x Angsuran (tabungan mengendap)
+    # Blokir 2x Angsuran (ditempatkan pada Perhitungan Penerimaan Bersih)
     biaya_blokir = float(round(2 * angsuran))
     ket_blokir = f"2 x {format_rupiah(angsuran)}"
 
-    # Total Biaya
-    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk + biaya_blokir
+    # Total Biaya (Biaya operasional & premi yang harus disiapkan)
+    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk
 
-    # Perhitungan Penerimaan Bersih:
-    # Jika Top Up: Limit - Sisa Bade - Total Biaya
-    # Jika reguler (KUR/KUM): Limit - Total Biaya
-    dana_cair_bersih = limit - sisa_bade - total_biaya if is_topup else (limit - total_biaya)
+    # Perhitungan Penerimaan Bersih: Limit - (Sisa Bade) - Total Biaya - Blokir 2x Angsuran
+    dana_cair_bersih = limit - sisa_bade - total_biaya - biaya_blokir if is_topup else (limit - total_biaya - biaya_blokir)
     jenis_label = f"Top Up {base_jenis}" if is_topup else base_jenis
 
     return {
@@ -418,7 +416,7 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
     Baris pertama: **Pengajuan [KUR/KUM/Top Up KUM] limit [nominal] tenor [n] bulan**
     Baris kedua: Angsuran: Rp ...
     Baris ketiga dst: Rincian biaya-biaya
-    Jika Top Up: ditambahkan rincian dana diterima bersih (Limit - Sisa Bade - Total Biaya)
+    Setelah Total Biaya Disiapkan: Perhitungan Penerimaan Bersih (termasuk Blokir 2x Angsuran)
     """
     limit_fmt = f"{int(hasil['limit']):,}".replace(",", ".")
     angsuran_fmt = format_rupiah(hasil['angsuran'])
@@ -448,22 +446,18 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
         f"5. Asuransi Sijitu       : {sijitu_fmt} (Keterangan: {hasil['ket_sijitu']})",
     ]
 
-    nomor_biaya = 6
     if hasil.get("biaya_bpjstk", 0) > 0:
-        lines.append(f"{nomor_biaya}. BPJSTK                : {format_rupiah(hasil['biaya_bpjstk'])}")
-        nomor_biaya += 1
+        lines.append(f"6. BPJSTK                : {format_rupiah(hasil['biaya_bpjstk'])}")
     elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
-        lines.append(f"{nomor_biaya}. BPJSTK                : Rp 0 (Sudah punya kartu)")
-        nomor_biaya += 1
-
-    blokir_fmt = format_rupiah(hasil.get("biaya_blokir", 0))
-    lines.append(f"{nomor_biaya}. Blokir 2x Angsuran   : {blokir_fmt} ({hasil.get('ket_blokir', '')})")
+        lines.append("6. BPJSTK                : Rp 0 (Sudah punya kartu)")
 
     lines.extend([
         "----------------------------------------------------------------------",
         f"Total Biaya yang Disiapkan : {total_fmt}*",
         f"*(Catatan: Calon Debitur: {hasil['nama']}, Umur: {hasil['umur']} tahun)"
     ])
+
+    blokir_fmt = format_rupiah(hasil.get("biaya_blokir", 0))
 
     if hasil.get("is_topup"):
         sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))
@@ -474,6 +468,7 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
             f"- Limit Pengajuan Baru      : Rp {limit_fmt}",
             f"- Sisa Pokok / Bade Hutang  : {sisa_bade_fmt}",
             f"- Total Biaya Disiapkan     : {total_fmt}",
+            f"- Blokir 2x Angsuran        : {blokir_fmt} ({hasil.get('ket_blokir', '')})",
             "----------------------------------------------------------------------",
             f"Estimasi Dana Diterima Bersih : {dana_cair_fmt}"
         ])
@@ -484,6 +479,7 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
             "Perhitungan Penerimaan Bersih:",
             f"- Limit Pengajuan (Plafond) : Rp {limit_fmt}",
             f"- Total Biaya Disiapkan     : {total_fmt}",
+            f"- Blokir 2x Angsuran        : {blokir_fmt} ({hasil.get('ket_blokir', '')})",
             "----------------------------------------------------------------------",
             f"Estimasi Dana Diterima Bersih : {dana_cair_fmt}"
         ])

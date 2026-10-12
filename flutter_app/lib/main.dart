@@ -226,12 +226,12 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     final showBpjstk = isKur && (limit > 100000000);
     final biayaBpjstk = (showBpjstk && !_punyaBpjstk) ? 168000 : 0;
 
-    // 7. Blokir 2x Angsuran
+    // Blokir 2x Angsuran (ditempatkan pada Perhitungan Penerimaan Bersih)
     final biayaBlokir = (2 * angsuran).round();
 
     // Total Biaya
-    final totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk + biayaBlokir;
-    final danaCairBersih = isTopUp ? (limit - sisaBade - totalBiaya).round() : (limit - totalBiaya).round();
+    final totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
+    final danaCairBersih = isTopUp ? (limit - sisaBade - totalBiaya - biayaBlokir).round() : (limit - totalBiaya - biayaBlokir).round();
 
     return Scaffold(
       appBar: AppBar(
@@ -487,7 +487,6 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                   _buildCostRow('5. Asuransi Sijitu', biayaSijitu, subtitle: umur >= 50 ? 'Umur >= 50 th' : 'Umur < 50 th'),
                   if (showBpjstk)
                     _buildCostRow('6. BPJSTK', biayaBpjstk, subtitle: _punyaBpjstk ? 'Sudah punya kartu' : 'Belum punya kartu'),
-                  _buildCostRow('${showBpjstk ? "7" : "6"}. Blokir 2x Angsuran', biayaBlokir, subtitle: '2 x ${_currencyFormat.format(angsuran)}'),
                   const Divider(),
                   _buildCostRow('Total Biaya Disiapkan', totalBiaya, isBold: true),
 
@@ -514,8 +513,8 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                         const SizedBox(height: 2),
                         Text(
                           isTopUp
-                              ? 'Plafond (${_currencyFormat.format(limit)}) - Sisa Pokok (${_currencyFormat.format(sisaBade)}) - Biaya (${_currencyFormat.format(totalBiaya)})'
-                              : 'Plafond (${_currencyFormat.format(limit)}) - Total Biaya (${_currencyFormat.format(totalBiaya)})',
+                              ? 'Plafond (${_currencyFormat.format(limit)}) - Sisa Pokok (${_currencyFormat.format(sisaBade)}) - Biaya (${_currencyFormat.format(totalBiaya)}) - Blokir (${_currencyFormat.format(biayaBlokir)})'
+                              : 'Plafond (${_currencyFormat.format(limit)}) - Total Biaya (${_currencyFormat.format(totalBiaya)}) - Blokir (${_currencyFormat.format(biayaBlokir)})',
                           style: TextStyle(fontSize: 11, color: Colors.green.shade900),
                         ),
                       ],
@@ -547,10 +546,10 @@ Rincian Biaya yang Harus Disiapkan Calon Debitur:
 3. Asuransi Kerugian     : ${_currencyFormat.format(biayaKerugian)}
 4. Biaya Notaris         : ${_currencyFormat.format(biayaNotaris)}
 5. Asuransi Sijitu       : ${_currencyFormat.format(biayaSijitu)}
-${showBpjstk ? "6. BPJSTK                : ${_currencyFormat.format(biayaBpjstk)}\n7. Blokir 2x Angsuran   : ${_currencyFormat.format(biayaBlokir)} (2 x ${_currencyFormat.format(angsuran)})\n" : "6. Blokir 2x Angsuran   : ${_currencyFormat.format(biayaBlokir)} (2 x ${_currencyFormat.format(angsuran)})\n"}----------------------------------------------------------------------
+${showBpjstk ? "6. BPJSTK                : ${_currencyFormat.format(biayaBpjstk)}\n" : ""}----------------------------------------------------------------------
 Total Biaya yang Disiapkan : ${_currencyFormat.format(totalBiaya)}*
 *(Catatan: Calon Debitur: ${_namaController.text}, Umur: $umur tahun)
-${isTopUp ? "\nPerhitungan Penerimaan Bersih (Top Up):\n- Limit Pengajuan Baru      : ${_currencyFormat.format(limit)}\n- Sisa Pokok / Bade Hutang  : ${_currencyFormat.format(sisaBade)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}" : "\nPerhitungan Penerimaan Bersih:\n- Limit Pengajuan (Plafond) : ${_currencyFormat.format(limit)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}"}''';
+${isTopUp ? "\nPerhitungan Penerimaan Bersih (Top Up):\n- Limit Pengajuan Baru      : ${_currencyFormat.format(limit)}\n- Sisa Pokok / Bade Hutang  : ${_currencyFormat.format(sisaBade)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n- Blokir 2x Angsuran        : ${_currencyFormat.format(biayaBlokir)} (2 x ${_currencyFormat.format(angsuran)})\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}" : "\nPerhitungan Penerimaan Bersih:\n- Limit Pengajuan (Plafond) : ${_currencyFormat.format(limit)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n- Blokir 2x Angsuran        : ${_currencyFormat.format(biayaBlokir)} (2 x ${_currencyFormat.format(angsuran)})\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}"}''';
               Clipboard.setData(ClipboardData(text: summary));
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rincian berhasil disalin ke clipboard!')));
             },

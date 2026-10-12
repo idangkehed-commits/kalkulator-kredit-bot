@@ -114,12 +114,13 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("Rp 2.090.000", teks)
         self.assertIn("Rp 649.000", teks)
         self.assertEqual(hasil["biaya_blokir"], 6_692_826)
-        self.assertEqual(hasil["total_biaya"], 11_413_846)
+        self.assertEqual(hasil["total_biaya"], 4_721_020)
         self.assertEqual(hasil["dana_cair_bersih"], 98_586_154)
-        self.assertIn("Blokir 2x Angsuran", teks)
-        self.assertIn("Rp 6.692.826", teks)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 4.721.020*", teks)
         self.assertIn("Perhitungan Penerimaan Bersih:", teks)
         self.assertIn("Limit Pengajuan (Plafond) : Rp 110.000.000", teks)
+        self.assertIn("Total Biaya Disiapkan     : Rp 4.721.020", teks)
+        self.assertIn("- Blokir 2x Angsuran        : Rp 6.692.826", teks)
         self.assertIn("Estimasi Dana Diterima Bersih : Rp 98.586.154", teks)
 
     def test_topup_kum(self):
@@ -143,19 +144,19 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertEqual(hasil["biaya_kerugian"], 82_040)  # KUM >= 50jt dibebankan
         self.assertEqual(hasil["biaya_sijitu"], 600_000)
         self.assertEqual(hasil["biaya_blokir"], 8_266_666)
-        self.assertEqual(hasil["total_biaya"], 10_086_306)
-        # Dana cair = 80jt - 20jt - 10.086.306 = 49.913.694
+        self.assertEqual(hasil["total_biaya"], 1_819_640)
+        # Dana cair = 80jt - 20jt - 1.819.640 - 8.266.666 = 49.913.694
         self.assertEqual(hasil["dana_cair_bersih"], 49_913_694)
 
         teks = generate_hasil_teks(hasil)
         print("\n--- OUTPUT TEST TOP UP KUM ---")
         print(teks)
         self.assertIn("**Pengajuan Top Up KUM limit 80.000.000 tenor 24 bulan**", teks)
-        self.assertIn("Blokir 2x Angsuran", teks)
-        self.assertIn("Rp 8.266.666", teks)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 1.819.640*", teks)
         self.assertIn("Perhitungan Penerimaan Bersih (Top Up):", teks)
         self.assertIn("- Sisa Pokok / Bade Hutang  : Rp 20.000.000", teks)
-        self.assertIn("- Total Biaya Disiapkan     : Rp 10.086.306", teks)
+        self.assertIn("- Total Biaya Disiapkan     : Rp 1.819.640", teks)
+        self.assertIn("- Blokir 2x Angsuran        : Rp 8.266.666", teks)
         self.assertIn("Estimasi Dana Diterima Bersih : Rp 49.913.694", teks)
 
     def test_kur_bpjstk(self):
@@ -174,13 +175,15 @@ class TestKalkulatorKredit(unittest.TestCase):
         hasil_tidak = kalkulasi_lengkap(data_tidak, self.reader)
         self.assertEqual(hasil_tidak["biaya_bpjstk"], 168_000)
         self.assertEqual(hasil_tidak["biaya_blokir"], 6_692_826)
-        self.assertEqual(hasil_tidak["total_biaya"], 11_581_846)
+        self.assertEqual(hasil_tidak["total_biaya"], 4_889_020)
+        self.assertEqual(hasil_tidak["dana_cair_bersih"], 98_418_154)
         teks_tidak = generate_hasil_teks(hasil_tidak)
         print("\n--- OUTPUT TEST KUR BPJSTK TIDAK PUNYA ---")
         print(teks_tidak)
         self.assertIn("6. BPJSTK                : Rp 168.000", teks_tidak)
-        self.assertIn("7. Blokir 2x Angsuran   : Rp 6.692.826", teks_tidak)
-        self.assertIn("Rp 11.581.846", teks_tidak)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 4.889.020*", teks_tidak)
+        self.assertIn("- Blokir 2x Angsuran        : Rp 6.692.826", teks_tidak)
+        self.assertIn("Estimasi Dana Diterima Bersih : Rp 98.418.154", teks_tidak)
 
         # KUR 110jt, punya BPJSTK -> Rp 0
         data_punya = {
@@ -197,12 +200,14 @@ class TestKalkulatorKredit(unittest.TestCase):
         hasil_punya = kalkulasi_lengkap(data_punya, self.reader)
         self.assertEqual(hasil_punya["biaya_bpjstk"], 0)
         self.assertEqual(hasil_punya["biaya_blokir"], 6_692_826)
-        self.assertEqual(hasil_punya["total_biaya"], 11_413_846)
+        self.assertEqual(hasil_punya["total_biaya"], 4_721_020)
+        self.assertEqual(hasil_punya["dana_cair_bersih"], 98_586_154)
         teks_punya = generate_hasil_teks(hasil_punya)
         print("\n--- OUTPUT TEST KUR BPJSTK PUNYA ---")
         print(teks_punya)
         self.assertIn("6. BPJSTK                : Rp 0 (Sudah punya kartu)", teks_punya)
-        self.assertIn("7. Blokir 2x Angsuran   : Rp 6.692.826", teks_punya)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 4.721.020*", teks_punya)
+        self.assertIn("- Blokir 2x Angsuran        : Rp 6.692.826", teks_punya)
 
 if __name__ == "__main__":
     unittest.main()

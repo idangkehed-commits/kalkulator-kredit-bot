@@ -198,23 +198,19 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
         f"5. Asuransi Sijitu : {sijitu_fmt} <i>({ket_sijitu_esc})</i>",
     ]
 
-    nomor_biaya = 6
     if hasil.get("biaya_bpjstk", 0) > 0:
         bpjstk_fmt = format_rupiah(hasil['biaya_bpjstk'])
-        lines.append(f"{nomor_biaya}. BPJSTK : {bpjstk_fmt}")
-        nomor_biaya += 1
+        lines.append(f"6. BPJSTK : {bpjstk_fmt}")
     elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
-        lines.append(f"{nomor_biaya}. BPJSTK : Rp 0 <i>(Sudah punya kartu)</i>")
-        nomor_biaya += 1
-
-    blokir_fmt = format_rupiah(hasil.get('biaya_blokir', 0))
-    lines.append(f"{nomor_biaya}. Blokir 2x Angsuran : {blokir_fmt} <i>(2 x {angsuran_fmt})</i>")
+        lines.append("6. BPJSTK : Rp 0 <i>(Sudah punya kartu)</i>")
 
     lines.extend([
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
         f"<b>Total Biaya yang Disiapkan : {total_fmt}*</b>",
         f"<i>*(Catatan: Calon Debitur: {nama_esc}, Umur: {hasil['umur']} tahun)</i>"
     ])
+
+    blokir_fmt = format_rupiah(hasil.get('biaya_blokir', 0))
 
     if hasil.get("is_topup"):
         sisa_bade_fmt = format_rupiah(hasil.get("sisa_bade", 0))
@@ -225,6 +221,7 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
             f"• Limit Pengajuan Baru      : <b>Rp {limit_fmt}</b>",
             f"• Sisa Pokok / Bade Hutang  : <b>{sisa_bade_fmt}</b>",
             f"• Total Biaya Disiapkan     : <b>{total_fmt}</b>",
+            f"• Blokir 2x Angsuran        : <b>{blokir_fmt}</b> <i>(2 x {angsuran_fmt})</i>",
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
             f"💰 <b>Estimasi Dana Diterima Bersih : {dana_cair_fmt}</b>"
         ])
@@ -235,6 +232,7 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
             "<b>Perhitungan Penerimaan Bersih:</b>",
             f"• Limit Pengajuan (Plafond) : <b>Rp {limit_fmt}</b>",
             f"• Total Biaya Disiapkan     : <b>{total_fmt}</b>",
+            f"• Blokir 2x Angsuran        : <b>{blokir_fmt}</b> <i>(2 x {angsuran_fmt})</i>",
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
             f"💰 <b>Estimasi Dana Diterima Bersih : {dana_cair_fmt}</b>"
         ])

@@ -598,17 +598,10 @@
           </tr>
           <tr id="rowBpjstk">
             <td>
-              <span id="noBpjstk">6</span>. BPJSTK
+              6. BPJSTK
               <span class="item-sub" id="subBpjstk">Biaya kepesertaan KUR > 100jt</span>
             </td>
             <td id="resBpjstk">Rp 168.000</td>
-          </tr>
-          <tr id="rowBlokir">
-            <td>
-              <span id="noBlokir">6</span>. Blokir 2x Angsuran
-              <span class="item-sub" id="subBlokir">2 x Angsuran bulanan</span>
-            </td>
-            <td id="resBlokir">Rp 0</td>
           </tr>
           <tr class="total-row">
             <td>Total Biaya Disiapkan</td>
@@ -644,7 +637,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=3').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=4').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -853,14 +846,14 @@
         }
       }
 
-      // 7. Blokir 2x Angsuran
+      // Total Biaya Disiapkan (Biaya operasional & asuransi)
+      const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
+
+      // Blokir 2x Angsuran (ditempatkan pada Penerimaan Bersih)
       const biayaBlokir = 2 * angsuran;
 
-      // Total Biaya
-      const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk + biayaBlokir;
-
-      // Dana Cair Bersih
-      const danaCair = isTopUp ? (limit - sisaBade - totalBiaya) : (limit - totalBiaya);
+      // Dana Cair Bersih: Limit - (Sisa Pokok) - Total Biaya - Blokir 2x Angsuran
+      const danaCair = isTopUp ? (limit - sisaBade - totalBiaya - biayaBlokir) : (limit - totalBiaya - biayaBlokir);
 
       // Update Tampilan DOM
       const labelJenis = isTopUp ? 'Top Up KUM' : (isKur ? 'KUR' : 'KUM');
@@ -885,10 +878,6 @@
       document.getElementById('subBpjstk').textContent = ketBpjstk;
       document.getElementById('resBpjstk').textContent = formatRupiah(biayaBpjstk);
 
-      document.getElementById('noBlokir').textContent = showBpjstk ? '7' : '6';
-      document.getElementById('subBlokir').textContent = `2 x ${formatRupiah(angsuran)}`;
-      document.getElementById('resBlokir').textContent = formatRupiah(biayaBlokir);
-
       document.getElementById('resTotalBiaya').textContent = formatRupiah(totalBiaya);
 
       // Tampilkan Penerimaan Bersih untuk semua jenis pengajuan
@@ -896,10 +885,10 @@
       document.getElementById('resDanaCair').textContent = formatRupiah(danaCair);
       if (isTopUp) {
         document.getElementById('titleDanaCair').textContent = '💰 Estimasi Dana Diterima Bersih (Top Up)';
-        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Sisa Pokok (${formatRupiah(sisaBade)}) - Biaya (${formatRupiah(totalBiaya)})`;
+        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Sisa Pokok (${formatRupiah(sisaBade)}) - Biaya (${formatRupiah(totalBiaya)}) - Blokir (${formatRupiah(biayaBlokir)})`;
       } else {
         document.getElementById('titleDanaCair').textContent = '💰 Estimasi Dana Diterima Bersih';
-        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Total Biaya (${formatRupiah(totalBiaya)})`;
+        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Total Biaya (${formatRupiah(totalBiaya)}) - Blokir (${formatRupiah(biayaBlokir)})`;
       }
 
       // Return ringkasan teks untuk WA & Copy
@@ -913,9 +902,6 @@
       summaryText += `5. Asuransi Sijitu       : ${formatRupiah(biayaSijitu)} (${ketSijitu})\n`;
       if (showBpjstk) {
         summaryText += `6. BPJSTK                : ${formatRupiah(biayaBpjstk)} (${ketBpjstk})\n`;
-        summaryText += `7. Blokir 2x Angsuran   : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
-      } else {
-        summaryText += `6. Blokir 2x Angsuran   : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
       }
       summaryText += `----------------------------------------------------------------------\n`;
       summaryText += `Total Biaya yang Disiapkan : ${formatRupiah(totalBiaya)}*\n`;
@@ -927,6 +913,7 @@
         summaryText += `- Limit Pengajuan Baru      : ${formatRupiah(limit)}\n`;
         summaryText += `- Sisa Pokok / Bade Hutang  : ${formatRupiah(sisaBade)}\n`;
         summaryText += `- Total Biaya Disiapkan     : ${formatRupiah(totalBiaya)}\n`;
+        summaryText += `- Blokir 2x Angsuran        : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
         summaryText += `----------------------------------------------------------------------\n`;
         summaryText += `Estimasi Dana Diterima Bersih : ${formatRupiah(danaCair)}`;
       } else {
@@ -934,6 +921,7 @@
         summaryText += `Perhitungan Penerimaan Bersih:\n`;
         summaryText += `- Limit Pengajuan (Plafond) : ${formatRupiah(limit)}\n`;
         summaryText += `- Total Biaya Disiapkan     : ${formatRupiah(totalBiaya)}\n`;
+        summaryText += `- Blokir 2x Angsuran        : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
         summaryText += `----------------------------------------------------------------------\n`;
         summaryText += `Estimasi Dana Diterima Bersih : ${formatRupiah(danaCair)}`;
       }
