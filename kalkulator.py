@@ -265,6 +265,7 @@ class ExcelInsuranceReader:
         limit: float,
         tenor_bulan: int,
         jenis_objek: str = "kebakaran",
+        nilai_pertanggungan: Optional[float] = None,
         filepath: Optional[str] = None
     ) -> Tuple[float, str]:
         """
@@ -272,25 +273,29 @@ class ExcelInsuranceReader:
         - Syarat pembebanan:
             KUR: di atas 100jt (> 100jt)
             KUM: di 50jt ke atas (>= 50jt)
+        - Basis nilai pertanggungan:
+            Mendukung nominal pertanggungan khusus (sum insured / nilai cover objek yang diasuransikan).
+            Jika tidak diisi atau 0, default menggunakan limit pengajuan.
         - Pilihan Agunan (jenis_objek):
             1. 'kebakaran': FLEXAS Bangunan / Rumah Tinggal Kelas 1
                Rate dasar: 0.294 ‰ per tahun
-               Formula: (tenor / 12) * (limit * 0.294 / 1000)
+               Formula: (tenor / 12) * (basis_nilai * 0.294 / 1000)
             2. 'kendaraan_mobil' / 'mobil': TLO Kendaraan Roda 4 (Passenger Car) OJK Zone 2
                Rate tahunan sesuai bracket OJK (0.65% s/d 0.20%)
-               Formula: (tenor / 12) * (limit * rate_ojk / 100)
+               Formula: (tenor / 12) * (basis_nilai * rate_ojk / 100)
             3. 'kendaraan_motor' / 'motor': TLO Sepeda Motor Roda 2/3 OJK Zone 2
                Rate tahunan: 1.80%
-               Formula: (tenor / 12) * (limit * 1.80 / 100)
+               Formula: (tenor / 12) * (basis_nilai * 1.80 / 100)
             4. 'kendaraan_truk' / 'truk': TLO Truk / Pick Up OJK Zone 2
                Rate tahunan: 1.68%
-               Formula: (tenor / 12) * (limit * 1.68 / 100)
+               Formula: (tenor / 12) * (basis_nilai * 1.68 / 100)
         - Catatan Biaya Polis dan Materai: DIHILANGKAN (Rp 0) sesuai instruksi pengguna.
         """
         dibebankan, alasan = is_asuransi_kerugian_dibebankan(jenis_kredit, limit)
         if not dibebankan:
             return 0.0, alasan
 
+        basis_nilai = float(nilai_pertanggungan) if (nilai_pertanggungan is not None and float(nilai_pertanggungan) > 0) else limit
         tenor_tahun = tenor_bulan / 12.0
         objek = str(jenis_objek or "kebakaran").strip().lower()
 
@@ -298,41 +303,41 @@ class ExcelInsuranceReader:
             # TLO Sepeda Motor (Roda 2/3) - 1.80% per tahun
             rate_tahunan = 1.80
             rate_total = round(rate_tahunan * tenor_tahun, 3)
-            premi = round(limit * (rate_total / 100.0))
-            ket = f"Rp {premi:,} (TLO Motor, Rate: {rate_total:.2f}%)".replace(",", ".")
+            premi = round(basis_nilai * (rate_total / 100.0))
+            ket = f"Rp {premi:,} (TLO Motor, Cover: {format_rupiah(basis_nilai)}, Rate: {rate_total:.2f}%)".replace(",", ".")
             return float(premi), ket
 
         elif "truk" in objek or "truck" in objek or "pickup" in objek or "pick_up" in objek:
             # TLO Truk / Pick Up - 1.68% per tahun
             rate_tahunan = 1.68
             rate_total = round(rate_tahunan * tenor_tahun, 3)
-            premi = round(limit * (rate_total / 100.0))
-            ket = f"Rp {premi:,} (TLO Truk/Pick Up, Rate: {rate_total:.2f}%)".replace(",", ".")
+            premi = round(basis_nilai * (rate_total / 100.0))
+            ket = f"Rp {premi:,} (TLO Truk/Pick Up, Cover: {format_rupiah(basis_nilai)}, Rate: {rate_total:.2f}%)".replace(",", ".")
             return float(premi), ket
 
         elif "mobil" in objek or "car" in objek or "kendaraan" in objek:
-            # TLO Kendaraan Roda 4 Passenger Car OJK Zone 2
-            if limit <= 125_000_000:
+            # TLO Kendaraan Roda 4 Passenger Car OJK Zone 2 (Bracket rate dihitung dari nilai pertanggungan kendaraan)
+            if basis_nilai <= 125_000_000:
                 rate_tahunan = 0.65
-            elif limit <= 200_000_000:
+            elif basis_nilai <= 200_000_000:
                 rate_tahunan = 0.44
-            elif limit <= 400_000_000:
+            elif basis_nilai <= 400_000_000:
                 rate_tahunan = 0.38
-            elif limit <= 800_000_000:
+            elif basis_nilai <= 800_000_000:
                 rate_tahunan = 0.25
             else:
                 rate_tahunan = 0.20
             rate_total = round(rate_tahunan * tenor_tahun, 3)
-            premi = round(limit * (rate_total / 100.0))
-            ket = f"Rp {premi:,} (TLO Mobil Pribadi, Rate: {rate_total:.2f}%)".replace(",", ".")
+            premi = round(basis_nilai * (rate_total / 100.0))
+            ket = f"Rp {premi:,} (TLO Mobil Pribadi, Cover: {format_rupiah(basis_nilai)}, Rate: {rate_total:.2f}%)".replace(",", ".")
             return float(premi), ket
 
         else:
             # Default: Kebakaran (FLEXAS) Rumah Tinggal Konstruksi Kelas 1 (0.294 ‰)
             rate_flexas = 0.294
             rate_total = round(rate_flexas * tenor_tahun, 4)
-            premi = round(tenor_tahun * (limit * rate_flexas / 1000.0))
-            ket = f"Rp {premi:,} (FLEXAS Kebakaran, Rate: {rate_total:.3f}‰)".replace(",", ".")
+            premi = round(tenor_tahun * (basis_nilai * rate_flexas / 1000.0))
+            ket = f"Rp {premi:,} (FLEXAS Kebakaran, Cover: {format_rupiah(basis_nilai)}, Rate: {rate_total:.3f}‰)".replace(",", ".")
             return float(premi), ket
 
 
@@ -357,6 +362,9 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     biaya_notaris = float(data_pengajuan.get("biaya_notaris", 0.0))
     jenis_kerugian = str(data_pengajuan.get("jenis_kerugian") or data_pengajuan.get("agunan_kerugian") or "kebakaran").lower()
 
+    nominal_cover = data_pengajuan.get("nilai_pertanggungan") or data_pengajuan.get("nominal_kerugian") or data_pengajuan.get("cover_kerugian")
+    nilai_pertanggungan = float(nominal_cover) if (nominal_cover is not None and float(nominal_cover) > 0) else limit
+
     # Hitung umur
     umur = hitung_umur(tgl_lahir) if isinstance(tgl_lahir, (date, datetime)) else int(data_pengajuan.get("umur", 30))
 
@@ -378,8 +386,10 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     # 2. Asuransi Jiwa Kredit (otomatis dari Excel)
     biaya_jiwa, ket_jiwa = excel_reader.hitung_asuransi_jiwa(umur, tenor, limit)
 
-    # 3. Asuransi Kerugian (otomatis dari AXA MyBiz Mikro tanpa polis dan materai)
-    biaya_kerugian, ket_kerugian = excel_reader.hitung_asuransi_kerugian(base_jenis, limit, tenor, jenis_objek=jenis_kerugian)
+    # 3. Asuransi Kerugian (otomatis dari AXA MyBiz Mikro tanpa polis dan materai, dengan nominal cover yang dipilih)
+    biaya_kerugian, ket_kerugian = excel_reader.hitung_asuransi_kerugian(
+        base_jenis, limit, tenor, jenis_objek=jenis_kerugian, nilai_pertanggungan=nilai_pertanggungan
+    )
 
     # 4. Biaya Notaris (input manual)
     ket_notaris = "Input manual"
@@ -437,6 +447,7 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         "biaya_kerugian": biaya_kerugian,
         "ket_kerugian": ket_kerugian,
         "jenis_kerugian": jenis_kerugian,
+        "nilai_pertanggungan": nilai_pertanggungan,
         "biaya_notaris": biaya_notaris,
         "ket_notaris": ket_notaris,
         "biaya_sijitu": biaya_sijitu,

@@ -69,6 +69,11 @@ Ada 2 cara mudah:
    - Format `DD-MM-YYYY` (contoh: `17-08-1985`). Umur otomatis dihitung untuk dasar penentuan Asuransi Sijitu dan Asuransi Jiwa.
 8. **Biaya Notaris?**
    - Diinput manual (ketik `0` jika tidak ada, atau masukkan nominal seperti `1500000`).
+9. **Asuransi Kerugian (Jika dibebankan: KUR > 100jt atau KUM >= 50jt)**
+   - Pilihan Agunan: Kebakaran (FLEXAS), Mobil Pribadi (TLO), Motor (TLO), Truk/Pick Up (TLO).
+   - **Nominal yang dicover (Nilai Pertanggungan Agunan)**: Ditanyakan berapa nominal objek yang ingin dicover (bebas diisi sesuai nilai agunan, atau tekan tombol/enter untuk sama dengan limit).
+10. **Kartu BPJSTK (Khusus KUR > 100jt)**
+   - Ditanyakan apakah calon debitur sudah memiliki kartu BPJSTK (Punya: Rp 0, Belum Punya: Rp 170.000).
 
 ---
 
@@ -101,11 +106,13 @@ Ada 2 cara mudah:
 - Syarat pembebanan:
   - **KUR**: Dibebankan jika pengajuan **di atas 100 juta**.
   - **KUM**: Dibebankan jika pengajuan **50 juta atau lebih**.
+- **Nominal Coverage / Nilai Pertanggungan (Sum Insured)**:
+  - Tidak harus sama dengan limit pengajuan. Pengguna dapat menentukan nominal nilai pertanggungan agunan sendiri.
 - Pilihan Jenis Agunan Kerugian:
-  1. **Bangunan / Usaha (Kebakaran FLEXAS)**: Rate dasar `0.294‰` per tahun dikali tenor.
-  2. **Kendaraan Mobil Pribadi (TLO)**: Rate OJK Zone 2 (`0.65%` s/d `0.20%` per tahun) dikali tenor.
-  3. **Kendaraan Sepeda Motor (TLO)**: Rate OJK `1.80%` per tahun dikali tenor.
-  4. **Kendaraan Truk / Pick Up (TLO)**: Rate OJK `1.68%` per tahun dikali tenor.
+  1. **Bangunan / Rumah Tinggal (Kebakaran FLEXAS)**: Rate dasar `0.294‰` per tahun dikali tenor terhadap nilai pertanggungan.
+  2. **Kendaraan Mobil Pribadi (TLO)**: Rate OJK Zone 2 (`0.65%` s/d `0.20%` per tahun berdasarkan bracket nilai pertanggungan mobil) dikali tenor.
+  3. **Kendaraan Sepeda Motor (TLO)**: Rate OJK `1.80%` per tahun dikali tenor terhadap nilai pertanggungan motor.
+  4. **Kendaraan Truk / Pick Up (TLO)**: Rate OJK `1.68%` per tahun dikali tenor terhadap nilai pertanggungan truk.
 - **Biaya Polis & Materai**: Dihilangkan (Rp 0), murni menghitung premi risiko.
 
 ### 5. Biaya Notaris
@@ -115,15 +122,18 @@ Ada 2 cara mudah:
 - Umur < 50 tahun: **Rp 600.000**
 - Umur $\ge$ 50 tahun: **Rp 50.000**
 
-### 7. Fitur Pengajuan Top Up (Khusus KUM)
-- Mendukung simulasi pengajuan **Top Up KUM** dengan input **Sisa Pokok Hutang / Baki Debet (Bade)**.
-- Rumus Penerimaan Bersih:
-  $$\text{Dana Diterima Bersih} = \text{Limit Pengajuan Baru} - \text{Sisa Pokok Hutang} - \text{Total Biaya Disiapkan}$$
-
-### 8. Biaya BPJSTK (Khusus KUR > 100 Juta)
-- Ditanyakan setelah input biaya notaris: apakah calon debitur memiliki kartu BPJSTK (BPJS Ketenagakerjaan).
+### 7. Biaya BPJSTK (Khusus KUR > 100 Juta)
+- Ditanyakan pada saat pengajuan KUR > 100 juta: apakah calon debitur memiliki kartu BPJSTK (BPJS Ketenagakerjaan).
 - Jika **Tidak Punya**: ditambahkan biaya sebesar **Rp 170.000** pada poin 6 rincian biaya.
 - Jika **Punya**: **Rp 0** (bebas biaya).
+
+### 8. Perhitungan Penerimaan Bersih & Blokir 2x Angsuran
+- **Total Biaya Disiapkan**: Admin + Asuransi Jiwa + Asuransi Kerugian + Notaris + Sijitu + BPJSTK.
+- **Blokir 2x Angsuran**: Disimpan pada Perhitungan Penerimaan Bersih sebesar $2 \times \text{Angsuran Bulanan}$.
+- **Rumus Penerimaan Bersih Reguler**:
+  $$\text{Dana Diterima Bersih} = \text{Limit Pengajuan} - \text{Total Biaya Disiapkan} - \text{Blokir 2x Angsuran}$$
+- **Rumus Penerimaan Bersih Top Up (KUM)**:
+  $$\text{Dana Diterima Bersih} = \text{Limit Baru} - \text{Sisa Pokok Hutang} - \text{Total Biaya Disiapkan} - \text{Blokir 2x Angsuran}$$
 
 ---
 

@@ -124,8 +124,9 @@ def start_health_server():
     STATE_TGL_LAHIR,
     STATE_NOTARIS,
     STATE_KERUGIAN,
+    STATE_NOMINAL_KERUGIAN,
     STATE_BPJSTK
-) = range(11)
+) = range(12)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 EXCEL_DIR = os.path.join(os.path.dirname(__file__), "excel_data")
@@ -630,6 +631,7 @@ async def proses_setelah_notaris(event_source, context: ContextTypes.DEFAULT_TYP
         return STATE_KERUGIAN
     else:
         context.user_data["jenis_kerugian"] = "kebakaran"
+        context.user_data["nilai_pertanggungan"] = limit
         return await proses_setelah_kerugian(event_source, context, is_callback=is_callback)
 
 
@@ -648,7 +650,7 @@ async def handle_kerugian_callback(update: Update, context: ContextTypes.DEFAULT
     else:
         context.user_data["jenis_kerugian"] = "kebakaran"
 
-    return await proses_setelah_kerugian(query, context, is_callback=True)
+    return await minta_nominal_kerugian(query, context, is_callback=True)
 
 
 async def handle_kerugian_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -663,6 +665,45 @@ async def handle_kerugian_text(update: Update, context: ContextTypes.DEFAULT_TYP
     else:
         context.user_data["jenis_kerugian"] = "kebakaran"
 
+    return await minta_nominal_kerugian(update, context, is_callback=False)
+
+
+async def minta_nominal_kerugian(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
+    """Menanyakan berapa nominal/harga pertanggungan yang akan dicover untuk Asuransi Kerugian."""
+    limit = context.user_data.get("limit", 0.0)
+    limit_fmt = format_rupiah(limit)
+    keyboard = [
+        [
+            InlineKeyboardButton(f"Sama dgn Limit ({limit_fmt})", callback_data="COVER_SAMA_LIMIT")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    pesan = (
+        "👉 <b>Berapa nominal/harga pertanggungan yang akan dicover untuk Asuransi Kerugian?</b>\n\n"
+        "<i>(Ketik nominal yang akan dicover, misal: 150jt atau 150000000, atau klik tombol di bawah jika sama dengan limit pengajuan):</i>"
+    )
+    if is_callback:
+        await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+    else:
+        await event_source.message.reply_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+    return STATE_NOMINAL_KERUGIAN
+
+
+async def handle_nominal_kerugian_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani tombol nominal cover sama dengan limit."""
+    query = update.callback_query
+    await query.answer()
+    context.user_data["nilai_pertanggungan"] = context.user_data.get("limit", 0.0)
+    return await proses_setelah_kerugian(query, context, is_callback=True)
+
+
+async def handle_nominal_kerugian_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani input teks nominal cover asuransi kerugian."""
+    text = update.message.text
+    nom = parse_nominal(text)
+    if nom is None or nom <= 0:
+        nom = context.user_data.get("limit", 0.0)
+    context.user_data["nilai_pertanggungan"] = nom
     return await proses_setelah_kerugian(update, context, is_callback=False)
 
 
@@ -836,6 +877,10 @@ def main():
             STATE_KERUGIAN: [
                 CallbackQueryHandler(handle_kerugian_callback, pattern="^KERUGIAN_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_kerugian_text)
+            ],
+            STATE_NOMINAL_KERUGIAN: [
+                CallbackQueryHandler(handle_nominal_kerugian_callback, pattern="^COVER_SAMA_LIMIT$"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_nominal_kerugian_text)
             ],
             STATE_BPJSTK: [
                 CallbackQueryHandler(handle_bpjstk_callback, pattern="^BPJSTK_"),

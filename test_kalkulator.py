@@ -97,7 +97,20 @@ class TestKalkulatorKredit(unittest.TestCase):
         total_motor, _ = self.reader.hitung_asuransi_kerugian("KUR", 110_000_000, 36, "motor")
         self.assertEqual(total_motor, 5_940_000)
 
-        # 4. KUR 80jt (tidak dibebankan): Rp 0
+        # 4. Custom Nilai Pertanggungan (Cover): Limit 110jt, Cover 150jt
+        # Kebakaran: 3 * (150jt * 0.294/1000) = 132.300
+        total_custom_kebakaran, _ = self.reader.hitung_asuransi_kerugian(
+            "KUR", 110_000_000, 36, "kebakaran", nilai_pertanggungan=150_000_000
+        )
+        self.assertEqual(total_custom_kebakaran, 132_300)
+
+        # Mobil (Cover 250jt -> bracket 200jt-400jt rate 0.38% * 3 = 1.14% -> 250jt * 1.14% = 2.850.000)
+        total_custom_mobil, _ = self.reader.hitung_asuransi_kerugian(
+            "KUR", 110_000_000, 36, "mobil", nilai_pertanggungan=250_000_000
+        )
+        self.assertEqual(total_custom_mobil, 2_850_000)
+
+        # 5. KUR 80jt (tidak dibebankan): Rp 0
         total_80, _ = self.reader.hitung_asuransi_kerugian("KUR", 80_000_000, 36)
         self.assertEqual(total_80, 0)
 

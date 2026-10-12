@@ -294,6 +294,23 @@ def jalankan_bot():
         )
         print(f"   -> Jenis Agunan Kerugian: {jenis_kerugian.title()}\n")
 
+        def validate_nominal_cover(inp: str):
+            if not inp.strip():
+                return limit
+            nom = parse_nominal(inp)
+            if nom is not None and nom > 0:
+                return nom
+            return None
+
+        nilai_pertanggungan = tanya_dengan_validasi(
+            f"👉 Mau berapa nominal yang akan dicover untuk Asuransi Kerugian? (contoh: 150jt atau tekan Enter untuk sama dengan limit {format_rupiah(limit)}): ",
+            validate_nominal_cover,
+            "Format nominal tidak valid! Masukkan angka seperti 150jt atau 150.000.000."
+        )
+        print(f"   -> Nominal dicover: {format_rupiah(nilai_pertanggungan)}\n")
+    else:
+        nilai_pertanggungan = limit
+
     biaya_bpjstk = 0.0
     punya_bpjstk = None
     if jenis_kredit == "KUR" and limit > 100_000_000:
@@ -337,6 +354,7 @@ def jalankan_bot():
         "nama": nama_debitur,
         "biaya_notaris": biaya_notaris,
         "jenis_kerugian": jenis_kerugian,
+        "nilai_pertanggungan": nilai_pertanggungan,
         "biaya_bpjstk": biaya_bpjstk,
         "punya_bpjstk": punya_bpjstk
     }

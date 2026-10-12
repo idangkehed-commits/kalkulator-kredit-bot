@@ -44,6 +44,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
   final TextEditingController _tenorController = TextEditingController(text: '36');
   final TextEditingController _namaController = TextEditingController(text: 'Budi Santoso');
   final TextEditingController _notarisController = TextEditingController(text: '1.250.000');
+  final TextEditingController _nominalKerugianController = TextEditingController(text: '110.000.000');
 
   String _jenisKredit = 'KUR'; // KUR, KUM, Top Up KUM
   String _tipeBunga = 'efektif'; // flat, efektif
@@ -115,6 +116,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     _tenorController.dispose();
     _namaController.dispose();
     _notarisController.dispose();
+    _nominalKerugianController.dispose();
     super.dispose();
   }
 
@@ -210,35 +212,44 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
 
     // 3. Asuransi Kerugian (AXA MyBiz Mikro tanpa polis dan materai)
     int biayaKerugian = 0;
+    String ketKerugian = '';
     final dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+    final nominalCoverInp = _parseNominal(_nominalKerugianController.text);
+    final basisKerugian = nominalCoverInp > 0 ? nominalCoverInp : limit;
     final tenorTahun = tenorBulan / 12.0;
     if (dibebankanKerugian) {
       if (_jenisKerugian == 'motor') {
         final rateTotal = 1.80 * tenorTahun;
-        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+        biayaKerugian = (basisKerugian * (rateTotal / 100.0)).round();
+        ketKerugian = 'TLO Motor (Cover: ${_currencyFormat.format(basisKerugian)})';
       } else if (_jenisKerugian == 'truk') {
         final rateTotal = 1.68 * tenorTahun;
-        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+        biayaKerugian = (basisKerugian * (rateTotal / 100.0)).round();
+        ketKerugian = 'TLO Truk (Cover: ${_currencyFormat.format(basisKerugian)})';
       } else if (_jenisKerugian == 'mobil') {
         double rateThn = 0.65;
-        if (limit <= 125000000) {
+        if (basisKerugian <= 125000000) {
           rateThn = 0.65;
-        } else if (limit <= 200000000) {
+        } else if (basisKerugian <= 200000000) {
           rateThn = 0.44;
-        } else if (limit <= 400000000) {
+        } else if (basisKerugian <= 400000000) {
           rateThn = 0.38;
-        } else if (limit <= 800000000) {
+        } else if (basisKerugian <= 800000000) {
           rateThn = 0.25;
         } else {
           rateThn = 0.20;
         }
         final rateTotal = rateThn * tenorTahun;
-        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+        biayaKerugian = (basisKerugian * (rateTotal / 100.0)).round();
+        ketKerugian = 'TLO Mobil (Cover: ${_currencyFormat.format(basisKerugian)})';
       } else {
         // Kebakaran FLEXAS Rumah Tinggal Kelas 1 (0.294 ‰)
         final rateTotal = 0.294 * tenorTahun;
-        biayaKerugian = (limit * (rateTotal / 1000.0)).round();
+        biayaKerugian = (basisKerugian * (rateTotal / 1000.0)).round();
+        ketKerugian = 'FLEXAS Kebakaran (Cover: ${_currencyFormat.format(basisKerugian)})';
       }
+    } else {
+      ketKerugian = 'Tidak dibebankan';
     }
 
     // 4. Biaya Notaris
@@ -497,6 +508,38 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                         if (val != null) setState(() => _jenisKerugian = val);
                       },
                     ),
+                    const SizedBox(height: 12),
+                    TextField(
+                      controller: _nominalKerugianController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        labelText: 'Nominal Dicover (Nilai Pertanggungan Agunan)',
+                        prefixText: 'Rp ',
+                        border: OutlineInputBorder(),
+                      ),
+                      onChanged: (val) {
+                        final n = _parseNominal(val);
+                        _nominalKerugianController.value = TextEditingValue(
+                          text: NumberFormat('#,###', 'id_ID').format(n),
+                          selection: TextSelection.collapsed(offset: NumberFormat('#,###', 'id_ID').format(n).length),
+                        );
+                        setState(() {});
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      children: [50, 100, 110, 150, 200].map((jt) {
+                        return ActionChip(
+                          label: Text('$jt Jt', style: const TextStyle(fontSize: 11)),
+                          onPressed: () {
+                            setState(() {
+                              _nominalKerugianController.text = NumberFormat('#,###', 'id_ID').format(jt * 1000000);
+                            });
+                          },
+                        );
+                      }).toList(),
+                    ),
                   ],
                   if (showBpjstk) ...[
                     const SizedBox(height: 12),
@@ -526,7 +569,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                   const SizedBox(height: 8),
                   _buildCostRow('1. Admin & Provisi', biayaAdmin, subtitle: ketAdmin),
                   _buildCostRow('2. Asuransi Jiwa Kredit', biayaJiwa, subtitle: 'Premi Dasar (${jiwaRate.toStringAsFixed(2)}‰)'),
-                  _buildCostRow('3. Asuransi Kerugian', biayaKerugian, subtitle: dibebankanKerugian ? 'FLEXAS + Polis + Materai' : 'Tidak dibebankan'),
+                  _buildCostRow('3. Asuransi Kerugian', biayaKerugian, subtitle: dibebankanKerugian ? ketKerugian : 'Tidak dibebankan'),
                   _buildCostRow('4. Biaya Notaris', biayaNotaris),
                   _buildCostRow('5. Asuransi Sijitu', biayaSijitu, subtitle: umur >= 50 ? 'Umur >= 50 th' : 'Umur < 50 th'),
                   if (showBpjstk)

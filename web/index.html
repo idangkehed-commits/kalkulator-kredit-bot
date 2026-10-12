@@ -555,6 +555,20 @@
           <option value="motor">🏍️ Kendaraan Sepeda Motor (TLO)</option>
           <option value="truk">🚚 Kendaraan Truk / Pick Up (TLO)</option>
         </select>
+        <div style="margin-top: 10px;">
+          <label style="font-size: 0.8rem; color: var(--text-muted);">Nominal yang Dicover (Nilai Pertanggungan Agunan)</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">Rp</span>
+            <input type="text" id="inpNominalKerugian" class="has-prefix" value="110.000.000" inputmode="numeric">
+          </div>
+          <div class="chips-group" id="nominalKerugianChips">
+            <span class="chip" data-val="50000000">50 Jt</span>
+            <span class="chip" data-val="100000000">100 Jt</span>
+            <span class="chip active" data-val="110000000">110 Jt</span>
+            <span class="chip" data-val="150000000">150 Jt</span>
+            <span class="chip" data-val="200000000">200 Jt</span>
+          </div>
+        </div>
       </div>
 
       <!-- Pertanyaan BPJSTK (Khusus KUR > 100 Juta) -->
@@ -648,7 +662,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=6').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=7').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -823,32 +837,34 @@
       document.getElementById('groupKerugian').style.display = dibebankanKerugian ? 'block' : 'none';
 
       const jenisKerugian = document.getElementById('selKerugian').value;
+      const nominalCoverInp = parseRupiah(document.getElementById('inpNominalKerugian').value);
+      const basisKerugian = (nominalCoverInp > 0) ? nominalCoverInp : limit;
       const tenorTahun = tenorBulan / 12.0;
 
       if (dibebankanKerugian) {
         if (jenisKerugian === 'motor') {
           const rateTotal = +(1.80 * tenorTahun).toFixed(3);
-          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
-          ketKerugian = `TLO Motor (Rate: ${rateTotal.toFixed(2)}%)`;
+          biayaKerugian = Math.round(basisKerugian * (rateTotal / 100.0));
+          ketKerugian = `TLO Motor (Cover: ${formatRupiah(basisKerugian)}, Rate: ${rateTotal.toFixed(2)}%)`;
         } else if (jenisKerugian === 'truk') {
           const rateTotal = +(1.68 * tenorTahun).toFixed(3);
-          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
-          ketKerugian = `TLO Truk/Pick Up (Rate: ${rateTotal.toFixed(2)}%)`;
+          biayaKerugian = Math.round(basisKerugian * (rateTotal / 100.0));
+          ketKerugian = `TLO Truk/Pick Up (Cover: ${formatRupiah(basisKerugian)}, Rate: ${rateTotal.toFixed(2)}%)`;
         } else if (jenisKerugian === 'mobil') {
           let rateThn = 0.65;
-          if (limit <= 125000000) rateThn = 0.65;
-          else if (limit <= 200000000) rateThn = 0.44;
-          else if (limit <= 400000000) rateThn = 0.38;
-          else if (limit <= 800000000) rateThn = 0.25;
+          if (basisKerugian <= 125000000) rateThn = 0.65;
+          else if (basisKerugian <= 200000000) rateThn = 0.44;
+          else if (basisKerugian <= 400000000) rateThn = 0.38;
+          else if (basisKerugian <= 800000000) rateThn = 0.25;
           else rateThn = 0.20;
           const rateTotal = +(rateThn * tenorTahun).toFixed(3);
-          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
-          ketKerugian = `TLO Mobil Pribadi (Rate: ${rateTotal.toFixed(2)}%)`;
+          biayaKerugian = Math.round(basisKerugian * (rateTotal / 100.0));
+          ketKerugian = `TLO Mobil Pribadi (Cover: ${formatRupiah(basisKerugian)}, Rate: ${rateTotal.toFixed(2)}%)`;
         } else {
           // Kebakaran FLEXAS Rumah Tinggal Kelas 1 (0.294 ‰)
           const rateFlexas = +(0.294 * tenorTahun).toFixed(4);
-          biayaKerugian = Math.round(limit * rateFlexas / 1000.0);
-          ketKerugian = `FLEXAS Kebakaran (Rate: ${rateFlexas.toFixed(3)}‰)`;
+          biayaKerugian = Math.round(basisKerugian * rateFlexas / 1000.0);
+          ketKerugian = `FLEXAS Kebakaran (Cover: ${formatRupiah(basisKerugian)}, Rate: ${rateFlexas.toFixed(3)}‰)`;
         }
       } else {
         biayaKerugian = 0;
@@ -974,6 +990,7 @@
     setupCurrencyInput(document.getElementById('inpLimit'));
     setupCurrencyInput(document.getElementById('inpSisaBade'));
     setupCurrencyInput(document.getElementById('inpNotaris'));
+    setupCurrencyInput(document.getElementById('inpNominalKerugian'));
 
     // Event Listeners for inputs
     ['inpBunga', 'inpTenor', 'inpTglLahir', 'inpNama', 'selKerugian'].forEach(id => {
@@ -982,6 +999,16 @@
     });
 
     // Chips Handling
+    document.querySelectorAll('#nominalKerugianChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#nominalKerugianChips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const val = parseInt(chip.dataset.val, 10);
+        document.getElementById('inpNominalKerugian').value = val.toLocaleString('id-ID');
+        calculate();
+      });
+    });
+
     document.querySelectorAll('#limitChips .chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('#limitChips .chip').forEach(c => c.classList.remove('active'));
