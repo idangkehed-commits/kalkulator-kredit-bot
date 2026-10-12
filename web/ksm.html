@@ -211,19 +211,34 @@
 
       <!-- 4. Pilihan Tenor, Bunga & Biaya Provisi/Admin -->
       <div class="grid grid-cols-2 gap-3 pt-1">
-        <!-- Tenor -->
+        <!-- Tenor (Input Manual Bebas + Preset Cepat) -->
         <div>
-          <label for="tenorSelect" class="block text-xs font-semibold text-slate-700 mb-1.5">
-            Pilihan Tenor
+          <label for="tenorInput" class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+            <span>Tenor Pinjaman</span>
+            <span id="tenorYearLabel" class="text-[10px] text-mandiri-blue font-bold">36 Bulan (3.0 Thn)</span>
           </label>
           <div class="relative">
-            <select id="tenorSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-2xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7">
-              <!-- Populated via app.js -->
+            <input 
+              type="number" 
+              id="tenorInput" 
+              min="1" 
+              max="180" 
+              value="36"
+              placeholder="Ketik bulan (misal: 18, 30)"
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-12"
+            >
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-bold text-slate-400">Bln</span>
+          </div>
+          <!-- Dropdown Pilihan Cepat / Preset Tenor -->
+          <div class="relative mt-1.5">
+            <select id="tenorQuickSelect" class="w-full bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-medium rounded-xl px-2 py-1 appearance-none focus:outline-none focus:ring-1 focus:ring-mandiri-blue cursor-pointer pr-5">
+              <option value="">⚡ Pilih Preset Cepat...</option>
             </select>
-            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
-              <i class="fa-solid fa-chevron-down text-xs"></i>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-1.5 text-slate-400">
+              <i class="fa-solid fa-chevron-down text-[8px]"></i>
             </div>
           </div>
+          <div id="tenorWarning" class="hidden mt-1 text-[9px] text-amber-700 font-medium bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-lg leading-tight"></div>
         </div>
 
         <!-- Suku Bunga (Editable / Locked jika Special Pricing) -->
@@ -908,6 +923,15 @@ function getAxaInsuranceRate(planKey, age, totalMonths) {
 }
 
 // Utility Formatter
+function formatTenorText(months) {
+  if (!months || isNaN(months)) return '0 Bln';
+  const y = Math.floor(months / 12);
+  const m = months % 12;
+  if (y === 0) return `${months} Bulan`;
+  if (m === 0) return `${months} Bln (${y} Thn)`;
+  return `${months} Bln (${(months / 12).toFixed(1)} Thn)`;
+}
+
 function formatRupiah(num) {
   if (isNaN(num) || num === null || num === undefined) return 'Rp 0';
   return 'Rp ' + Math.round(num).toLocaleString('id-ID');
@@ -967,7 +991,9 @@ function calculateKsm() {
   const categoryId = document.getElementById('categorySelect').value;
   const income = parseRupiah(document.getElementById('incomeInput').value);
   const existingObligation = parseRupiah(document.getElementById('obligationInput').value);
-  let selectedTenor = parseInt(document.getElementById('tenorSelect').value, 10) || 36;
+  const tenorInputElem = document.getElementById('tenorInput');
+  let inputTenor = parseInt(tenorInputElem ? tenorInputElem.value : 36, 10);
+  if (isNaN(inputTenor) || inputTenor < 1) inputTenor = 36;
   const contractMonths = parseInt(document.getElementById('contractMonthsInput')?.value, 10) || 0;
   
   const requestedPlafonInput = parseRupiah(document.getElementById('requestedPlafonInput').value);
@@ -1054,8 +1080,26 @@ function calculateKsm() {
     effectiveMaxTenor = Math.min(effectiveMaxTenor, contractMonths);
   }
 
-  updateTenorOptions(effectiveMaxTenor, selectedTenor);
-  selectedTenor = parseInt(document.getElementById('tenorSelect').value, 10) || effectiveMaxTenor;
+  // Validasi & Update Label Tenor
+  const tenorWarning = document.getElementById('tenorWarning');
+  const tenorYearLabel = document.getElementById('tenorYearLabel');
+  
+  let selectedTenor = inputTenor;
+  if (selectedTenor > effectiveMaxTenor) {
+    if (tenorWarning) {
+      tenorWarning.textContent = `⚠️ Melebihi batas kategori (Maks: ${effectiveMaxTenor} Bulan / ${(effectiveMaxTenor/12).toFixed(1)} Thn). Menggunakan ${effectiveMaxTenor} Bulan.`;
+      tenorWarning.classList.remove('hidden');
+    }
+    selectedTenor = effectiveMaxTenor;
+  } else {
+    if (tenorWarning) tenorWarning.classList.add('hidden');
+  }
+
+  if (tenorYearLabel) {
+    tenorYearLabel.textContent = formatTenorText(selectedTenor);
+  }
+
+  updateTenorQuickOptions(effectiveMaxTenor, selectedTenor);
 
   // Render Tier Info Badge
   renderTierInfo(category, matchedTier, isUnderMinIncome, effectiveMaxTenor);
@@ -1229,7 +1273,7 @@ function renderResultSuccess(calc) {
   
   // Plafon Diajukan
   document.getElementById('resSimulatedPlafon').textContent = formatRupiah(calc.simulatedPlafon);
-  document.getElementById('resTenor').textContent = `${calc.selectedTenor} Bulan (${(calc.selectedTenor/12).toFixed(1)} Thn)`;
+  document.getElementById('resTenor').textContent = formatTenorText(calc.selectedTenor);
 
   // Info DBR
   document.getElementById('resMaxDbr').textContent = `${calc.maxDbrPercent}% (${formatRupiah(calc.maxInstallmentBudget)})`;
@@ -1302,12 +1346,16 @@ function renderResultError(message) {
   errorMessage.textContent = message;
 }
 
-// Render Tabel Perbandingan Tenor (12 s.d. Max Tenor)
+// Render Tabel Perbandingan Tenor (12 s.d. Max Tenor + Custom Tenor jika ada)
 function renderTenorComparisonTable(calc) {
   const container = document.getElementById('tenorComparisonContainer');
   if (!container) return;
 
-  const tenorList = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 144, 180].filter(t => t <= calc.effectiveMaxTenor);
+  let tenorList = [12, 18, 24, 30, 36, 48, 60, 72, 84, 96, 108, 120, 144, 180].filter(t => t <= calc.effectiveMaxTenor);
+  if (calc.selectedTenor && !tenorList.includes(calc.selectedTenor) && calc.selectedTenor <= calc.effectiveMaxTenor) {
+    tenorList.push(calc.selectedTenor);
+    tenorList.sort((a,b) => a - b);
+  }
   
   let rowsHtml = '';
   tenorList.forEach(tenor => {
@@ -1321,9 +1369,9 @@ function renderTenorComparisonTable(calc) {
     const isCurrent = tenor === calc.selectedTenor;
 
     rowsHtml += `
-      <tr class="${isCurrent ? 'bg-blue-50/80 font-semibold text-mandiri-blue' : 'hover:bg-slate-50 text-slate-700'} border-b border-slate-100 transition">
+      <tr onclick="selectTenorFromTable(${tenor})" class="${isCurrent ? 'bg-blue-50/90 font-semibold text-mandiri-blue border-l-4 border-mandiri-blue' : 'hover:bg-slate-50 text-slate-700 cursor-pointer'} border-b border-slate-100 transition">
         <td class="py-2.5 px-3 text-xs">
-          ${tenor} Bulan (${(tenor/12).toFixed(1)} Thn) ${(isCurrent ? '<span class="ml-1 text-[10px] bg-mandiri-blue text-white px-1.5 py-0.5 rounded-full">Dipilih</span>' : '')}
+          ${formatTenorText(tenor)} ${(isCurrent ? '<span class="ml-1 text-[10px] bg-mandiri-blue text-white px-1.5 py-0.5 rounded-full font-bold">Dipilih</span>' : '')}
         </td>
         <td class="py-2.5 px-3 text-xs font-medium text-right">${formatRupiah(maxPlafonAtTenor)}</td>
         <td class="py-2.5 px-3 text-xs font-bold text-right text-emerald-700">${formatRupiah(inst)}</td>
@@ -1335,7 +1383,7 @@ function renderTenorComparisonTable(calc) {
     <div class="mt-4 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
       <div class="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
         <span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-table-list mr-1.5 text-mandiri-blue"></i>Perbandingan Tenor Lainnya</span>
-        <span class="text-[10px] text-slate-400">Plafon: ${formatRupiah(calc.simulatedPlafon)}</span>
+        <span class="text-[10px] text-slate-400">Klik baris untuk memilih</span>
       </div>
       <div class="overflow-x-auto max-h-56">
         <table class="w-full text-left border-collapse">
@@ -1355,27 +1403,36 @@ function renderTenorComparisonTable(calc) {
   `;
 }
 
-// Update Pilihan Tenor Dropdown (Dukungan hingga 180 Bulan / 15 Tahun)
-function updateTenorOptions(maxTenor, currentVal) {
-  const tenorSelect = document.getElementById('tenorSelect');
-  const availableTenors = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180].filter(t => t <= maxTenor);
-  
-  if (!availableTenors.includes(maxTenor) && maxTenor > 0) {
-    availableTenors.push(maxTenor);
-    availableTenors.sort((a,b) => a - b);
+function selectTenorFromTable(tenor) {
+  const input = document.getElementById('tenorInput');
+  if (input) {
+    input.value = tenor;
+    calculateKsm();
+  }
+}
+window.selectTenorFromTable = selectTenorFromTable;
+
+// Update Dropdown Pilihan Cepat / Preset Tenor
+function updateTenorQuickOptions(maxTenor, currentVal) {
+  const quickSelect = document.getElementById('tenorQuickSelect');
+  if (!quickSelect) return;
+
+  const presets = [12, 18, 24, 30, 36, 48, 60, 72, 84, 96, 108, 120, 144, 180].filter(t => t <= maxTenor);
+  if (!presets.includes(maxTenor) && maxTenor > 0) {
+    presets.push(maxTenor);
+    presets.sort((a,b) => a - b);
   }
 
-  const prevVal = currentVal || parseInt(tenorSelect.value, 10);
-  tenorSelect.innerHTML = '';
-  
-  availableTenors.forEach(t => {
+  quickSelect.innerHTML = '<option value="">⚡ Pilih Preset Cepat / Pas Tahun...</option>';
+  presets.forEach(t => {
     const opt = document.createElement('option');
     opt.value = t;
-    opt.textContent = `${t} Bulan (${(t/12).toFixed(1)} Tahun)`;
-    if (t === prevVal || (t === maxTenor && !availableTenors.includes(prevVal))) {
+    const y = (t / 12).toFixed(1);
+    opt.textContent = `${t} Bulan (${y} Tahun)${t === maxTenor ? ' - MAKSIMAL' : ''}`;
+    if (t === currentVal) {
       opt.selected = true;
     }
-    tenorSelect.appendChild(opt);
+    quickSelect.appendChild(opt);
   });
 }
 
@@ -1405,7 +1462,7 @@ function shareWhatsApp() {
 ------------------------------------
 ✅ *Limit Maksimal*: *${formatRupiah(c.maxAllowedLimit)}*
 💵 *Plafon Diajukan*: *${formatRupiah(c.simulatedPlafon)}*
-📅 *Pilihan Tenor*: ${c.selectedTenor} Bulan (${(c.selectedTenor/12).toFixed(1)} Thn)
+📅 *Pilihan Tenor*: ${formatTenorText(c.selectedTenor)}
 📈 *Suku Bunga*: ${c.interestRate}% p.a. (Efektif${c.category.isSpecialPricing ? ' - Promo Locked' : ''})
 💵 *Estimasi Angsuran*: *${formatRupiah(c.monthlyInstallment)} / bulan*
 📉 *DBR Terpakai*: ${c.actualDbrPercent.toFixed(1)}% dari ${c.maxDbrPercent}%
@@ -1436,8 +1493,24 @@ function setupEvents() {
     });
   });
 
-  document.getElementById('categorySelect').addEventListener('change', calculateKsm);
-  document.getElementById('tenorSelect').addEventListener('change', calculateKsm);
+  const categorySelect = document.getElementById('categorySelect');
+  if (categorySelect) categorySelect.addEventListener('change', calculateKsm);
+
+  const tenorInput = document.getElementById('tenorInput');
+  if (tenorInput) {
+    tenorInput.addEventListener('input', calculateKsm);
+  }
+
+  const tenorQuickSelect = document.getElementById('tenorQuickSelect');
+  if (tenorQuickSelect) {
+    tenorQuickSelect.addEventListener('change', (e) => {
+      const val = parseInt(e.target.value, 10);
+      if (val && tenorInput) {
+        tenorInput.value = val;
+        calculateKsm();
+      }
+    });
+  }
   document.getElementById('interestRateInput').addEventListener('input', calculateKsm);
   
   const provisiInput = document.getElementById('provisiAdminRateInput');
