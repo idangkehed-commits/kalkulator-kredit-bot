@@ -460,6 +460,7 @@
       <!-- Limit / Plafond -->
       <div class="form-group">
         <label>Limit Pengajuan (Plafond)</label>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 10 untuk 10 Jt, 110 untuk 110 Jt s/d 500)</div>
         <div class="input-wrapper">
           <span class="input-prefix">Rp</span>
           <input type="text" id="inpLimit" class="has-prefix" value="110.000.000" inputmode="numeric">
@@ -478,6 +479,7 @@
       <!-- Sisa Pokok Hutang (Khusus Top Up KUM) -->
       <div class="form-group" id="groupSisaBade" style="display: none;">
         <label>Sisa Pokok Hutang / Baki Debet (Bade)</label>
+        <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 20 untuk 20 Jt)</div>
         <div class="input-wrapper">
           <span class="input-prefix">Rp</span>
           <input type="text" id="inpSisaBade" class="has-prefix" value="20.000.000" inputmode="numeric">
@@ -562,6 +564,7 @@
         </select>
         <div style="margin-top: 10px;">
           <label style="font-size: 0.8rem; color: var(--text-muted);">Nominal yang Dicover (Nilai Pertanggungan Agunan)</label>
+          <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 150 untuk 150 Jt)</div>
           <div class="input-wrapper">
             <span class="input-prefix">Rp</span>
             <input type="text" id="inpNominalKerugian" class="has-prefix" value="110.000.000" inputmode="numeric">
@@ -667,7 +670,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=7').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=9').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -771,13 +774,18 @@
 
     // Kalkulasi Utama
     function calculate() {
-      const limit = parseRupiah(document.getElementById('inpLimit').value);
-      const sisaBade = parseRupiah(document.getElementById('inpSisaBade').value);
+      let limit = parseRupiah(document.getElementById('inpLimit').value);
+      if (limit > 0 && limit <= 500) limit = limit * 1000000;
+
+      let sisaBade = parseRupiah(document.getElementById('inpSisaBade').value);
+      if (sisaBade > 0 && sisaBade <= 500) sisaBade = sisaBade * 1000000;
+
       const bungaVal = parseFloat(document.getElementById('inpBunga').value) || 0;
       const tenorBulan = parseInt(document.getElementById('inpTenor').value, 10) || 12;
       const tglLahir = document.getElementById('inpTglLahir').value;
       const umur = hitungUmur(tglLahir);
-      const notaris = parseRupiah(document.getElementById('inpNotaris').value);
+      let notaris = parseRupiah(document.getElementById('inpNotaris').value);
+      if (notaris > 0 && notaris <= 500) notaris = notaris * 1000000;
       const nama = document.getElementById('inpNama').value.trim() || 'Calon Debitur';
 
       document.getElementById('badgeUmur').textContent = `Umur: ${umur} tahun`;
@@ -842,7 +850,8 @@
       document.getElementById('groupKerugian').style.display = dibebankanKerugian ? 'block' : 'none';
 
       const jenisKerugian = document.getElementById('selKerugian').value;
-      const nominalCoverInp = parseRupiah(document.getElementById('inpNominalKerugian').value);
+      let nominalCoverInp = parseRupiah(document.getElementById('inpNominalKerugian').value);
+      if (nominalCoverInp > 0 && nominalCoverInp <= 500) nominalCoverInp = nominalCoverInp * 1000000;
       const basisKerugian = (nominalCoverInp > 0) ? nominalCoverInp : limit;
       const tenorTahun = tenorBulan / 12.0;
 
@@ -989,6 +998,14 @@
         const num = parseRupiah(e.target.value);
         e.target.value = num ? num.toLocaleString('id-ID') : '';
         calculate();
+      });
+      input.addEventListener('blur', (e) => {
+        let num = parseRupiah(e.target.value);
+        if (num > 0 && num <= 500) {
+          num = num * 1000000;
+          e.target.value = num.toLocaleString('id-ID');
+          calculate();
+        }
       });
     }
 

@@ -72,6 +72,9 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
         Di atas 100 juta (> 100 jt): 1.5% dari limit pengajuan.
     """
     jenis = jenis_kredit.strip().upper()
+    if 0 < limit <= 500:
+        limit = limit * 1_000_000.0
+
     if "KUR" in jenis:
         if 10_000_000 <= limit <= 100_000_000:
             biaya = 0.02 * limit
@@ -114,6 +117,8 @@ def is_asuransi_kerugian_dibebankan(jenis_kredit: str, limit: float) -> Tuple[bo
     - KUM: Dibebankan jika pengajuan di 50 juta dan lebih dari 50 juta (>= 50jt).
     """
     jenis = jenis_kredit.strip().upper()
+    if 0 < limit <= 500:
+        limit = limit * 1_000_000.0
     if "KUR" in jenis:
         if limit > 100_000_000:
             return True, "Dibebankan (KUR > 100jt)"
@@ -227,6 +232,9 @@ class ExcelInsuranceReader:
         3. Premi Dasar = round(Rate * Limit / 1000)
         4. Premi Final menggunakan Premi Dasar (tanpa diskon 18%).
         """
+        if 0 < limit <= 500:
+            limit = limit * 1_000_000.0
+
         rates_table = self._load_jiwa_table(filepath)
         
         # Batasi umur pada range tabel 18 - 65
@@ -291,9 +299,15 @@ class ExcelInsuranceReader:
                Formula: (tenor / 12) * (basis_nilai * 1.68 / 100)
         - Catatan Biaya Polis dan Materai: DIHILANGKAN (Rp 0) sesuai instruksi pengguna.
         """
+        if 0 < limit <= 500:
+            limit = limit * 1_000_000.0
+
         dibebankan, alasan = is_asuransi_kerugian_dibebankan(jenis_kredit, limit)
         if not dibebankan:
             return 0.0, alasan
+
+        if nilai_pertanggungan is not None and 0 < float(nilai_pertanggungan) <= 500:
+            nilai_pertanggungan = float(nilai_pertanggungan) * 1_000_000.0
 
         basis_nilai = float(nilai_pertanggungan) if (nilai_pertanggungan is not None and float(nilai_pertanggungan) > 0) else limit
         tenor_tahun = tenor_bulan / 12.0
@@ -351,9 +365,15 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
 
     is_topup = "TOP UP" in jenis_upper or "TOPUP" in jenis_upper or bool(data_pengajuan.get("is_topup", False))
     base_jenis = "KUR" if "KUR" in jenis_upper else "KUM"
+
     sisa_bade = float(data_pengajuan.get("sisa_bade", 0.0))
+    if 0 < sisa_bade <= 500:
+        sisa_bade = sisa_bade * 1_000_000.0
 
     limit = float(data_pengajuan.get("limit", 0))
+    if 0 < limit <= 500:
+        limit = limit * 1_000_000.0
+
     tenor = int(data_pengajuan.get("tenor", 12))
     bunga = float(data_pengajuan.get("bunga", 6.0))
     tipe_bunga = data_pengajuan.get("tipe_bunga", "efektif").lower()
@@ -363,6 +383,8 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     jenis_kerugian = str(data_pengajuan.get("jenis_kerugian") or data_pengajuan.get("agunan_kerugian") or "kebakaran").lower()
 
     nominal_cover = data_pengajuan.get("nilai_pertanggungan") or data_pengajuan.get("nominal_kerugian") or data_pengajuan.get("cover_kerugian")
+    if nominal_cover is not None and 0 < float(nominal_cover) <= 500:
+        nominal_cover = float(nominal_cover) * 1_000_000.0
     nilai_pertanggungan = float(nominal_cover) if (nominal_cover is not None and float(nominal_cover) > 0) else limit
 
     # Hitung umur

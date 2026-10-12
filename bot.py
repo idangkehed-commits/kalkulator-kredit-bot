@@ -25,7 +25,15 @@ from kalkulator import (
 
 
 def parse_nominal(text: str) -> Optional[float]:
-    """Mengubah input teks seperti '110jt', '110.000.000', '110000000' menjadi float."""
+    """
+    Mengubah input teks nominal menjadi float dalam Rupiah.
+    Mendukung:
+    - Input ringkas jutaan: '10' -> 10.000.000 s/d '500' -> 500.000.000
+    - Desimal ringkas: '10.5' / '10,5' -> 10.500.000
+    - Singkatan 'jt' atau 'juta': '110jt', '110 juta', '10.5jt'
+    - Singkatan 'rb' atau 'ribu' atau 'k': '500rb', '50k'
+    - Angka penuh dengan titik/koma ribuan: '110.000.000', '110000000'
+    """
     if not text:
         return None
     cleaned = text.strip().lower()
@@ -48,12 +56,28 @@ def parse_nominal(text: str) -> Optional[float]:
         except ValueError:
             return None
 
+    # Handle desimal ringkas jika hanya 1 titik/koma dengan 1-2 digit di belakangnya (misal 10.5 atau 12,5)
+    match_decimal = re.match(r"^(\d+)[.,](\d{1,2})$", cleaned)
+    if match_decimal:
+        int_part = match_decimal.group(1)
+        dec_part = match_decimal.group(2)
+        try:
+            val = float(f"{int_part}.{dec_part}")
+            if 0 < val <= 500:
+                return val * 1_000_000
+            return val
+        except ValueError:
+            pass
+
     # Handle angka standar dengan titik/koma ribuan
-    # Jika ada titik sebagai pemisah ribuan
     num_str = cleaned.replace(".", "").replace(",", ".")
     num_str = re.sub(r"[^\d.]", "", num_str)
     try:
-        return float(num_str)
+        val = float(num_str)
+        # Jika user hanya menulis angka ringkas 1 s/d 500 (misal: 10 untuk 10jt, 110 untuk 110jt, s/d 500)
+        if 0 < val <= 500:
+            return val * 1_000_000
+        return val
     except ValueError:
         return None
 
@@ -131,7 +155,7 @@ def jalankan_bot():
             return None
 
         sisa_bade = tanya_dengan_validasi(
-            "👉 Berapa Sisa Bade / Pokok hutangnya? (contoh: 25jt atau 25.000.000): ",
+            "👉 Berapa Sisa Bade / Pokok hutangnya? (cukup ketik angka jutanya: contoh 25 untuk 25jt, atau tulis lengkap): ",
             validate_sisa,
             "Format nominal sisa pokok hutang tidak valid!"
         )
@@ -148,9 +172,9 @@ def jalankan_bot():
         return None
 
     limit = tanya_dengan_validasi(
-        "👉 Limit / Plafond pengajuan berapa? (contoh: 110jt atau 110.000.000): ",
+        "👉 Limit / Plafond pengajuan berapa? (cukup ketik angka jutanya: 10 untuk 10jt, 110 untuk 110jt s/d 500, atau tulis lengkap): ",
         validate_limit,
-        "Format limit tidak valid! Masukkan angka seperti 50jt, 100000000, dsb."
+        "Format limit tidak valid! Cukup ketik angka seperti 10, 50, 110, atau tulis lengkap 110jt / 110000000."
     )
     print(f"   -> Limit pengajuan: {format_rupiah(limit)}\n")
 
@@ -303,9 +327,9 @@ def jalankan_bot():
             return None
 
         nilai_pertanggungan = tanya_dengan_validasi(
-            f"👉 Mau berapa nominal yang akan dicover untuk Asuransi Kerugian? (contoh: 150jt atau tekan Enter untuk sama dengan limit {format_rupiah(limit)}): ",
+            f"👉 Mau berapa nominal yang akan dicover untuk Asuransi Kerugian? (cukup ketik angka jutanya: contoh 150 untuk 150jt, atau tekan Enter untuk sama dengan limit {format_rupiah(limit)}): ",
             validate_nominal_cover,
-            "Format nominal tidak valid! Masukkan angka seperti 150jt atau 150.000.000."
+            "Format nominal tidak valid! Masukkan angka seperti 150 atau tulis lengkap 150jt."
         )
         print(f"   -> Nominal dicover: {format_rupiah(nilai_pertanggungan)}\n")
     else:

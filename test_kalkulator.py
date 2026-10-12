@@ -12,6 +12,7 @@ from kalkulator import (
     generate_hasil_teks,
     ExcelInsuranceReader
 )
+from bot import parse_nominal
 
 class TestKalkulatorKredit(unittest.TestCase):
     def setUp(self):
@@ -232,6 +233,63 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("6. BPJSTK                : Rp 0 (Sudah punya kartu)", teks_punya)
         self.assertIn("Total Biaya yang Disiapkan : Rp 4.686.020*", teks_punya)
         self.assertIn("- Blokir 2x Angsuran        : Rp 6.692.826", teks_punya)
+
+    def test_parse_nominal_ringkas(self):
+        # 10 s/d 500 otomatis juta
+        self.assertEqual(parse_nominal("10"), 10_000_000)
+        self.assertEqual(parse_nominal("25"), 25_000_000)
+        self.assertEqual(parse_nominal("50"), 50_000_000)
+        self.assertEqual(parse_nominal("100"), 100_000_000)
+        self.assertEqual(parse_nominal("110"), 110_000_000)
+        self.assertEqual(parse_nominal("150"), 150_000_000)
+        self.assertEqual(parse_nominal("500"), 500_000_000)
+        
+        # Desimal ringkas
+        self.assertEqual(parse_nominal("10.5"), 10_500_000)
+        self.assertEqual(parse_nominal("10,5"), 10_500_000)
+        self.assertEqual(parse_nominal("12.75"), 12_750_000)
+        
+        # Format teks konvensional
+        self.assertEqual(parse_nominal("10jt"), 10_000_000)
+        self.assertEqual(parse_nominal("110 juta"), 110_000_000)
+        self.assertEqual(parse_nominal("110.000.000"), 110_000_000)
+        self.assertEqual(parse_nominal("110000000"), 110_000_000)
+        self.assertEqual(parse_nominal("500rb"), 500_000)
+
+    def test_limit_shorthand_kalkulasi(self):
+        # Test kalkulasi dengan limit ringkas 10 (maksudnya 10jt)
+        data = {
+            "jenis_kredit": "KUR",
+            "limit": 10,
+            "tenor": 12,
+            "bunga": 6.0,
+            "tipe_bunga": "efektif",
+            "tanggal_lahir": date(1990, 1, 1),
+            "nama": "Pak Shorthand",
+            "biaya_notaris": 0
+        }
+        hasil = kalkulasi_lengkap(data, self.reader)
+        self.assertEqual(hasil["limit"], 10_000_000)
+        self.assertTrue(hasil["angsuran"] > 800_000)
+        self.assertTrue(hasil["dana_cair_bersih"] > 0)
+
+        # Test limit 110 dan nilai_pertanggungan 150
+        data_110 = {
+            "jenis_kredit": "KUR",
+            "limit": 110,
+            "tenor": 36,
+            "bunga": 6.0,
+            "tipe_bunga": "efektif",
+            "tanggal_lahir": date(1988, 3, 15),
+            "nama": "Budi Santoso",
+            "biaya_notaris": 1_250_000,
+            "jenis_kerugian": "kebakaran",
+            "nilai_pertanggungan": 150
+        }
+        hasil_110 = kalkulasi_lengkap(data_110, self.reader)
+        self.assertEqual(hasil_110["limit"], 110_000_000)
+        self.assertEqual(hasil_110["nilai_pertanggungan"], 150_000_000)
+        self.assertEqual(hasil_110["biaya_kerugian"], 132_300)
 
 if __name__ == "__main__":
     unittest.main()

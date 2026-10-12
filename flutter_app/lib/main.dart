@@ -153,11 +153,18 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
 
   @override
   Widget build(BuildContext context) {
-    final limit = _parseNominal(_limitController.text);
-    final sisaBade = _parseNominal(_sisaBadeController.text);
+    final limitRaw = _parseNominal(_limitController.text);
+    final limit = (limitRaw > 0 && limitRaw <= 500) ? limitRaw * 1000000 : limitRaw;
+
+    final sisaBadeRaw = _parseNominal(_sisaBadeController.text);
+    final sisaBade = (sisaBadeRaw > 0 && sisaBadeRaw <= 500) ? sisaBadeRaw * 1000000 : sisaBadeRaw;
+
     final bungaVal = double.tryParse(_bungaController.text.replaceAll(',', '.')) ?? 0.0;
     final tenorBulan = int.tryParse(_tenorController.text) ?? 12;
-    final notaris = _parseNominal(_notarisController.text);
+
+    final notarisRaw = _parseNominal(_notarisController.text);
+    final notaris = (notarisRaw > 0 && notarisRaw <= 500) ? notarisRaw * 1000000 : notarisRaw;
+
     final umur = _hitungUmur(_tanggalLahir);
 
     final isKur = _jenisKredit.contains('KUR');
@@ -214,7 +221,8 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     int biayaKerugian = 0;
     String ketKerugian = '';
     final dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
-    final nominalCoverInp = _parseNominal(_nominalKerugianController.text);
+    final nominalCoverRaw = _parseNominal(_nominalKerugianController.text);
+    final nominalCoverInp = (nominalCoverRaw > 0 && nominalCoverRaw <= 500) ? nominalCoverRaw * 1000000 : nominalCoverRaw;
     final basisKerugian = nominalCoverInp > 0 ? nominalCoverInp : limit;
     final tenorTahun = tenorBulan / 12.0;
     if (dibebankanKerugian) {
@@ -340,6 +348,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                     keyboardType: TextInputType.number,
                     decoration: const InputDecoration(
                       labelText: 'Limit Pengajuan (Plafond)',
+                      helperText: 'Cukup ketik angka jutanya (contoh: 10 untuk 10jt, 110 untuk 110jt s/d 500)',
                       prefixText: 'Rp ',
                       border: OutlineInputBorder(),
                     ),

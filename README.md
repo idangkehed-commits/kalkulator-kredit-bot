@@ -54,7 +54,8 @@ Ada 2 cara mudah:
 1. **Haloo, mau pengajuan apa nih?**
    - Pilihan: `[1] KUR` atau `[2] KUM`
 2. **Limit pengajuan berapa?**
-   - Format fleksibel: bisa tulis `110jt`, `110.000.000`, `50000000`, dsb.
+   - Format fleksibel & super ringkas: Cukup ketik angka jutanya saja, misal ketik **`10`** (untuk 10 Juta), **`50`** (50 Juta), **`110`** (110 Juta) s/d **`500`** (500 Juta).
+   - Juga mendukung desimal seperti **`10.5`** atau **`12,5`** (12,5 Juta), serta format lengkap seperti `110jt`, `110.000.000`, `110000000`.
 3. **Mau Flat perbulan apa Efektif per tahun?**
    - Untuk **KUR**: otomatis dikunci ke **Efektif per tahun** (Anuitas).
    - Untuk **KUM**: user memilih tombol **Flat per bulan** atau **Efektif per tahun**.

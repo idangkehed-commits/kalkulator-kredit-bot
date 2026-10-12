@@ -332,7 +332,7 @@ async def jenis_kredit_selected(update: Update, context: ContextTypes.DEFAULT_TY
         await query.edit_message_text(
             f"✅ Jenis Kredit: <b>{jenis}</b>\n\n"
             "👉 <b>Berapa limit pengajuan yang diinginkan?</b>\n"
-            "<i>(Contoh: ketik 110jt, 110.000.000, atau 50000000)</i>",
+            "<i>(Cukup ketik angka jutanya: contoh 10 untuk 10jt, 110 untuk 110jt s/d 500 untuk 500jt, atau tulis lengkap 110.000.000):</i>",
             parse_mode="HTML"
         )
         return STATE_LIMIT
@@ -346,7 +346,7 @@ async def handle_sisa_bade(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     if sisa is None or sisa < 0:
         await update.message.reply_text(
             "⚠️ Nominal Sisa Pokok Hutang / Bade tidak valid. Silakan ketik kembali:\n"
-            "<i>(Contoh: 25jt atau 25.000.000)</i>",
+            "<i>(Cukup ketik angka jutanya: contoh 25 untuk 25jt, atau tulis lengkap):</i>",
             parse_mode="HTML"
         )
         return STATE_SISA_BADE
@@ -355,7 +355,7 @@ async def handle_sisa_bade(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     await update.message.reply_text(
         f"✅ Sisa Pokok / Bade: <b>{format_rupiah(sisa)}</b>\n\n"
         "👉 <b>Berapa Limit Pengajuan baru yang diinginkan?</b>\n"
-        "<i>(Contoh: ketik 110jt, 110.000.000, atau 50000000)</i>",
+        "<i>(Cukup ketik angka jutanya: contoh 10 untuk 10jt, 110 untuk 110jt s/d 500 untuk 500jt, atau tulis lengkap):</i>",
         parse_mode="HTML"
     )
     return STATE_LIMIT
@@ -369,7 +369,7 @@ async def handle_limit(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     if limit is None or limit <= 0:
         await update.message.reply_text(
             "⚠️ Nominal limit tidak valid. Silakan ketik kembali nominal pengajuan:\n"
-            "<i>(Contoh: 110jt atau 110.000.000)</i>",
+            "<i>(Cukup ketik angka jutanya: contoh 10 untuk 10jt, 110 untuk 110jt s/d 500 untuk 500jt, atau tulis lengkap):</i>",
             parse_mode="HTML"
         )
         return STATE_LIMIT
@@ -704,7 +704,7 @@ async def minta_nominal_kerugian(event_source, context: ContextTypes.DEFAULT_TYP
     reply_markup = InlineKeyboardMarkup(keyboard)
     pesan = (
         "👉 <b>Berapa nominal/harga pertanggungan yang akan dicover untuk Asuransi Kerugian?</b>\n\n"
-        "<i>(Ketik nominal yang akan dicover, misal: 150jt atau 150000000, atau klik tombol di bawah jika sama dengan limit pengajuan):</i>"
+        "<i>(Cukup ketik angka jutanya: contoh 150 untuk 150jt, atau klik tombol di bawah jika sama dengan limit pengajuan):</i>"
     )
     if is_callback:
         await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
