@@ -598,10 +598,17 @@
           </tr>
           <tr id="rowBpjstk">
             <td>
-              6. BPJSTK
+              <span id="noBpjstk">6</span>. BPJSTK
               <span class="item-sub" id="subBpjstk">Biaya kepesertaan KUR > 100jt</span>
             </td>
             <td id="resBpjstk">Rp 168.000</td>
+          </tr>
+          <tr id="rowBlokir">
+            <td>
+              <span id="noBlokir">6</span>. Blokir 2x Angsuran
+              <span class="item-sub" id="subBlokir">2 x Angsuran bulanan</span>
+            </td>
+            <td id="resBlokir">Rp 0</td>
           </tr>
           <tr class="total-row">
             <td>Total Biaya Disiapkan</td>
@@ -846,8 +853,11 @@
         }
       }
 
+      // 7. Blokir 2x Angsuran
+      const biayaBlokir = 2 * angsuran;
+
       // Total Biaya
-      const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
+      const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk + biayaBlokir;
 
       // Dana Cair Bersih
       const danaCair = isTopUp ? (limit - sisaBade - totalBiaya) : (limit - totalBiaya);
@@ -875,6 +885,10 @@
       document.getElementById('subBpjstk').textContent = ketBpjstk;
       document.getElementById('resBpjstk').textContent = formatRupiah(biayaBpjstk);
 
+      document.getElementById('noBlokir').textContent = showBpjstk ? '7' : '6';
+      document.getElementById('subBlokir').textContent = `2 x ${formatRupiah(angsuran)}`;
+      document.getElementById('resBlokir').textContent = formatRupiah(biayaBlokir);
+
       document.getElementById('resTotalBiaya').textContent = formatRupiah(totalBiaya);
 
       // Tampilkan Penerimaan Bersih untuk semua jenis pengajuan
@@ -899,6 +913,9 @@
       summaryText += `5. Asuransi Sijitu       : ${formatRupiah(biayaSijitu)} (${ketSijitu})\n`;
       if (showBpjstk) {
         summaryText += `6. BPJSTK                : ${formatRupiah(biayaBpjstk)} (${ketBpjstk})\n`;
+        summaryText += `7. Blokir 2x Angsuran   : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
+      } else {
+        summaryText += `6. Blokir 2x Angsuran   : ${formatRupiah(biayaBlokir)} (2 x ${formatRupiah(angsuran)})\n`;
       }
       summaryText += `----------------------------------------------------------------------\n`;
       summaryText += `Total Biaya yang Disiapkan : ${formatRupiah(totalBiaya)}*\n`;

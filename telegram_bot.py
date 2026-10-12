@@ -198,11 +198,17 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
         f"5. Asuransi Sijitu : {sijitu_fmt} <i>({ket_sijitu_esc})</i>",
     ]
 
+    nomor_biaya = 6
     if hasil.get("biaya_bpjstk", 0) > 0:
         bpjstk_fmt = format_rupiah(hasil['biaya_bpjstk'])
-        lines.append(f"6. BPJSTK : {bpjstk_fmt}")
+        lines.append(f"{nomor_biaya}. BPJSTK : {bpjstk_fmt}")
+        nomor_biaya += 1
     elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
-        lines.append("6. BPJSTK : Rp 0 <i>(Sudah punya kartu)</i>")
+        lines.append(f"{nomor_biaya}. BPJSTK : Rp 0 <i>(Sudah punya kartu)</i>")
+        nomor_biaya += 1
+
+    blokir_fmt = format_rupiah(hasil.get('biaya_blokir', 0))
+    lines.append(f"{nomor_biaya}. Blokir 2x Angsuran : {blokir_fmt} <i>(2 x {angsuran_fmt})</i>")
 
     lines.extend([
         "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",

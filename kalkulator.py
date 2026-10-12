@@ -361,8 +361,12 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         biaya_bpjstk = 0.0
         ket_bpjstk = "Rp 0"
 
+    # 7. Blokir 2x Angsuran (tabungan mengendap)
+    biaya_blokir = float(round(2 * angsuran))
+    ket_blokir = f"2 x {format_rupiah(angsuran)}"
+
     # Total Biaya
-    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk
+    total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk + biaya_blokir
 
     # Perhitungan Penerimaan Bersih:
     # Jika Top Up: Limit - Sisa Bade - Total Biaya
@@ -397,6 +401,8 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         "biaya_bpjstk": biaya_bpjstk,
         "ket_bpjstk": ket_bpjstk,
         "punya_bpjstk": punya_bpjstk,
+        "biaya_blokir": biaya_blokir,
+        "ket_blokir": ket_blokir,
         "total_biaya": total_biaya
     }
 
@@ -442,10 +448,16 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
         f"5. Asuransi Sijitu       : {sijitu_fmt} (Keterangan: {hasil['ket_sijitu']})",
     ]
 
+    nomor_biaya = 6
     if hasil.get("biaya_bpjstk", 0) > 0:
-        lines.append(f"6. BPJSTK                : {format_rupiah(hasil['biaya_bpjstk'])}")
+        lines.append(f"{nomor_biaya}. BPJSTK                : {format_rupiah(hasil['biaya_bpjstk'])}")
+        nomor_biaya += 1
     elif hasil.get("base_jenis") == "KUR" and hasil.get("limit", 0) > 100_000_000 and hasil.get("punya_bpjstk") is True:
-        lines.append("6. BPJSTK                : Rp 0 (Sudah punya kartu)")
+        lines.append(f"{nomor_biaya}. BPJSTK                : Rp 0 (Sudah punya kartu)")
+        nomor_biaya += 1
+
+    blokir_fmt = format_rupiah(hasil.get("biaya_blokir", 0))
+    lines.append(f"{nomor_biaya}. Blokir 2x Angsuran   : {blokir_fmt} ({hasil.get('ket_blokir', '')})")
 
     lines.extend([
         "----------------------------------------------------------------------",
