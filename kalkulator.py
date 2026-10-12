@@ -70,7 +70,8 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float, promo_admin: bool = Fa
         Di luar itu diinformasikan atau dihitung sesuai ketentuan.
     - KUM:
         Sampai 100 juta (<= 100 jt): 1% dari limit pengajuan.
-        Di atas 100 juta (> 100 jt): 1.5% dari limit pengajuan.
+        101 juta sampai 250 juta (101jt s/d 250jt): 1.25% dari limit pengajuan.
+        251 juta sampai 500 juta (251jt s/d 500jt): 1.5% dari limit pengajuan.
     """
     if promo_admin:
         return 1.0, "Promo Admin & Provisi"
@@ -94,9 +95,12 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float, promo_admin: bool = Fa
         if limit <= 100_000_000:
             biaya = 0.01 * limit
             ket = "1% dari limit pengajuan (s/d 100jt)"
+        elif limit <= 250_000_000:
+            biaya = 0.0125 * limit
+            ket = "1.25% dari limit pengajuan (101jt s/d 250jt)"
         else:
             biaya = 0.015 * limit
-            ket = "1.5% dari limit pengajuan (> 100jt)"
+            ket = "1.5% dari limit pengajuan (251jt s/d 500jt)"
         return round(biaya), ket
     else:
         return 0.0, "Jenis kredit tidak dikenal"

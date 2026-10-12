@@ -46,12 +46,32 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertEqual(biaya_110, 2_090_000)
 
     def test_admin_provisi_kum(self):
-        biaya, _ = hitung_admin_provisi("KUM", 80_000_000)
-        self.assertEqual(biaya, 800_000)
+        # Tier 1: s/d 100jt -> 1%
+        biaya_80, ket_80 = hitung_admin_provisi("KUM", 80_000_000)
+        self.assertEqual(biaya_80, 800_000)
+        self.assertIn("1%", ket_80)
 
-        # > 100jt -> tetap 1.5%
-        biaya_120, _ = hitung_admin_provisi("KUM", 120_000_000)
-        self.assertEqual(biaya_120, 1_800_000)
+        biaya_100, _ = hitung_admin_provisi("KUM", 100_000_000)
+        self.assertEqual(biaya_100, 1_000_000)
+
+        # Tier 2: 101jt s/d 250jt -> 1.25%
+        biaya_120, ket_120 = hitung_admin_provisi("KUM", 120_000_000)
+        self.assertEqual(biaya_120, 1_500_000)
+        self.assertIn("1.25%", ket_120)
+
+        biaya_200, _ = hitung_admin_provisi("KUM", 200_000_000)
+        self.assertEqual(biaya_200, 2_500_000)
+
+        biaya_250, _ = hitung_admin_provisi("KUM", 250_000_000)
+        self.assertEqual(biaya_250, 3_125_000)
+
+        # Tier 3: 251jt s/d 500jt -> 1.5%
+        biaya_300, ket_300 = hitung_admin_provisi("KUM", 300_000_000)
+        self.assertEqual(biaya_300, 4_500_000)
+        self.assertIn("1.5%", ket_300)
+
+        biaya_500, _ = hitung_admin_provisi("KUM", 500_000_000)
+        self.assertEqual(biaya_500, 7_500_000)
 
     def test_asuransi_sijitu(self):
         biaya_35, _ = hitung_asuransi_sijitu(35)

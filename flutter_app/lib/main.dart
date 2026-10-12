@@ -211,9 +211,12 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
       if (limit <= 100000000) {
         biayaAdmin = (0.01 * limit).round();
         ketAdmin = '1% (s/d 100jt)';
+      } else if (limit <= 250000000) {
+        biayaAdmin = (0.0125 * limit).round();
+        ketAdmin = '1.25% (101jt s/d 250jt)';
       } else {
         biayaAdmin = (0.015 * limit).round();
-        ketAdmin = '1.5% (> 100jt)';
+        ketAdmin = '1.5% (251jt s/d 500jt)';
       }
     }
 
