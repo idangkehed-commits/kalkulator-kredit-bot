@@ -612,7 +612,7 @@
 
       <!-- Penerimaan Bersih Calon Debitur -->
       <div class="topup-cair-card" id="cardTopupCair">
-        <div class="topup-cair-title" id="titleDanaCair">Penerimaan Bersih Calon Debitur</div>
+        <div class="topup-cair-title" id="titleDanaCair">💰 Estimasi Dana Diterima Bersih</div>
         <div class="topup-cair-val" id="resDanaCair">Rp 0</div>
         <div style="font-size: 0.75rem; color: #166534;" id="subDanaCair">
           Plafond - Total Biaya
@@ -637,7 +637,9 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg error:', err));
+        navigator.serviceWorker.register('/sw.js?v=3').then(reg => {
+          reg.update();
+        }).catch(err => console.log('SW reg error:', err));
       });
     }
 
@@ -879,10 +881,10 @@
       document.getElementById('cardTopupCair').style.display = 'block';
       document.getElementById('resDanaCair').textContent = formatRupiah(danaCair);
       if (isTopUp) {
-        document.getElementById('titleDanaCair').textContent = 'Penerimaan Bersih (Top Up)';
+        document.getElementById('titleDanaCair').textContent = '💰 Estimasi Dana Diterima Bersih (Top Up)';
         document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Sisa Pokok (${formatRupiah(sisaBade)}) - Biaya (${formatRupiah(totalBiaya)})`;
       } else {
-        document.getElementById('titleDanaCair').textContent = 'Penerimaan Bersih Calon Debitur';
+        document.getElementById('titleDanaCair').textContent = '💰 Estimasi Dana Diterima Bersih';
         document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Total Biaya (${formatRupiah(totalBiaya)})`;
       }
 

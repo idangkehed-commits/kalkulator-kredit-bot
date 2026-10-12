@@ -499,7 +499,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          isTopUp ? 'Penerimaan Bersih (Top Up)' : 'Penerimaan Bersih Calon Debitur',
+                          isTopUp ? '💰 Estimasi Dana Diterima Bersih (Top Up)' : '💰 Estimasi Dana Diterima Bersih',
                           style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
                         ),
                         const SizedBox(height: 4),
