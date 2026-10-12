@@ -1,0 +1,17 @@
+{
+  "name": "Kalkulator KSM Mandiri",
+  "short_name": "KSM Mandiri",
+  "start_url": "/ksm",
+  "display": "standalone",
+  "background_color": "#002776",
+  "theme_color": "#002776",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/ksm-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

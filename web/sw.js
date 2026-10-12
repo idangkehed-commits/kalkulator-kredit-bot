@@ -1,8 +1,11 @@
-const CACHE_NAME = 'kredit-kalkulator-v7';
+const CACHE_NAME = 'kredit-kalkulator-v8';
 const ASSETS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/ksm',
+  '/manifest.json',
+  '/ksm-manifest.json',
+  '/ksm-icon.svg'
 ];
 
 self.addEventListener('install', (event) => {

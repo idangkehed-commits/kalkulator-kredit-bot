@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="mandiriGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#001947"/>
+      <stop offset="50%" stop-color="#002776"/>
+      <stop offset="100%" stop-color="#0054A6"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#mandiriGrad)"/>
+  <rect x="96" y="112" width="320" height="180" rx="36" fill="#ffffff" fill-opacity="0.12" stroke="#ffffff" stroke-width="12" stroke-opacity="0.25"/>
+  <circle cx="160" cy="202" r="28" fill="#FFB703"/>
+  <rect x="220" y="186" width="140" height="32" rx="16" fill="#ffffff" fill-opacity="0.8"/>
+  <g fill="#FFB703">
+    <!-- Calculator buttons -->
+    <rect x="112" y="330" width="64" height="64" rx="20"/>
+    <rect x="196" y="330" width="64" height="64" rx="20" fill="#ffffff" fill-opacity="0.9"/>
+    <rect x="280" y="330" width="64" height="64" rx="20" fill="#ffffff" fill-opacity="0.9"/>
+    <rect x="364" y="330" width="64" height="64" rx="20"/>
+    <rect x="112" y="414" width="64" height="64" rx="20" fill="#ffffff" fill-opacity="0.9"/>
+    <rect x="196" y="414" width="64" height="64" rx="20" fill="#ffffff" fill-opacity="0.9"/>
+    <rect x="280" y="414" width="64" height="64" rx="20"/>
+    <rect x="364" y="414" width="64" height="64" rx="20"/>
+  </g>
+</svg>

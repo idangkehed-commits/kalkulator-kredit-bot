@@ -1,0 +1,1500 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Kalkulator KSM Mandiri - Limit & Tiering</title>
+  
+  <!-- Android & iOS Mobile Web App Meta Tags -->
+  <meta name="theme-color" content="#002776">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="KSM Mandiri">
+  <meta name="description" content="Kalkulator Cerdas Kredit Serbaguna Mandiri (KSM) berbasis Tiering Gaji & DBR">
+  <link rel="icon" type="image/svg+xml" href="/ksm-icon.svg">
+  <link rel="apple-touch-icon" href="/ksm-icon.svg">
+  <link rel="manifest" href="/ksm-manifest.json">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            mandiri: {
+              navy: '#002776',
+              dark: '#001947',
+              blue: '#0054A6',
+              lightBlue: '#E8F1FC',
+              gold: '#F39C12',
+              yellow: '#FFB703',
+              accent: '#EBF4FF'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Google Font: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* Android App Touch & Polish */
+    body {
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    input, select, textarea {
+      user-select: auto;
+    }
+    .safe-top {
+      padding-top: env(safe-area-inset-top, 0px);
+    }
+    .safe-bottom {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between antialiased">
+
+  <!-- Top App Bar / Header -->
+  <header class="bg-gradient-to-r from-mandiri-dark via-mandiri-navy to-mandiri-blue text-white shadow-lg sticky top-0 z-40 safe-top">
+    <div class="max-w-md mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center border border-white/20 shadow-inner">
+          <i class="fa-solid fa-calculator text-mandiri-yellow text-xl"></i>
+        </div>
+        <div>
+          <h1 class="text-base font-bold tracking-tight flex items-center gap-1.5 leading-snug">
+            KSM Mandiri
+            <span class="text-[10px] bg-mandiri-gold/25 text-mandiri-yellow border border-mandiri-yellow/30 px-1.5 py-0.2 rounded-md font-medium">Pro</span>
+          </h1>
+          <p class="text-[11px] text-blue-200">Kalkulator Plafon & Tiering Gaji</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2">
+        <a href="/" class="text-xs bg-emerald-500/25 hover:bg-emerald-500/40 text-emerald-200 active:scale-95 transition px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-emerald-400/30">
+          <i class="fa-solid fa-store text-emerald-400"></i>
+          <span class="font-medium text-[11px]">KUR/KUM</span>
+        </a>
+        <!-- Button Referensi Matriks Modal -->
+        <button onclick="toggleMatrixModal(true)" class="text-xs bg-white/15 hover:bg-white/25 active:scale-95 transition px-2.5 py-1.5 rounded-xl flex items-center gap-1.5 border border-white/20">
+          <i class="fa-solid fa-table text-mandiri-yellow"></i>
+          <span class="font-medium text-[11px]">Matriks</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Container (Mobile Viewport) -->
+  <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
+
+    <!-- Card 1: Input Form Parameters -->
+    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+        <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-sliders text-mandiri-blue"></i> Parameter Nasabah
+        </h2>
+        <span class="text-[11px] text-slate-400">Kredit Serbaguna</span>
+      </div>
+
+      <!-- 1. Kategori Instansi -->
+      <div>
+        <label for="categorySelect" class="block text-xs font-semibold text-slate-700 mb-1.5">
+          Kategori Instansi / Perusahaan
+        </label>
+        <div class="relative">
+          <select id="categorySelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
+            <!-- Populated via app.js -->
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            <i class="fa-solid fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Penghasilan Bersih (THP) -->
+      <div>
+        <label for="incomeInput" class="block text-xs font-semibold text-slate-700 mb-1.5">
+          Penghasilan Bersih / Gaji Bulanan (THP)
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-slate-400">Rp</span>
+          <input 
+            type="text" 
+            id="incomeInput" 
+            inputmode="numeric"
+            value="12.000.000"
+            placeholder="10.000.000"
+            class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-bold rounded-2xl pl-10 pr-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition"
+          >
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Masukkan total penghasilan payroll / fixed income per bulan.</p>
+      </div>
+
+      <!-- Box Deteksi Tier Otomatis -->
+      <div id="tierDetectionBox" class="transition-all duration-300">
+        <!-- Rendered by app.js -->
+      </div>
+
+      <!-- 3. Cicilan Pinjaman Lain yang Sedang Berjalan -->
+      <div>
+        <label for="obligationInput" class="block text-xs font-semibold text-slate-700 mb-1.5">
+          Total Cicilan Lain yang Berjalan (Bank Lain / Leasing)
+        </label>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-slate-400">Rp</span>
+          <input 
+            type="text" 
+            id="obligationInput" 
+            inputmode="numeric"
+            value="0"
+            placeholder="0"
+            class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold rounded-2xl pl-10 pr-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition"
+          >
+        </div>
+        <p class="text-[10px] text-slate-400 mt-1">Cicilan aktif di SLIK OJK (KPR, leasing, kartu kredit, KTA lain).</p>
+      </div>
+
+      <!-- Sisa Masa Kontrak (Khusus PPPK - Kondisional) -->
+      <div id="pppkContractContainer" class="hidden bg-amber-50/70 border border-amber-200 p-3 rounded-2xl">
+        <label for="contractMonthsInput" class="block text-xs font-bold text-amber-900 mb-1 flex items-center gap-1.5">
+          <i class="fa-solid fa-file-contract text-amber-600"></i>
+          Sisa Masa Kontrak Kerja (Bulan)
+        </label>
+        <input 
+          type="number" 
+          id="contractMonthsInput" 
+          value="48"
+          min="1"
+          max="60"
+          placeholder="Maks 60 bulan"
+          class="w-full bg-white border border-amber-300 text-amber-950 text-sm font-semibold rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-amber-500 transition"
+        >
+        <p class="text-[10px] text-amber-700 mt-1">Sesuai aturan PPPK, tenor pinjaman dibatasi maksimal sisa masa kontrak.</p>
+      </div>
+
+      <!-- Khusus Special Pricing: Pilihan DBR 50% atau 70% -->
+      <div id="specialDbrContainer" class="hidden bg-gradient-to-r from-amber-50 to-orange-50/80 border border-amber-300 p-3.5 rounded-2xl space-y-2">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold text-amber-950 flex items-center gap-1.5">
+            <i class="fa-solid fa-percent text-amber-600"></i>
+            Pilihan Batas DBR (Special Pricing)
+          </label>
+          <span class="text-[10px] bg-amber-200/90 text-amber-900 px-2 py-0.5 rounded-full font-bold">Promo 8.25%</span>
+        </div>
+        <p class="text-[10px] text-amber-800">Pilih rasio kapasitas angsuran yang diinginkan debitur:</p>
+        <div class="grid grid-cols-2 gap-2 pt-0.5">
+          <button type="button" onclick="setSpecialDbr(50)" id="btnDbr50" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-300 bg-white text-slate-700 hover:bg-amber-100 active:scale-95 transition flex flex-col items-center justify-center">
+            <span class="text-xs">DBR 50%</span>
+            <span class="text-[10px] text-slate-400 font-normal">Standar</span>
+          </button>
+          <button type="button" onclick="setSpecialDbr(70)" id="btnDbr70" class="py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-500 bg-amber-500 text-white shadow-sm active:scale-95 transition flex flex-col items-center justify-center">
+            <span class="text-xs">DBR 70%</span>
+            <span class="text-[10px] text-amber-100 font-normal">Maksimal</span>
+          </button>
+        </div>
+        <input type="hidden" id="specialDbrInput" value="70">
+      </div>
+
+      <!-- 4. Pilihan Tenor, Bunga & Biaya Provisi/Admin -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <!-- Tenor -->
+        <div>
+          <label for="tenorSelect" class="block text-xs font-semibold text-slate-700 mb-1.5">
+            Pilihan Tenor
+          </label>
+          <div class="relative">
+            <select id="tenorSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-2xl px-3 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7">
+              <!-- Populated via app.js -->
+            </select>
+            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5 text-slate-500">
+              <i class="fa-solid fa-chevron-down text-xs"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Suku Bunga (Editable / Locked jika Special Pricing) -->
+        <div>
+          <label for="interestRateInput" class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+            <span class="flex items-center gap-1">
+              <span>Suku Bunga</span>
+              <span id="interestLockBadge" class="hidden text-[10px] text-amber-700 font-bold bg-amber-100 border border-amber-300 px-1.5 py-0.2 rounded-md"><i class="fa-solid fa-lock text-[9px]"></i> 8.25%</span>
+            </span>
+            <span class="text-[10px] text-mandiri-blue font-bold">p.a. Efektif</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="number" 
+              id="interestRateInput" 
+              step="0.05"
+              value="9.75"
+              placeholder="9.75"
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7"
+            >
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-bold text-slate-400">%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Biaya Provisi & Admin + Usia Nasabah (Persiapan Asuransi) -->
+      <div class="grid grid-cols-2 gap-3 pt-1">
+        <!-- Biaya Provisi & Admin -->
+        <div>
+          <label for="provisiAdminRateInput" class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+            <span>Provisi & Admin</span>
+            <span class="text-[10px] text-mandiri-blue font-semibold">dari Limit</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="number" 
+              id="provisiAdminRateInput" 
+              step="0.01"
+              value="1.08"
+              placeholder="1.08"
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7"
+            >
+            <span class="absolute inset-y-0 right-0 pr-3 flex items-center text-xs font-bold text-slate-400">%</span>
+          </div>
+        </div>
+
+        <!-- Usia Nasabah (Untuk Asuransi Jiwa) -->
+        <div>
+          <label for="borrowerAgeInput" class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+            <span>Usia Nasabah</span>
+            <span class="text-[10px] text-slate-400">Tahun</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="number" 
+              id="borrowerAgeInput" 
+              value="30"
+              min="18"
+              max="65"
+              placeholder="30"
+              class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8"
+            >
+            <span class="absolute inset-y-0 right-0 pr-2.5 flex items-center text-[10px] font-bold text-slate-400">Thn</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pilihan Program Asuransi Jiwa AXA Mandiri -->
+      <div>
+        <label for="insurancePlanSelect" class="block text-xs font-semibold text-slate-700 mb-1.5 flex items-center justify-between">
+          <span>Program Asuransi Jiwa (AXA Mandiri)</span>
+          <span class="text-[10px] text-emerald-600 font-bold"><i class="fa-solid fa-shield-halved mr-1"></i>CLP Mandiri</span>
+        </label>
+        <div class="relative">
+          <select id="insurancePlanSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
+            <option value="plan1_ksm22" selected>Plan 1 - KSM 22% (Standar AXA)</option>
+            <option value="plan1_ksm30">Plan 1 - KSM 30%</option>
+            <option value="plan2_ksm22">Plan 2 - KSM 22%</option>
+            <option value="none">Tanpa Asuransi (0 ‰)</option>
+          </select>
+          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
+            <i class="fa-solid fa-chevron-down text-xs"></i>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Simulasi Nominal Pengajuan yang Diinginkan (Opsional) -->
+      <div class="pt-1 border-t border-slate-100">
+        <div class="flex items-center justify-between mb-1.5">
+          <label for="requestedPlafonInput" class="text-xs font-semibold text-slate-700">
+            Plafon yang Diinginkan (Opsional)
+          </label>
+          <button type="button" onclick="applyMaxLimit()" class="text-[11px] text-mandiri-blue font-bold hover:underline flex items-center gap-1">
+            <i class="fa-solid fa-wand-magic-sparkles text-[10px]"></i> Gunakan Limit Maksimal
+          </button>
+        </div>
+        <div class="relative">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-xs font-bold text-slate-400">Rp</span>
+          <input 
+            type="text" 
+            id="requestedPlafonInput" 
+            inputmode="numeric"
+            placeholder="Kosongkan untuk otomatis limit maksimal"
+            class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-2xl pl-10 pr-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition"
+          >
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Card 2: Hasil Kalkulasi Container -->
+    <div id="resultCard" class="space-y-4">
+      
+      <!-- Error Box (Shown when validation fails) -->
+      <div id="resultErrorBox" class="hidden p-5 text-center space-y-3 bg-red-50/90 border border-red-200 rounded-3xl">
+        <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
+          <i class="fa-solid fa-ban"></i>
+        </div>
+        <h3 class="font-bold text-slate-800 text-sm">Pengajuan Belum Memenuhi Syarat</h3>
+        <p id="resultErrorMessage" class="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto"></p>
+      </div>
+
+      <!-- Details Box (Shown on valid calculation) -->
+      <div id="resultDetailsBox" class="space-y-4">
+
+        <!-- Primary Highlight Hero Card -->
+        <div class="bg-gradient-to-br from-mandiri-dark via-mandiri-navy to-mandiri-blue rounded-3xl p-5 text-white shadow-xl relative overflow-hidden">
+          <div class="absolute -right-8 -top-8 w-36 h-36 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+          <div class="absolute -left-12 -bottom-12 w-44 h-44 bg-mandiri-yellow/10 rounded-full blur-2xl pointer-events-none"></div>
+
+          <div class="relative z-10 space-y-4">
+            
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-blue-200 font-medium uppercase tracking-wider flex items-center gap-1.5">
+                <i class="fa-solid fa-award text-mandiri-yellow"></i> Limit Maksimal Pengajuan
+              </span>
+              <span class="text-[10px] bg-emerald-500/25 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold">
+                Memenuhi Syarat
+              </span>
+            </div>
+
+            <!-- Main Limit Display -->
+            <div>
+              <div id="resMaxLimit" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white drop-shadow-xs">
+                Rp 0
+              </div>
+              <p class="text-[11px] text-blue-200 mt-0.5">Batas tertinggi yang dapat diajukan sesuai tier & kapasitas DBR.</p>
+            </div>
+
+            <!-- Divider -->
+            <div class="h-px bg-white/15 my-2"></div>
+
+            <!-- Monthly Installment Highlight -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/15">
+                <span class="text-[10px] text-blue-200 block font-medium">Estimasi Angsuran</span>
+                <span id="resMonthlyInstallment" class="text-sm sm:text-base font-extrabold text-mandiri-yellow">
+                  Rp 0 / bln
+                </span>
+              </div>
+              <div class="bg-white/10 backdrop-blur-md rounded-2xl p-3 border border-white/15">
+                <span class="text-[10px] text-blue-200 block font-medium">Plafon Disimulasikan</span>
+                <span id="resSimulatedPlafon" class="text-sm sm:text-base font-bold text-white">
+                  Rp 0
+                </span>
+              </div>
+            </div>
+
+            <!-- Constraint Indicator Alert -->
+            <div id="resConstraintInfo" class="transition-all"></div>
+
+          </div>
+        </div>
+
+        <!-- Card 3: Analisis Rasio DBR (Debt Burden Ratio) -->
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3.5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-mandiri-blue"></i> Analisis Rasio DBR
+            </h3>
+            <span class="text-[11px] text-slate-500 font-medium">
+              Maks DBR: <strong id="resMaxDbr" class="text-mandiri-blue">0%</strong>
+            </span>
+          </div>
+
+          <!-- DBR Progress Meter -->
+          <div class="space-y-1.5">
+            <div class="flex justify-between text-[11px] text-slate-600 font-semibold">
+              <span>DBR Terpakai (+ Pinjaman Baru)</span>
+              <span id="resActualDbr" class="text-mandiri-blue font-bold">0%</span>
+            </div>
+            <div class="w-full bg-slate-100 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-200">
+              <div id="dbrProgressBar" class="h-2 rounded-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+            </div>
+          </div>
+
+          <!-- Metric Details -->
+          <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-400 block font-medium">Sisa Kuota Angsuran</span>
+              <span id="resRemainingBudget" class="font-bold text-slate-800 text-xs">Rp 0</span>
+            </div>
+            <div class="p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+              <span class="text-[10px] text-slate-400 block font-medium">Tenor Pengajuan</span>
+              <span id="resTenor" class="font-bold text-slate-800 text-xs">-</span>
+            </div>
+          </div>
+
+          <!-- Quick Share & Action Buttons -->
+          <div class="grid grid-cols-2 gap-2 pt-2">
+            <button 
+              type="button" 
+              onclick="shareWhatsApp()"
+              class="bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white text-xs font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 shadow-xs transition"
+            >
+              <i class="fa-brands fa-whatsapp text-sm"></i> Kirim WhatsApp
+            </button>
+            
+            <button 
+              type="button" 
+              onclick="window.print()"
+              class="bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-xs font-bold py-2.5 px-3 rounded-2xl flex items-center justify-center gap-2 shadow-xs transition"
+            >
+              <i class="fa-solid fa-print text-sm"></i> Simpan PDF
+            </button>
+          </div>
+
+          <!-- Tenor Comparison Table -->
+          <div id="tenorComparisonContainer">
+            <!-- Rendered via app.js -->
+          </div>
+
+        </div>
+
+        <!-- Card 4: Rincian Potongan Biaya & Dana Cair Bersih -->
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-receipt text-mandiri-blue"></i> Estimasi Pencairan Bersih
+            </h3>
+            <span class="text-[10px] bg-blue-50 text-mandiri-blue font-bold px-2 py-0.5 rounded-full border border-blue-200">
+              Biaya Awal
+            </span>
+          </div>
+
+          <!-- Rincian Biaya List -->
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Plafon Pinjaman Disetujui</span>
+              <span id="disbursePlafon" class="font-bold text-slate-800">Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span class="flex items-center gap-1">
+                Biaya Provisi & Admin (<span id="disburseProvisiPercent">1.08%</span>)
+              </span>
+              <span id="disburseProvisiAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span class="flex items-center gap-1">
+                Biaya Asuransi Jiwa AXA (<span id="disburseInsuranceRate" class="font-semibold text-emerald-700">0 ‰</span>)
+                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]" title="Dihitung otomatis sesuai usia & tenor"></i>
+              </span>
+              <span id="disburseInsuranceAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
+          </div>
+
+          <!-- Net Disbursed Highlight -->
+          <div class="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-emerald-800 uppercase font-bold tracking-wider block">Estimasi Dana Masuk Rekening</span>
+              <span class="text-[11px] text-emerald-600">Setelah dikurangi potongan biaya</span>
+            </div>
+            <div id="disburseNetAmount" class="text-base sm:text-lg font-black text-emerald-700">
+              Rp 0
+            </div>
+          </div>
+
+          <!-- Info Status Asuransi Aktif -->
+          <div class="p-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-900 flex items-start gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-600 text-sm mt-0.5"></i>
+            <div>
+              <strong>Asuransi Jiwa CLP Otomatis:</strong> Tarif premi dihitung presisi berdasarkan matriks resmi <em>AXA Mandiri Consumer Loan Protection</em> sesuai usia (<span id="infoBorrowerAge" class="font-bold">30</span> thn) dan tenor pinjaman.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Modal Matriks Ketentuan Resmi (Sesuai Foto Upload) -->
+  <div id="matrixModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
+    <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden animate-slide-up">
+      
+      <!-- Modal Header -->
+      <div class="bg-gradient-to-r from-mandiri-dark to-mandiri-navy text-white px-5 py-4 flex items-center justify-between">
+        <div>
+          <h3 class="font-bold text-sm flex items-center gap-2">
+            <i class="fa-solid fa-table-cells text-mandiri-yellow"></i>
+            Matriks Resmi Tiering KSM Mandiri
+          </h3>
+          <p class="text-[11px] text-blue-200">Berdasarkan Ketentuan Kebijakan KSM</p>
+        </div>
+        <button onclick="toggleMatrixModal(false)" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white text-sm">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable Tables) -->
+      <div class="p-4 overflow-y-auto space-y-4 text-xs">
+        
+        <!-- Tabel Khusus: Special Pricing -->
+        <div class="border-2 border-amber-400 rounded-2xl overflow-hidden shadow-xs">
+          <div class="bg-gradient-to-r from-amber-100 to-orange-100 px-3 py-2 border-b border-amber-300 flex items-center justify-between font-bold text-amber-950">
+            <span class="flex items-center gap-1.5"><i class="fa-solid fa-star text-amber-500"></i> Special Pricing (Promo Eksklusif)</span>
+            <span class="text-[10px] bg-amber-500 text-white px-2 py-0.5 rounded-full font-bold">Bunga 8.25%</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-amber-50/70 text-slate-700 font-bold border-b border-amber-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Pilihan DBR</th></tr>
+            </thead>
+            <tbody>
+              <tr class="bg-white"><td class="p-2 font-semibold">> Rp 5 Juta</td><td class="p-2 font-extrabold text-mandiri-blue">Rp 1 Milyar</td><td class="p-2 font-semibold">180 Bln (15 Thn)</td><td class="p-2 font-bold text-amber-700">50% atau 70%</td></tr>
+            </tbody>
+          </table>
+          <div class="bg-amber-50/50 p-2 text-[10px] text-amber-900 border-t border-amber-200">
+            * Suku bunga terkunci otomatis di 8.25% p.a. efektif, limit maksimal s.d. 1 Milyar dengan tenor s.d. 15 Tahun.
+          </div>
+        </div>
+
+        <!-- Tabel 1: BUMD -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-emerald-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-emerald-900">
+            <span>Class 3 : Cluster Hijau - BUMD</span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">BUMD</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">5 - < 10 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-emerald-700">30%</td></tr>
+              <tr><td class="p-2">≥ 10 - < 15 Juta</td><td class="p-2 font-semibold">250 Jt</td><td class="p-2">60 Bln</td><td class="p-2 font-bold text-emerald-700">50%</td></tr>
+              <tr><td class="p-2">≥ 15 - < 20 Juta</td><td class="p-2 font-semibold">500 Jt</td><td class="p-2">96 Bln</td><td class="p-2 font-bold text-emerald-700">60%</td></tr>
+              <tr><td class="p-2">≥ 20 Juta</td><td class="p-2 font-semibold">750 Jt</td><td class="p-2">120 Bln</td><td class="p-2 font-bold text-emerald-700">70%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 2: Swasta Debitur Corporate & Large Commercial -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-emerald-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-emerald-900">
+            <span>Class 3 : Swasta Debitur & Group Debitur</span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">Corp & Large CB</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">5 - < 10 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-emerald-700">30%</td></tr>
+              <tr><td class="p-2">≥ 10 - < 15 Juta</td><td class="p-2 font-semibold">250 Jt</td><td class="p-2">60 Bln</td><td class="p-2 font-bold text-emerald-700">50%</td></tr>
+              <tr><td class="p-2">≥ 15 - < 20 Juta</td><td class="p-2 font-semibold">500 Jt</td><td class="p-2">96 Bln</td><td class="p-2 font-bold text-emerald-700">60%</td></tr>
+              <tr><td class="p-2">≥ 20 Juta</td><td class="p-2 font-semibold">750 Jt</td><td class="p-2">120 Bln</td><td class="p-2 font-bold text-emerald-700">70%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 3: ASN Horizontal Existing -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-emerald-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-emerald-900">
+            <span>Class 3 : ASN Horizontal - Mitra ID Existing</span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">Existing</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">< 5 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">60 Bln</td><td class="p-2 font-bold text-emerald-700">40%</td></tr>
+              <tr><td class="p-2">≥ 5 Juta</td><td class="p-2 font-semibold">500 Jt</td><td class="p-2">120 Bln</td><td class="p-2 font-bold text-emerald-700">50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 4: ASN Horizontal New Mitra -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-emerald-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-emerald-900">
+            <span>Class 3 : ASN Horizontal - New Mitra ID</span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">New Mitra</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">< 5 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-emerald-700">40%</td></tr>
+              <tr><td class="p-2">≥ 5 Juta</td><td class="p-2 font-semibold">500 Jt</td><td class="p-2">60 Bln</td><td class="p-2 font-bold text-emerald-700">50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 5: PPPK ASN / TNI / POLRI -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-emerald-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-emerald-900">
+            <span>PPPK ASN / TNI / POLRI</span>
+            <span class="text-[10px] bg-emerald-200 text-emerald-800 px-2 py-0.5 rounded-full">PPPK</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">3 - ≤ 5 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">60 / Sisa Kontrak</td><td class="p-2 font-bold text-emerald-700">40%</td></tr>
+              <tr><td class="p-2">> 5 Juta</td><td class="p-2 font-semibold">300 Jt</td><td class="p-2">Maks Masa Kontrak</td><td class="p-2 font-bold text-emerald-700">50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 6: Class 4 Non Cluster Hijau -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-pink-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-pink-900">
+            <span>Class 4 : Swasta Non Kelolaan Large CB</span>
+            <span class="text-[10px] bg-pink-200 text-pink-800 px-2 py-0.5 rounded-full">Non Cluster Hijau</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">5 - < 20 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-pink-700">30%</td></tr>
+              <tr><td class="p-2">≥ 20 - < 30 Juta</td><td class="p-2 font-semibold">300 Jt</td><td class="p-2">60 Bln</td><td class="p-2 font-bold text-pink-700">40%</td></tr>
+              <tr><td class="p-2">≥ 30 Juta</td><td class="p-2 font-semibold">500 Jt</td><td class="p-2">120 Bln</td><td class="p-2 font-bold text-pink-700">50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Tabel 7: Class 5 Non Cluster Hijau -->
+        <div class="border border-slate-200 rounded-2xl overflow-hidden">
+          <div class="bg-pink-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between font-bold text-pink-900">
+            <span>Class 5 : Swasta Non Debitur & Non Group</span>
+            <span class="text-[10px] bg-pink-200 text-pink-800 px-2 py-0.5 rounded-full">Non Cluster Hijau</span>
+          </div>
+          <table class="w-full text-left text-[11px]">
+            <thead class="bg-slate-100 text-slate-600 font-bold border-b border-slate-200">
+              <tr><th class="p-2">Tier Income</th><th class="p-2">Max Limit</th><th class="p-2">Max Tenor</th><th class="p-2">Max DBR</th></tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr><td class="p-2">5 - < 10 Juta</td><td class="p-2 font-semibold">100 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-pink-700">30%</td></tr>
+              <tr><td class="p-2">≥ 10 - < 20 Juta</td><td class="p-2 font-semibold">300 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-pink-700">40%</td></tr>
+              <tr><td class="p-2">≥ 20 Juta</td><td class="p-2 font-semibold">300 Jt</td><td class="p-2">36 Bln</td><td class="p-2 font-bold text-pink-700">50%</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="bg-slate-50 p-3 border-t border-slate-200 flex justify-end">
+        <button onclick="toggleMatrixModal(false)" class="bg-slate-800 text-white font-semibold text-xs px-4 py-2 rounded-xl">
+          Tutup
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Bottom App Navigation Footer -->
+  <footer class="bg-white border-t border-slate-200 py-3 px-4 text-center text-slate-500 text-[11px] safe-bottom">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <span>Simulasi Kredit Serbaguna Mandiri</span>
+      <button onclick="toggleMatrixModal(true)" class="text-mandiri-blue font-bold flex items-center gap-1">
+        <i class="fa-solid fa-circle-question"></i> Panduan Tiering
+      </button>
+    </div>
+  </footer>
+
+  <!-- Script Files -->
+  <script>
+// ==========================================
+// DATA MATRIKS TIERING MANDIRI KSM
+// Berdasarkan Ketentuan Resmi (Sesuai Foto Upload)
+// ==========================================
+
+const TIER_CATEGORIES = [
+  {
+    id: 'special_pricing',
+    name: 'Special Pricing (Promo Bunga 8.25%, Limit s.d 1 Milyar)',
+    classBadge: 'Special Pricing : Promo 8.25%',
+    isGreenCluster: true,
+    isSpecialPricing: true,
+    fixedInterest: 8.25,
+    minIncome: 5000001, // Gaji di atas 5 Juta
+    tiers: [
+      { minInc: 5000001, maxInc: Infinity, maxLimit: 1000000000, maxTenor: 180, maxDbr: 70, label: '> 5 Juta' }
+    ]
+  },
+  {
+    id: 'bumd',
+    name: 'BUMD',
+    classBadge: 'Class 3 : Cluster Hijau',
+    isGreenCluster: true,
+    minIncome: 5000000,
+    tiers: [
+      { minInc: 5000000, maxInc: 10000000, maxLimit: 100000000, maxTenor: 36, maxDbr: 30, label: '5 - < 10 Juta' },
+      { minInc: 10000000, maxInc: 15000000, maxLimit: 250000000, maxTenor: 60, maxDbr: 50, label: '≥ 10 - < 15 Juta' },
+      { minInc: 15000000, maxInc: 20000000, maxLimit: 500000000, maxTenor: 96, maxDbr: 60, label: '≥ 15 - < 20 Juta' },
+      { minInc: 20000000, maxInc: Infinity, maxLimit: 750000000, maxTenor: 120, maxDbr: 70, label: '≥ 20 Juta' }
+    ]
+  },
+  {
+    id: 'swasta_corporate_large',
+    name: 'Swasta Debitur & Group Debitur Corporate & Large Commercial Banking',
+    classBadge: 'Class 3 : Cluster Hijau',
+    isGreenCluster: true,
+    minIncome: 5000000,
+    tiers: [
+      { minInc: 5000000, maxInc: 10000000, maxLimit: 100000000, maxTenor: 36, maxDbr: 30, label: '5 - < 10 Juta' },
+      { minInc: 10000000, maxInc: 15000000, maxLimit: 250000000, maxTenor: 60, maxDbr: 50, label: '≥ 10 - < 15 Juta' },
+      { minInc: 15000000, maxInc: 20000000, maxLimit: 500000000, maxTenor: 96, maxDbr: 60, label: '≥ 15 - < 20 Juta' },
+      { minInc: 20000000, maxInc: Infinity, maxLimit: 750000000, maxTenor: 120, maxDbr: 70, label: '≥ 20 Juta' }
+    ]
+  },
+  {
+    id: 'asn_mitra_existing',
+    name: 'ASN Horizontal - Mitra ID Existing',
+    classBadge: 'Class 3 : Cluster Hijau',
+    isGreenCluster: true,
+    minIncome: 1000000,
+    tiers: [
+      { minInc: 0, maxInc: 5000000, maxLimit: 100000000, maxTenor: 60, maxDbr: 40, label: '< 5 Juta' },
+      { minInc: 5000000, maxInc: Infinity, maxLimit: 500000000, maxTenor: 120, maxDbr: 50, label: '≥ 5 Juta' }
+    ]
+  },
+  {
+    id: 'asn_new_mitra',
+    name: 'ASN Horizontal - New Mitra ID',
+    classBadge: 'Class 3 : Cluster Hijau',
+    isGreenCluster: true,
+    minIncome: 1000000,
+    tiers: [
+      { minInc: 0, maxInc: 5000000, maxLimit: 100000000, maxTenor: 36, maxDbr: 40, label: '< 5 Juta' },
+      { minInc: 5000000, maxInc: Infinity, maxLimit: 500000000, maxTenor: 60, maxDbr: 50, label: '≥ 5 Juta' }
+    ]
+  },
+  {
+    id: 'pppk_asn_tni_polri',
+    name: 'PPPK ASN / TNI / POLRI',
+    classBadge: 'Cluster Hijau',
+    isGreenCluster: true,
+    isPppk: true,
+    minIncome: 3000000,
+    tiers: [
+      { minInc: 3000000, maxInc: 5000000, maxLimit: 100000000, maxTenor: 60, maxDbr: 40, label: '3 - ≤ 5 Juta', inclusiveMax: true },
+      { minInc: 5000000, maxInc: Infinity, maxLimit: 300000000, maxTenor: 60, maxDbr: 50, label: '> 5 Juta', exclusiveMin: true }
+    ]
+  },
+  {
+    id: 'swasta_non_kelolaan',
+    name: 'Swasta Debitur & Group Debitur Non Kelolaan Large Commercial Banking',
+    classBadge: 'Class 4 : Non Cluster Hijau',
+    isGreenCluster: false,
+    minIncome: 5000000,
+    tiers: [
+      { minInc: 5000000, maxInc: 20000000, maxLimit: 100000000, maxTenor: 36, maxDbr: 30, label: '5 - < 20 Juta' },
+      { minInc: 20000000, maxInc: 30000000, maxLimit: 300000000, maxTenor: 60, maxDbr: 40, label: '≥ 20 - < 30 Juta' },
+      { minInc: 30000000, maxInc: Infinity, maxLimit: 500000000, maxTenor: 120, maxDbr: 50, label: '≥ 30 Juta' }
+    ]
+  },
+  {
+    id: 'swasta_non_debitur',
+    name: 'Swasta Non Debitur & Non Group Debitur Corporate & Large Commercial Banking',
+    classBadge: 'Class 5 : Non Cluster Hijau',
+    isGreenCluster: false,
+    minIncome: 5000000,
+    tiers: [
+      { minInc: 5000000, maxInc: 10000000, maxLimit: 100000000, maxTenor: 36, maxDbr: 30, label: '5 - < 10 Juta' },
+      { minInc: 10000000, maxInc: 20000000, maxLimit: 300000000, maxTenor: 36, maxDbr: 40, label: '≥ 10 - < 20 Juta' },
+      { minInc: 20000000, maxInc: Infinity, maxLimit: 300000000, maxTenor: 36, maxDbr: 50, label: '≥ 20 Juta' }
+    ]
+  }
+];
+
+// ==========================================
+// DATA TARIF PREMI ASURANSI JIWA AXA MANDIRI
+// Sesuai File Excel CLP KSM (Consumer Loan Protection)
+// ==========================================
+
+const AXA_KSM_RATES = {
+  // Plan 1 - KSM 22% (Standar & Default)
+  'plan1_ksm22': {
+    name: 'Plan 1 - KSM 22% (Standar AXA)',
+    brackets: [
+      { minAge: 18, maxAge: 30, rates: [1.78, 2.70, 3.44, 3.74, 4.29, 4.95, 5.36, 5.99, 6.61, 7.23, 7.65, 8.25, 8.87, 9.47, 10.10] },
+      { minAge: 31, maxAge: 35, rates: [1.83, 2.83, 3.98, 4.51, 5.29, 6.20, 6.94, 7.92, 8.93, 10.01, 10.96, 12.14, 13.38, 14.68, 16.05] },
+      { minAge: 36, maxAge: 40, rates: [2.87, 4.42, 5.94, 6.86, 8.15, 9.65, 10.89, 12.42, 14.01, 15.70, 17.19, 19.04, 20.99, 23.04, 25.18] },
+      { minAge: 41, maxAge: 45, rates: [4.67, 7.32, 10.31, 11.67, 13.70, 16.05, 17.98, 20.51, 23.13, 25.93, 28.38, 31.44, 34.66, 38.04, 41.58] },
+      { minAge: 46, maxAge: 50, rates: [7.13, 12.70, 17.88, 20.24, 23.75, 27.84, 31.19, 35.57, 40.11, 44.96, 49.22, 54.53, 60.11, 65.98, 72.12] },
+      { minAge: 51, maxAge: 55, rates: [11.23, 20.26, 28.53, 32.29, 37.90, 44.42, 49.76, 56.76, 64.01, 71.74, 78.54, 87.01, 95.91, 105.28, 115.07] },
+      { minAge: 56, maxAge: 60, rates: [16.02, 28.52, 40.16, 45.46, 53.35, 62.53, 70.05, 79.90, 90.11, 101.00, 110.57, 122.49, 135.03, 148.21, 161.99] },
+      { minAge: 61, maxAge: 61, rates: [20.81, 34.01, 48.10, 54.44, 63.90, 74.89, 83.89, 95.69, 107.91, 120.96, 132.41, 146.69, 161.71, 177.49, 0] },
+      { minAge: 62, maxAge: 62, rates: [20.81, 34.01, 48.10, 54.44, 63.90, 74.89, 83.89, 95.69, 107.91, 120.96, 132.41, 146.69, 161.71, 0, 0] },
+      { minAge: 63, maxAge: 63, rates: [20.81, 34.01, 48.10, 54.44, 63.90, 74.89, 83.89, 95.69, 107.91, 120.96, 132.41, 146.69, 0, 0, 0] },
+      { minAge: 64, maxAge: 64, rates: [20.81, 34.01, 48.10, 54.44, 63.90, 74.89, 83.89, 95.69, 107.91, 120.96, 132.41, 0, 0, 0, 0] },
+      { minAge: 65, maxAge: 65, rates: [20.81, 34.01, 48.10, 54.44, 63.90, 74.89, 83.89, 95.69, 107.91, 120.96, 0, 0, 0, 0, 0] }
+    ]
+  },
+
+  // Plan 1 - KSM 30%
+  'plan1_ksm30': {
+    name: 'Plan 1 - KSM 30%',
+    brackets: [
+      { minAge: 18, maxAge: 30, rates: [1.78, 2.70, 3.51, 3.84, 4.43, 5.13, 5.59, 6.26, 6.92, 7.58, 8.04, 8.68, 9.30, 9.96, 10.59] },
+      { minAge: 31, maxAge: 35, rates: [1.84, 2.84, 4.07, 4.64, 5.49, 6.46, 7.28, 8.33, 9.43, 10.60, 11.64, 12.93, 14.27, 15.68, 17.15] },
+      { minAge: 36, maxAge: 40, rates: [2.89, 4.46, 6.07, 6.94, 8.20, 9.65, 11.20, 12.45, 14.09, 15.84, 17.40, 19.32, 21.32, 23.43, 25.62] },
+      { minAge: 41, maxAge: 45, rates: [4.71, 7.36, 11.96, 12.02, 14.21, 16.73, 18.84, 21.58, 24.42, 27.46, 30.17, 33.49, 36.97, 40.62, 44.42] },
+      { minAge: 46, maxAge: 50, rates: [7.19, 12.76, 18.26, 20.85, 24.64, 29.01, 32.68, 37.43, 42.36, 47.63, 52.32, 58.08, 64.12, 70.44, 77.05] },
+      { minAge: 51, maxAge: 55, rates: [11.34, 20.36, 29.14, 33.27, 39.31, 46.29, 52.15, 59.72, 67.59, 75.99, 83.49, 92.67, 102.31, 112.40, 122.94] },
+      { minAge: 56, maxAge: 60, rates: [16.19, 28.66, 41.02, 46.84, 55.34, 65.17, 73.41, 84.07, 95.15, 106.98, 117.53, 130.46, 144.03, 158.24, 173.08] },
+      { minAge: 61, maxAge: 61, rates: [21.03, 34.32, 49.12, 56.09, 66.28, 78.04, 87.92, 100.68, 108.52, 122.02, 134.05, 148.80, 164.27, 180.48, 0] },
+      { minAge: 62, maxAge: 62, rates: [21.03, 34.32, 49.12, 56.09, 66.28, 78.04, 87.92, 100.68, 108.52, 122.02, 134.05, 148.80, 164.27, 0, 0] },
+      { minAge: 63, maxAge: 63, rates: [21.03, 34.32, 49.12, 56.09, 66.28, 78.04, 87.92, 100.68, 108.52, 122.02, 134.05, 148.80, 0, 0, 0] },
+      { minAge: 64, maxAge: 64, rates: [21.03, 34.32, 49.12, 56.09, 66.28, 78.04, 87.92, 100.68, 108.52, 122.02, 134.05, 0, 0, 0, 0] },
+      { minAge: 65, maxAge: 65, rates: [21.03, 34.32, 49.12, 56.09, 66.28, 78.04, 87.92, 100.68, 108.52, 122.02, 0, 0, 0, 0, 0] }
+    ]
+  },
+
+  // Plan 2 - KSM 22%
+  'plan2_ksm22': {
+    name: 'Plan 2 - KSM 22%',
+    brackets: [
+      { minAge: 18, maxAge: 30, rates: [2.14, 3.16, 3.89, 4.23, 4.85, 5.49, 5.95, 6.65, 7.34, 8.03, 8.49, 9.16, 9.85, 10.51, 11.21] },
+      { minAge: 31, maxAge: 35, rates: [2.20, 3.31, 4.50, 5.10, 5.98, 6.88, 7.70, 8.79, 9.91, 11.11, 12.17, 13.48, 14.85, 16.29, 17.82] },
+      { minAge: 36, maxAge: 40, rates: [3.44, 5.17, 6.71, 7.75, 9.21, 10.71, 12.09, 13.79, 15.55, 17.43, 19.08, 21.13, 23.30, 25.57, 27.95] },
+      { minAge: 41, maxAge: 45, rates: [5.60, 8.56, 11.65, 13.19, 15.48, 17.82, 19.96, 22.77, 25.67, 28.78, 31.50, 34.90, 38.47, 42.22, 46.15] },
+      { minAge: 46, maxAge: 50, rates: [8.56, 14.86, 20.20, 22.87, 26.84, 30.90, 34.62, 39.48, 44.52, 49.91, 54.63, 60.53, 66.72, 73.24, 80.05] },
+      { minAge: 51, maxAge: 55, rates: [13.48, 23.70, 32.24, 36.49, 42.83, 49.31, 55.23, 63.00, 71.05, 79.63, 87.18, 96.58, 106.46, 116.86, 127.73] },
+      { minAge: 56, maxAge: 60, rates: [19.22, 33.37, 45.38, 51.37, 60.29, 69.41, 77.76, 88.69, 100.02, 112.11, 122.73, 135.96, 149.88, 164.51, 179.81] },
+      { minAge: 61, maxAge: 61, rates: [24.97, 39.79, 54.35, 61.52, 72.21, 83.13, 93.12, 106.22, 119.78, 134.27, 146.98, 162.83, 179.50, 197.01, 0] },
+      { minAge: 62, maxAge: 62, rates: [24.97, 39.79, 54.35, 61.52, 72.21, 83.13, 93.12, 106.22, 119.78, 134.27, 146.98, 162.83, 179.50, 0, 0] },
+      { minAge: 63, maxAge: 63, rates: [24.97, 39.79, 54.35, 61.52, 72.21, 83.13, 93.12, 106.22, 119.78, 134.27, 146.98, 162.83, 0, 0, 0] },
+      { minAge: 64, maxAge: 64, rates: [24.97, 39.79, 54.35, 61.52, 72.21, 83.13, 93.12, 106.22, 119.78, 134.27, 146.98, 0, 0, 0, 0] },
+      { minAge: 65, maxAge: 65, rates: [24.97, 39.79, 54.35, 61.52, 72.21, 83.13, 93.12, 106.22, 119.78, 134.27, 0, 0, 0, 0, 0] }
+    ]
+  }
+};
+
+// Hitung Rate Asuransi Jiwa dengan Interpolasi Bulan Sesuai Excel
+function getAxaInsuranceRate(planKey, age, totalMonths) {
+  const plan = AXA_KSM_RATES[planKey] || AXA_KSM_RATES['plan1_ksm22'];
+  if (!plan) return 0;
+  
+  // Cari bracket usia
+  let bracket = plan.brackets.find(b => age >= b.minAge && age <= b.maxAge);
+  if (!bracket) {
+    if (age < 18) bracket = plan.brackets[0];
+    else bracket = plan.brackets[plan.brackets.length - 1];
+  }
+
+  const exactYears = Math.floor(totalMonths / 12);
+  const extraMonths = totalMonths % 12;
+
+  // Jika pas kelipatan tahun (12, 24, 36, 60, dst)
+  if (extraMonths === 0) {
+    const yearIndex = Math.min(14, Math.max(0, exactYears - 1));
+    return bracket.rates[yearIndex];
+  }
+
+  // Linear Interpolation antara tahun N dan tahun N+1
+  const lowerYearIndex = Math.min(14, Math.max(0, exactYears - 1));
+  const upperYearIndex = Math.min(14, Math.max(0, exactYears));
+
+  const lowerRate = exactYears === 0 ? 0 : bracket.rates[lowerYearIndex];
+  const upperRate = bracket.rates[upperYearIndex];
+
+  // Prorated persis rumus Excel
+  const fraction = extraMonths / 12;
+  const proratedRate = lowerRate + ((upperRate - lowerRate) * fraction);
+  return parseFloat(proratedRate.toFixed(2));
+}
+
+// Utility Formatter
+function formatRupiah(num) {
+  if (isNaN(num) || num === null || num === undefined) return 'Rp 0';
+  return 'Rp ' + Math.round(num).toLocaleString('id-ID');
+}
+
+function parseRupiah(str) {
+  if (!str) return 0;
+  const cleaned = str.toString().replace(/[^0-9]/g, '');
+  return parseInt(cleaned, 10) || 0;
+}
+
+// Rumus Angsuran Anuitas (Effective Rate Bank Mandiri Standard)
+function calculateAnnuity(principal, annualRatePercent, tenorMonths) {
+  if (principal <= 0 || tenorMonths <= 0) return 0;
+  const monthlyRate = (annualRatePercent / 100) / 12;
+  if (monthlyRate === 0) return principal / tenorMonths;
+  
+  const factor = Math.pow(1 + monthlyRate, tenorMonths);
+  return principal * (monthlyRate * factor) / (factor - 1);
+}
+
+// Rumus Present Value (Maksimum Plafon dari Kapasitas Angsuran)
+function calculatePrincipalFromInstallment(installment, annualRatePercent, tenorMonths) {
+  if (installment <= 0 || tenorMonths <= 0) return 0;
+  const monthlyRate = (annualRatePercent / 100) / 12;
+  if (monthlyRate === 0) return installment * tenorMonths;
+
+  const factor = Math.pow(1 + monthlyRate, tenorMonths);
+  return installment * (factor - 1) / (monthlyRate * factor);
+}
+
+// App State
+let currentCalculation = null;
+
+// Khusus Special Pricing: Toggle DBR 50% atau 70%
+function setSpecialDbr(dbrVal) {
+  const input = document.getElementById('specialDbrInput');
+  if (input) input.value = dbrVal;
+  
+  const btn50 = document.getElementById('btnDbr50');
+  const btn70 = document.getElementById('btnDbr70');
+  if (btn50 && btn70) {
+    if (dbrVal === 50) {
+      btn50.className = 'py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-500 bg-amber-500 text-white shadow-xs active:scale-95 transition flex flex-col items-center justify-center';
+      btn70.className = 'py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-300 bg-white text-slate-700 hover:bg-amber-100 active:scale-95 transition flex flex-col items-center justify-center';
+    } else {
+      btn70.className = 'py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-500 bg-amber-500 text-white shadow-xs active:scale-95 transition flex flex-col items-center justify-center';
+      btn50.className = 'py-2.5 px-3 text-xs font-bold rounded-xl border border-amber-300 bg-white text-slate-700 hover:bg-amber-100 active:scale-95 transition flex flex-col items-center justify-center';
+    }
+  }
+  calculateKsm();
+}
+window.setSpecialDbr = setSpecialDbr;
+
+// Core Calculation Function
+function calculateKsm() {
+  const categoryId = document.getElementById('categorySelect').value;
+  const income = parseRupiah(document.getElementById('incomeInput').value);
+  const existingObligation = parseRupiah(document.getElementById('obligationInput').value);
+  let selectedTenor = parseInt(document.getElementById('tenorSelect').value, 10) || 36;
+  const contractMonths = parseInt(document.getElementById('contractMonthsInput')?.value, 10) || 0;
+  
+  const requestedPlafonInput = parseRupiah(document.getElementById('requestedPlafonInput').value);
+
+  const category = TIER_CATEGORIES.find(c => c.id === categoryId);
+  if (!category) return;
+
+  // Toggle input PPPK Sisa Kontrak
+  const pppkContainer = document.getElementById('pppkContractContainer');
+  if (category.isPppk) {
+    pppkContainer.classList.remove('hidden');
+  } else {
+    pppkContainer.classList.add('hidden');
+  }
+
+  // Khusus Special Pricing: Kunci Bunga di 8.25% & Munculkan Tombol Pilihan DBR
+  const specialDbrContainer = document.getElementById('specialDbrContainer');
+  const interestInput = document.getElementById('interestRateInput');
+  const lockBadge = document.getElementById('interestLockBadge');
+
+  let interestRate = parseFloat(interestInput.value) || 0;
+
+  if (category.isSpecialPricing) {
+    if (specialDbrContainer) specialDbrContainer.classList.remove('hidden');
+    if (interestInput) {
+      interestInput.value = '8.25';
+      interestInput.readOnly = true;
+      interestInput.classList.add('bg-amber-50', 'text-amber-900', 'font-black');
+    }
+    if (lockBadge) lockBadge.classList.remove('hidden');
+    interestRate = 8.25;
+  } else {
+    if (specialDbrContainer) specialDbrContainer.classList.add('hidden');
+    if (interestInput) {
+      interestInput.readOnly = false;
+      interestInput.classList.remove('bg-amber-50', 'text-amber-900', 'font-black');
+    }
+    if (lockBadge) lockBadge.classList.add('hidden');
+    interestRate = parseFloat(interestInput.value) || 0;
+  }
+
+  // 1. Cek Income Tier
+  let matchedTier = null;
+  let isUnderMinIncome = false;
+
+  if (category.isSpecialPricing) {
+    // Syarat Special Pricing: gaji di atas 5 Juta (> Rp 5.000.000)
+    if (income <= 5000000) {
+      isUnderMinIncome = true;
+    } else {
+      matchedTier = category.tiers[0];
+    }
+  } else if (income < category.minIncome) {
+    isUnderMinIncome = true;
+  } else {
+    for (const tier of category.tiers) {
+      if (tier.inclusiveMax) {
+        if (income >= tier.minInc && income <= tier.maxInc) {
+          matchedTier = tier;
+          break;
+        }
+      } else if (tier.exclusiveMin) {
+        if (income > tier.minInc && income < tier.maxInc) {
+          matchedTier = tier;
+          break;
+        }
+      } else {
+        if (income >= tier.minInc && income < tier.maxInc) {
+          matchedTier = tier;
+          break;
+        }
+      }
+    }
+  }
+
+  // Handle fallback jika income sangat tinggi dan melewati batas tier
+  if (!matchedTier && !isUnderMinIncome && income >= category.minIncome) {
+    matchedTier = category.tiers[category.tiers.length - 1];
+  }
+
+  // Update Tenor Options berdasarkan Max Tenor Kategori/Tier
+  let effectiveMaxTenor = matchedTier ? matchedTier.maxTenor : 36;
+  if (category.isPppk && contractMonths > 0) {
+    effectiveMaxTenor = Math.min(effectiveMaxTenor, contractMonths);
+  }
+
+  updateTenorOptions(effectiveMaxTenor, selectedTenor);
+  selectedTenor = parseInt(document.getElementById('tenorSelect').value, 10) || effectiveMaxTenor;
+
+  // Render Tier Info Badge
+  renderTierInfo(category, matchedTier, isUnderMinIncome, effectiveMaxTenor);
+
+  // Jika di bawah batas minimum income
+  if (isUnderMinIncome || !matchedTier) {
+    const errorMsg = category.isSpecialPricing 
+      ? `Penghasilan Anda (${formatRupiah(income)}) belum memenuhi syarat: Kategori Special Pricing mensyaratkan gaji di atas Rp 5.000.000.`
+      : `Penghasilan Anda (${formatRupiah(income)}) belum memenuhi syarat minimal untuk kategori ${category.name} (${formatRupiah(category.minIncome)}).`;
+    renderResultError(errorMsg);
+    currentCalculation = null;
+    return;
+  }
+
+  // 2. Perhitungan DBR & Batas Angsuran
+  let maxDbrPercent = matchedTier.maxDbr;
+  if (category.isSpecialPricing) {
+    const specialDbrVal = parseInt(document.getElementById('specialDbrInput')?.value, 10);
+    maxDbrPercent = (specialDbrVal === 50) ? 50 : 70;
+  }
+
+  const maxInstallmentBudget = income * (maxDbrPercent / 100);
+  const remainingInstallmentBudget = maxInstallmentBudget - existingObligation;
+
+  // Cek apakah cicilan lain sudah melebihi kuota DBR
+  if (remainingInstallmentBudget <= 0) {
+    renderResultError(
+      `Total cicilan eksisting (${formatRupiah(existingObligation)}) telah melebihi kuota maksimal DBR ${maxDbrPercent}% (${formatRupiah(maxInstallmentBudget)}). Kapasitas angsuran baru tidak tersedia.`
+    );
+    currentCalculation = null;
+    return;
+  }
+
+  // 3. Hitung Plafon Maksimal
+  // a. Berdasarkan DBR dan Tenor Terpilih
+  const maxPlafonByDbr = calculatePrincipalFromInstallment(remainingInstallmentBudget, interestRate, selectedTenor);
+  
+  // b. Plafon Maksimal Tabel (Hard Limit)
+  const maxPlafonTable = matchedTier.maxLimit;
+
+  // c. Plafon Maksimal Akhir yang dapat diajukan (diambil nilai terkecil)
+  const maxAllowedLimit = Math.min(maxPlafonTable, maxPlafonByDbr);
+
+  // 4. Plafon Pengajuan yang Disimulasikan
+  let simulatedPlafon = maxAllowedLimit;
+  if (requestedPlafonInput > 0) {
+    simulatedPlafon = Math.min(requestedPlafonInput, maxAllowedLimit);
+  }
+
+  // 5. Hitung Angsuran Per Bulan untuk Plafon Pengajuan
+  const monthlyInstallment = calculateAnnuity(simulatedPlafon, interestRate, selectedTenor);
+  const totalRepayment = monthlyInstallment * selectedTenor;
+  const totalInterest = totalRepayment - simulatedPlafon;
+
+  // 6. DBR Aktual
+  const totalObligationNew = existingObligation + monthlyInstallment;
+  const actualDbrPercent = (totalObligationNew / income) * 100;
+
+  // 7. Potongan Biaya Provisi & Admin (Default 1.08% dari limit) & Asuransi Jiwa AXA Mandiri
+  const provisiAdminRate = parseFloat(document.getElementById('provisiAdminRateInput')?.value) || 1.08;
+  const borrowerAge = parseInt(document.getElementById('borrowerAgeInput')?.value, 10) || 30;
+  const insurancePlan = document.getElementById('insurancePlanSelect')?.value || 'plan1_ksm22';
+
+  const provisiAdminAmount = Math.round(simulatedPlafon * (provisiAdminRate / 100));
+
+  let insuranceRate = 0;
+  if (insurancePlan !== 'none') {
+    insuranceRate = getAxaInsuranceRate(insurancePlan, borrowerAge, selectedTenor);
+  }
+  const insuranceAmount = Math.round(simulatedPlafon * (insuranceRate / 1000));
+  const totalFees = provisiAdminAmount + insuranceAmount;
+  const netDisbursedAmount = Math.max(0, simulatedPlafon - totalFees);
+
+  // Simpan data state untuk ekspor / WA
+  currentCalculation = {
+    category,
+    matchedTier,
+    income,
+    existingObligation,
+    interestRate,
+    selectedTenor,
+    effectiveMaxTenor,
+    contractMonths,
+    maxDbrPercent,
+    maxInstallmentBudget,
+    remainingInstallmentBudget,
+    maxPlafonTable,
+    maxPlafonByDbr,
+    maxAllowedLimit,
+    simulatedPlafon,
+    monthlyInstallment,
+    totalRepayment,
+    totalInterest,
+    actualDbrPercent,
+    provisiAdminRate,
+    borrowerAge,
+    insurancePlan,
+    insuranceRate,
+    provisiAdminAmount,
+    insuranceAmount,
+    netDisbursedAmount
+  };
+
+  // Render UI Hasil
+  renderResultSuccess(currentCalculation);
+}
+
+// Render Status Badge & Info Tier
+function renderTierInfo(category, tier, isUnderMin, maxTenor) {
+  const container = document.getElementById('tierDetectionBox');
+  if (isUnderMin || !tier) {
+    container.innerHTML = `
+      <div class="p-3 bg-red-50 border border-red-200 rounded-2xl text-xs text-red-700 flex items-center gap-2">
+        <i class="fa-solid fa-triangle-exclamation text-base"></i>
+        <div>
+          <span class="font-bold">Di Bawah Batas Minimum:</span> Kategori ini membutuhkan penghasilan minimal <strong>${formatRupiah(category.minIncome)}</strong>.
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  let badgeColor = category.isGreenCluster ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-pink-100 text-pink-800 border-pink-300';
+  if (category.isSpecialPricing) {
+    badgeColor = 'bg-amber-100 text-amber-900 border-amber-300 font-extrabold';
+  }
+
+  const activeDbr = category.isSpecialPricing 
+    ? (document.getElementById('specialDbrInput')?.value || 70) 
+    : tier.maxDbr;
+  
+  container.innerHTML = `
+    <div class="bg-blue-50/70 border border-blue-200/80 rounded-2xl p-3.5 space-y-2">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Hasil Klasifikasi Tier</span>
+        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full border ${badgeColor}">
+          ${category.classBadge}
+        </span>
+      </div>
+      <div class="grid grid-cols-3 gap-2 pt-1 text-center">
+        <div class="bg-white p-2 rounded-xl shadow-xs border border-slate-100">
+          <span class="text-[10px] text-slate-400 block font-medium">Batas Plafon Tabel</span>
+          <span class="text-xs sm:text-sm font-bold text-mandiri-blue">${formatRupiah(tier.maxLimit)}</span>
+        </div>
+        <div class="bg-white p-2 rounded-xl shadow-xs border border-slate-100">
+          <span class="text-[10px] text-slate-400 block font-medium">Maks Tenor</span>
+          <span class="text-xs sm:text-sm font-bold text-mandiri-blue">${maxTenor} Bulan</span>
+        </div>
+        <div class="bg-white p-2 rounded-xl shadow-xs border border-slate-100">
+          <span class="text-[10px] text-slate-400 block font-medium">Maks DBR</span>
+          <span class="text-xs sm:text-sm font-bold text-amber-600">${activeDbr}%</span>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// Render Hasil Sukses
+function renderResultSuccess(calc) {
+  const resultCard = document.getElementById('resultCard');
+  const errorBox = document.getElementById('resultErrorBox');
+  const detailsBox = document.getElementById('resultDetailsBox');
+
+  resultCard.classList.remove('hidden');
+  errorBox.classList.add('hidden');
+  detailsBox.classList.remove('hidden');
+
+  // Limit Utama yang Dapat Diajukan
+  document.getElementById('resMaxLimit').textContent = formatRupiah(calc.maxAllowedLimit);
+  document.getElementById('resMonthlyInstallment').textContent = formatRupiah(calc.monthlyInstallment) + ' / bln';
+  
+  // Plafon Diajukan
+  document.getElementById('resSimulatedPlafon').textContent = formatRupiah(calc.simulatedPlafon);
+  document.getElementById('resTenor').textContent = `${calc.selectedTenor} Bulan (${(calc.selectedTenor/12).toFixed(1)} Thn)`;
+
+  // Info DBR
+  document.getElementById('resMaxDbr').textContent = `${calc.maxDbrPercent}% (${formatRupiah(calc.maxInstallmentBudget)})`;
+  document.getElementById('resActualDbr').textContent = `${calc.actualDbrPercent.toFixed(1)}%`;
+  document.getElementById('resRemainingBudget').textContent = formatRupiah(calc.remainingInstallmentBudget);
+
+  // DBR Progress Bar
+  const dbrBar = document.getElementById('dbrProgressBar');
+  const dbrPctClamped = Math.min(100, Math.max(0, calc.actualDbrPercent));
+  dbrBar.style.width = `${dbrPctClamped}%`;
+  
+  if (calc.actualDbrPercent > calc.maxDbrPercent) {
+    dbrBar.className = 'h-2 rounded-full bg-red-500 transition-all duration-500';
+  } else if (calc.actualDbrPercent > calc.maxDbrPercent * 0.8) {
+    dbrBar.className = 'h-2 rounded-full bg-amber-500 transition-all duration-500';
+  } else {
+    dbrBar.className = 'h-2 rounded-full bg-emerald-500 transition-all duration-500';
+  }
+
+  // Label pembatas limit (Constraint Indicator)
+  const constraintLabel = document.getElementById('resConstraintInfo');
+  if (calc.maxPlafonByDbr < calc.maxPlafonTable) {
+    constraintLabel.innerHTML = `
+      <div class="flex items-center gap-1.5 text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-xl">
+        <i class="fa-solid fa-circle-info"></i>
+        <span><strong>Limit Dibatasi Kemampuan DBR:</strong> Kapasitas angsuran Anda membatasi plafon maksimal ke <strong>${formatRupiah(calc.maxAllowedLimit)}</strong> (Batas plafon tabel: ${formatRupiah(calc.maxPlafonTable)}).</span>
+      </div>
+    `;
+  } else {
+    constraintLabel.innerHTML = `
+      <div class="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
+        <i class="fa-solid fa-circle-check"></i>
+        <span><strong>Kapasitas Angsuran Sangat Memadai:</strong> Anda dapat mengajukan hingga batas maksimal tertinggi kategori Anda (<strong>${formatRupiah(calc.maxPlafonTable)}</strong>).</span>
+      </div>
+    `;
+  }
+
+  // Rincian Pencairan Bersih
+  const elDisbursePlafon = document.getElementById('disbursePlafon');
+  const elDisburseProvisiPct = document.getElementById('disburseProvisiPercent');
+  const elDisburseProvisiAmt = document.getElementById('disburseProvisiAmount');
+  const elDisburseInsuranceRate = document.getElementById('disburseInsuranceRate');
+  const elDisburseInsuranceAmt = document.getElementById('disburseInsuranceAmount');
+  const elDisburseNetAmt = document.getElementById('disburseNetAmount');
+  const elInfoAge = document.getElementById('infoBorrowerAge');
+
+  if (elDisbursePlafon) elDisbursePlafon.textContent = formatRupiah(calc.simulatedPlafon);
+  if (elDisburseProvisiPct) elDisburseProvisiPct.textContent = `${calc.provisiAdminRate}%`;
+  if (elDisburseProvisiAmt) elDisburseProvisiAmt.textContent = `- ${formatRupiah(calc.provisiAdminAmount)}`;
+  if (elDisburseInsuranceRate) elDisburseInsuranceRate.textContent = `${calc.insuranceRate.toFixed(2)} ‰`;
+  if (elDisburseInsuranceAmt) {
+    elDisburseInsuranceAmt.textContent = calc.insuranceAmount > 0 ? `- ${formatRupiah(calc.insuranceAmount)}` : 'Rp 0';
+  }
+  if (elDisburseNetAmt) elDisburseNetAmt.textContent = formatRupiah(calc.netDisbursedAmount);
+  if (elInfoAge) elInfoAge.textContent = calc.borrowerAge;
+
+  // Render Tabel Komparasi Tenor
+  renderTenorComparisonTable(calc);
+}
+
+function renderResultError(message) {
+  const resultCard = document.getElementById('resultCard');
+  const errorBox = document.getElementById('resultErrorBox');
+  const detailsBox = document.getElementById('resultDetailsBox');
+  const errorMessage = document.getElementById('resultErrorMessage');
+
+  resultCard.classList.remove('hidden');
+  errorBox.classList.remove('hidden');
+  detailsBox.classList.add('hidden');
+  errorMessage.textContent = message;
+}
+
+// Render Tabel Perbandingan Tenor (12 s.d. Max Tenor)
+function renderTenorComparisonTable(calc) {
+  const container = document.getElementById('tenorComparisonContainer');
+  if (!container) return;
+
+  const tenorList = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 144, 180].filter(t => t <= calc.effectiveMaxTenor);
+  
+  let rowsHtml = '';
+  tenorList.forEach(tenor => {
+    // Plafon Maksimal di tenor ini
+    const maxPlafonAtTenor = Math.min(
+      calc.maxPlafonTable,
+      calculatePrincipalFromInstallment(calc.remainingInstallmentBudget, calc.interestRate, tenor)
+    );
+    // Angsuran jika mengajukan plafon saat ini
+    const inst = calculateAnnuity(calc.simulatedPlafon, calc.interestRate, tenor);
+    const isCurrent = tenor === calc.selectedTenor;
+
+    rowsHtml += `
+      <tr class="${isCurrent ? 'bg-blue-50/80 font-semibold text-mandiri-blue' : 'hover:bg-slate-50 text-slate-700'} border-b border-slate-100 transition">
+        <td class="py-2.5 px-3 text-xs">
+          ${tenor} Bulan (${(tenor/12).toFixed(1)} Thn) ${(isCurrent ? '<span class="ml-1 text-[10px] bg-mandiri-blue text-white px-1.5 py-0.5 rounded-full">Dipilih</span>' : '')}
+        </td>
+        <td class="py-2.5 px-3 text-xs font-medium text-right">${formatRupiah(maxPlafonAtTenor)}</td>
+        <td class="py-2.5 px-3 text-xs font-bold text-right text-emerald-700">${formatRupiah(inst)}</td>
+      </tr>
+    `;
+  });
+
+  container.innerHTML = `
+    <div class="mt-4 border border-slate-200 rounded-2xl overflow-hidden bg-white shadow-xs">
+      <div class="bg-slate-50 px-3 py-2 border-b border-slate-200 flex items-center justify-between">
+        <span class="text-xs font-bold text-slate-700"><i class="fa-solid fa-table-list mr-1.5 text-mandiri-blue"></i>Perbandingan Tenor Lainnya</span>
+        <span class="text-[10px] text-slate-400">Plafon: ${formatRupiah(calc.simulatedPlafon)}</span>
+      </div>
+      <div class="overflow-x-auto max-h-56">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-100/70 text-[10px] uppercase text-slate-500 font-bold border-b border-slate-200">
+              <th class="py-2 px-3">Tenor</th>
+              <th class="py-2 px-3 text-right">Maks Plafon</th>
+              <th class="py-2 px-3 text-right">Angsuran/Bln</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+}
+
+// Update Pilihan Tenor Dropdown (Dukungan hingga 180 Bulan / 15 Tahun)
+function updateTenorOptions(maxTenor, currentVal) {
+  const tenorSelect = document.getElementById('tenorSelect');
+  const availableTenors = [12, 24, 36, 48, 60, 72, 84, 96, 108, 120, 132, 144, 156, 168, 180].filter(t => t <= maxTenor);
+  
+  if (!availableTenors.includes(maxTenor) && maxTenor > 0) {
+    availableTenors.push(maxTenor);
+    availableTenors.sort((a,b) => a - b);
+  }
+
+  const prevVal = currentVal || parseInt(tenorSelect.value, 10);
+  tenorSelect.innerHTML = '';
+  
+  availableTenors.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t;
+    opt.textContent = `${t} Bulan (${(t/12).toFixed(1)} Tahun)`;
+    if (t === prevVal || (t === maxTenor && !availableTenors.includes(prevVal))) {
+      opt.selected = true;
+    }
+    tenorSelect.appendChild(opt);
+  });
+}
+
+// Quick Button "Gunakan Limit Maksimal"
+function applyMaxLimit() {
+  if (!currentCalculation) return;
+  const requestedInput = document.getElementById('requestedPlafonInput');
+  requestedInput.value = currentCalculation.maxAllowedLimit.toLocaleString('id-ID');
+  calculateKsm();
+}
+
+// Share to WhatsApp Format
+function shareWhatsApp() {
+  if (!currentCalculation) return;
+  const c = currentCalculation;
+  
+  const text = `*SIMULASI MANDIRI KSM (Kredit Serbaguna Mandiri)*
+------------------------------------
+📌 *Kategori*: ${c.category.name} (${c.category.classBadge})
+💰 *Gaji / Income*: ${formatRupiah(c.income)} / bln
+🎯 *Tier Terdeteksi*: ${c.matchedTier.label}
+📊 *Batas Maks DBR*: ${c.maxDbrPercent}% (Kapasitas: ${formatRupiah(c.maxInstallmentBudget)})
+💳 *Cicilan Lain*: ${formatRupiah(c.existingObligation)} / bln
+
+------------------------------------
+⭐ *HASIL REKOMENDASI PENGAJUAN*
+------------------------------------
+✅ *Limit Maksimal*: *${formatRupiah(c.maxAllowedLimit)}*
+💵 *Plafon Diajukan*: *${formatRupiah(c.simulatedPlafon)}*
+📅 *Pilihan Tenor*: ${c.selectedTenor} Bulan (${(c.selectedTenor/12).toFixed(1)} Thn)
+📈 *Suku Bunga*: ${c.interestRate}% p.a. (Efektif${c.category.isSpecialPricing ? ' - Promo Locked' : ''})
+💵 *Estimasi Angsuran*: *${formatRupiah(c.monthlyInstallment)} / bulan*
+📉 *DBR Terpakai*: ${c.actualDbrPercent.toFixed(1)}% dari ${c.maxDbrPercent}%
+
+------------------------------------
+📑 *RINCIAN BIAYA & PENCAIRAN BERSIH*
+------------------------------------
+🏷️ *Provisi & Admin (${c.provisiAdminRate}%)*: -${formatRupiah(c.provisiAdminAmount)}
+🛡️ *Asuransi Jiwa*: ${c.insuranceAmount > 0 ? '-' + formatRupiah(c.insuranceAmount) : 'Rp 0 (Sesuai Tabel)'}
+💰 *Estimasi Dana Bersih Masuk Rekening*: *${formatRupiah(c.netDisbursedAmount)}*
+
+_Catatan: Simulasi ini merupakan estimasi awal. Keputusan akhir mengacu pada hasil verifikasi & ketentuan Bank Mandiri._`;
+
+  const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`;
+  window.open(waUrl, '_blank');
+}
+
+// Setup Event Listeners
+function setupEvents() {
+  const rupiahInputs = ['incomeInput', 'obligationInput', 'requestedPlafonInput'];
+  rupiahInputs.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', (e) => {
+      const val = parseRupiah(e.target.value);
+      e.target.value = val === 0 && e.target.value === '' ? '' : val.toLocaleString('id-ID');
+      calculateKsm();
+    });
+  });
+
+  document.getElementById('categorySelect').addEventListener('change', calculateKsm);
+  document.getElementById('tenorSelect').addEventListener('change', calculateKsm);
+  document.getElementById('interestRateInput').addEventListener('input', calculateKsm);
+  
+  const provisiInput = document.getElementById('provisiAdminRateInput');
+  if (provisiInput) provisiInput.addEventListener('input', calculateKsm);
+
+  const ageInput = document.getElementById('borrowerAgeInput');
+  if (ageInput) ageInput.addEventListener('input', calculateKsm);
+
+  const insurancePlanSelect = document.getElementById('insurancePlanSelect');
+  if (insurancePlanSelect) insurancePlanSelect.addEventListener('change', calculateKsm);
+
+  const contractInput = document.getElementById('contractMonthsInput');
+  if (contractInput) {
+    contractInput.addEventListener('input', calculateKsm);
+  }
+
+  // Populate Categories
+  const categorySelect = document.getElementById('categorySelect');
+  categorySelect.innerHTML = '';
+  TIER_CATEGORIES.forEach(cat => {
+    const opt = document.createElement('option');
+    opt.value = cat.id;
+    if (cat.isSpecialPricing) {
+      opt.textContent = `⭐ [Special Pricing] ${cat.name}`;
+    } else {
+      opt.textContent = `[${cat.isGreenCluster ? '🟢 Hijau' : '🔴 Non-Hijau'}] ${cat.name}`;
+    }
+    categorySelect.appendChild(opt);
+  });
+
+  // Initial Calculation
+  calculateKsm();
+}
+
+// Initialize on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  setupEvents();
+});
+
+</script>
+  <script>
+    function toggleMatrixModal(show) {
+      const modal = document.getElementById('matrixModal');
+      if (show) {
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
+    }
+
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => {
+          console.log('SW registration:', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
