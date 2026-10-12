@@ -74,7 +74,7 @@ Ada 2 cara mudah:
    - Ditanyakan apakah ingin memakai promo Admin & Provisi:
      - Jika **Ya**: Biaya Admin & Provisi otomatis menjadi **Rp 1** (berlaku untuk semua jenis kredit: KUR, KUM, Top Up).
      - Jika **Tidak**: Dihitung menggunakan tarif reguler.
-10. **Asuransi Kerugian (Jika dibebankan: KUR > 100jt atau KUM >= 50jt)**
+10. **Asuransi Kerugian (Jika dibebankan: KUR > 100jt atau KUM > 25jt)**
    - Pilihan Agunan: Kebakaran (FLEXAS), Mobil Pribadi (TLO), Motor (TLO), Truk/Pick Up (TLO).
    - **Nominal yang dicover (Nilai Pertanggungan Agunan)**: Ditanyakan berapa nominal objek yang ingin dicover (bebas diisi sesuai nilai agunan, atau tekan tombol/enter untuk sama dengan limit).
 11. **Kartu BPJSTK (Khusus KUR > 100jt)**
@@ -114,7 +114,7 @@ Ada 2 cara mudah:
 ### 4. Asuransi Kerugian (Model AXA MyBiz Mikro)
 - Syarat pembebanan:
   - **KUR**: Dibebankan jika pengajuan **di atas 100 juta**.
-  - **KUM**: Dibebankan jika pengajuan **50 juta atau lebih**.
+  - **KUM**: Dibebankan jika pengajuan **di atas 25 juta** (> 25jt).
 - **Nominal Coverage / Nilai Pertanggungan (Sum Insured)**:
   - Tidak harus sama dengan limit pengajuan. Pengguna dapat menentukan nominal nilai pertanggungan agunan sendiri.
 - Pilihan Jenis Agunan Kerugian:

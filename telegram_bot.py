@@ -665,7 +665,7 @@ async def handle_promo_admin_text(update: Update, context: ContextTypes.DEFAULT_
 
 
 async def proses_setelah_promo_admin(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
-    """Mengecek apakah asuransi kerugian dibebankan (KUR > 100jt atau KUM >= 50jt)."""
+    """Mengecek apakah asuransi kerugian dibebankan (KUR > 100jt atau KUM > 25jt)."""
     jenis = context.user_data.get("jenis_kredit", "KUR")
     limit = context.user_data.get("limit", 0.0)
 

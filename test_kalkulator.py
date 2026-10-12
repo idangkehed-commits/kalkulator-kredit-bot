@@ -70,10 +70,17 @@ class TestKalkulatorKredit(unittest.TestCase):
         dibebankan, _ = is_asuransi_kerugian_dibebankan("KUR", 100_000_001)
         self.assertTrue(dibebankan)
 
-        dibebankan, _ = is_asuransi_kerugian_dibebankan("KUM", 49_000_000)
+        # KUM & Top Up KUM: Dibebankan jika pengajuan di atas 25 juta (> 25jt)
+        dibebankan, _ = is_asuransi_kerugian_dibebankan("KUM", 25_000_000)
         self.assertFalse(dibebankan)
 
-        dibebankan, _ = is_asuransi_kerugian_dibebankan("KUM", 50_000_000)
+        dibebankan, _ = is_asuransi_kerugian_dibebankan("KUM", 25_000_001)
+        self.assertTrue(dibebankan)
+
+        dibebankan, _ = is_asuransi_kerugian_dibebankan("Top Up KUM", 25_000_000)
+        self.assertFalse(dibebankan)
+
+        dibebankan, _ = is_asuransi_kerugian_dibebankan("Top Up KUM", 30_000_000)
         self.assertTrue(dibebankan)
 
     def test_excel_asuransi_jiwa(self):

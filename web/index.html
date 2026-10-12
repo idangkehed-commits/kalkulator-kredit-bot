@@ -562,7 +562,7 @@
         </div>
       </div>
 
-      <!-- Pilihan Agunan Asuransi Kerugian (Khusus KUR > 100jt atau KUM >= 50jt) -->
+      <!-- Pilihan Agunan Asuransi Kerugian (Khusus KUR > 100jt atau KUM > 25jt) -->
       <div class="form-group" id="groupKerugian">
         <label>Agunan Asuransi Kerugian (AXA MyBiz)</label>
         <select id="selKerugian">
@@ -579,6 +579,7 @@
             <input type="text" id="inpNominalKerugian" class="has-prefix" value="110.000.000" inputmode="numeric">
           </div>
           <div class="chips-group" id="nominalKerugianChips">
+            <span class="chip" data-val="25000000">25 Jt</span>
             <span class="chip" data-val="50000000">50 Jt</span>
             <span class="chip" data-val="100000000">100 Jt</span>
             <span class="chip active" data-val="110000000">110 Jt</span>
@@ -679,7 +680,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=10').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=11').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -859,7 +860,7 @@
       // 3. Asuransi Kerugian (AXA MyBiz Mikro murni tanpa polis dan materai)
       let biayaKerugian = 0;
       let ketKerugian = '';
-      const dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+      const dibebankanKerugian = isKur ? (limit > 100000000) : (limit > 25000000);
       document.getElementById('groupKerugian').style.display = dibebankanKerugian ? 'block' : 'none';
 
       const jenisKerugian = document.getElementById('selKerugian').value;
@@ -895,7 +896,7 @@
         }
       } else {
         biayaKerugian = 0;
-        ketKerugian = isKur ? 'Tidak dibebankan (KUR <= 100jt)' : 'Tidak dibebankan (KUM < 50jt)';
+        ketKerugian = isKur ? 'Tidak dibebankan (KUR <= 100jt)' : 'Tidak dibebankan (KUM <= 25jt)';
       }
 
       // 4. Notaris

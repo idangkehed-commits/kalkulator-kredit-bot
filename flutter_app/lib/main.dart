@@ -224,7 +224,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     // 3. Asuransi Kerugian (AXA MyBiz Mikro tanpa polis dan materai)
     int biayaKerugian = 0;
     String ketKerugian = '';
-    final dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+    final dibebankanKerugian = isKur ? (limit > 100000000) : (limit > 25000000);
     final nominalCoverRaw = _parseNominal(_nominalKerugianController.text);
     final nominalCoverInp = (nominalCoverRaw > 0 && nominalCoverRaw <= 500) ? nominalCoverRaw * 1000000 : nominalCoverRaw;
     final basisKerugian = nominalCoverInp > 0 ? nominalCoverInp : limit;
@@ -550,7 +550,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                     const SizedBox(height: 8),
                     Wrap(
                       spacing: 6,
-                      children: [50, 100, 110, 150, 200].map((jt) {
+                      children: [25, 50, 100, 110, 150, 200].map((jt) {
                         return ActionChip(
                           label: Text('$jt Jt', style: const TextStyle(fontSize: 11)),
                           onPressed: () {

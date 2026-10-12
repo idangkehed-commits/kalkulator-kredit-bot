@@ -118,7 +118,7 @@ def is_asuransi_kerugian_dibebankan(jenis_kredit: str, limit: float) -> Tuple[bo
     """
     Ketentuan pembebanan Asuransi Kerugian:
     - KUR: Dibebankan jika pengajuan di atas 100 juta (> 100jt).
-    - KUM: Dibebankan jika pengajuan di 50 juta dan lebih dari 50 juta (>= 50jt).
+    - KUM / Top Up KUM: Dibebankan jika pengajuan di atas 25 juta (> 25jt).
     """
     jenis = jenis_kredit.strip().upper()
     if 0 < limit <= 500:
@@ -129,10 +129,10 @@ def is_asuransi_kerugian_dibebankan(jenis_kredit: str, limit: float) -> Tuple[bo
         else:
             return False, "Tidak dibebankan (KUR <= 100jt)"
     elif "KUM" in jenis:
-        if limit >= 50_000_000:
-            return True, "Dibebankan (KUM >= 50jt)"
+        if limit > 25_000_000:
+            return True, "Dibebankan (KUM > 25jt)"
         else:
-            return False, "Tidak dibebankan (KUM < 50jt)"
+            return False, "Tidak dibebankan (KUM <= 25jt)"
     return False, "Tidak dibebankan"
 
 
