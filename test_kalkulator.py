@@ -160,7 +160,7 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("Estimasi Dana Diterima Bersih : Rp 49.913.694", teks)
 
     def test_kur_bpjstk(self):
-        # KUR 110jt, tidak punya BPJSTK -> + Rp 168.000
+        # KUR 110jt, tidak punya BPJSTK -> + Rp 170.000
         data_tidak = {
             "jenis_kredit": "KUR",
             "limit": 110_000_000,
@@ -173,17 +173,17 @@ class TestKalkulatorKredit(unittest.TestCase):
             "punya_bpjstk": False
         }
         hasil_tidak = kalkulasi_lengkap(data_tidak, self.reader)
-        self.assertEqual(hasil_tidak["biaya_bpjstk"], 168_000)
+        self.assertEqual(hasil_tidak["biaya_bpjstk"], 170_000)
         self.assertEqual(hasil_tidak["biaya_blokir"], 6_692_826)
-        self.assertEqual(hasil_tidak["total_biaya"], 4_889_020)
-        self.assertEqual(hasil_tidak["dana_cair_bersih"], 98_418_154)
+        self.assertEqual(hasil_tidak["total_biaya"], 4_891_020)
+        self.assertEqual(hasil_tidak["dana_cair_bersih"], 98_416_154)
         teks_tidak = generate_hasil_teks(hasil_tidak)
         print("\n--- OUTPUT TEST KUR BPJSTK TIDAK PUNYA ---")
         print(teks_tidak)
-        self.assertIn("6. BPJSTK                : Rp 168.000", teks_tidak)
-        self.assertIn("Total Biaya yang Disiapkan : Rp 4.889.020*", teks_tidak)
+        self.assertIn("6. BPJSTK                : Rp 170.000", teks_tidak)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 4.891.020*", teks_tidak)
         self.assertIn("- Blokir 2x Angsuran        : Rp 6.692.826", teks_tidak)
-        self.assertIn("Estimasi Dana Diterima Bersih : Rp 98.418.154", teks_tidak)
+        self.assertIn("Estimasi Dana Diterima Bersih : Rp 98.416.154", teks_tidak)
 
         # KUR 110jt, punya BPJSTK -> Rp 0
         data_punya = {

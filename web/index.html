@@ -550,7 +550,7 @@
       <div class="form-group" id="groupBpjstk">
         <label>Kepesertaan BPJSTK (Khusus KUR > 100jt)</label>
         <div class="radio-toggle">
-          <div class="radio-card active" data-bpjstk="tidak">Belum Punya (+168rb)</div>
+          <div class="radio-card active" data-bpjstk="tidak">Belum Punya (+170rb)</div>
           <div class="radio-card" data-bpjstk="punya">Punya Kartu (Rp 0)</div>
         </div>
       </div>
@@ -601,11 +601,11 @@
               6. BPJSTK
               <span class="item-sub" id="subBpjstk">Biaya kepesertaan KUR > 100jt</span>
             </td>
-            <td id="resBpjstk">Rp 168.000</td>
+            <td id="resBpjstk">Rp 170.000</td>
           </tr>
           <tr class="total-row">
             <td>Total Biaya Disiapkan</td>
-            <td id="resTotalBiaya">Rp 4.889.020</td>
+            <td id="resTotalBiaya">Rp 4.891.020</td>
           </tr>
         </tbody>
       </table>
@@ -637,7 +637,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=4').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=5').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -838,7 +838,7 @@
 
       if (showBpjstk) {
         if (!punyaBpjstk) {
-          biayaBpjstk = 168000;
+          biayaBpjstk = 170000;
           ketBpjstk = 'Belum punya kartu BPJSTK';
         } else {
           biayaBpjstk = 0;

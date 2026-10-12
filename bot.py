@@ -279,15 +279,15 @@ def jalankan_bot():
 
         print("👉 Apakah calon debitur punya kartu BPJSTK (BPJS Ketenagakerjaan)?")
         print("   [1] Punya (Bebas Biaya Rp 0)")
-        print("   [2] Tidak Punya (Biaya Rp 168.000)")
+        print("   [2] Tidak Punya (Biaya Rp 170.000)")
         punya_bpjstk = tanya_dengan_validasi(
             "👉 Pilih (1 untuk Punya / 2 untuk Tidak Punya): ",
             validate_bpjstk,
             "Pilihan tidak valid! Ketik 1 (Punya) atau 2 (Tidak Punya)."
         )
         if not punya_bpjstk:
-            biaya_bpjstk = 168_000.0
-            print("   -> Calon debitur tidak punya kartu BPJSTK (Biaya Rp 168.000 ditambahkan).\n")
+            biaya_bpjstk = 170_000.0
+            print("   -> Calon debitur tidak punya kartu BPJSTK (Biaya Rp 170.000 ditambahkan).\n")
         else:
             biaya_bpjstk = 0.0
             print("   -> Calon debitur sudah punya kartu BPJSTK (Bebas Biaya Rp 0).\n")

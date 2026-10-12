@@ -224,7 +224,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
 
     // 6. BPJSTK (Khusus KUR > 100jt)
     final showBpjstk = isKur && (limit > 100000000);
-    final biayaBpjstk = (showBpjstk && !_punyaBpjstk) ? 168000 : 0;
+    final biayaBpjstk = (showBpjstk && !_punyaBpjstk) ? 170000 : 0;
 
     // Blokir 2x Angsuran (ditempatkan pada Perhitungan Penerimaan Bersih)
     final biayaBlokir = (2 * angsuran).round();
@@ -459,7 +459,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                     SwitchListTile(
                       contentPadding: EdgeInsets.zero,
                       title: const Text('Sudah Punya Kartu BPJSTK?'),
-                      subtitle: Text(_punyaBpjstk ? 'Bebas Biaya (Rp 0)' : 'Dikenakan biaya Rp 168.000'),
+                      subtitle: Text(_punyaBpjstk ? 'Bebas Biaya (Rp 0)' : 'Dikenakan biaya Rp 170.000'),
                       value: _punyaBpjstk,
                       onChanged: (val) => setState(() => _punyaBpjstk = val),
                     ),

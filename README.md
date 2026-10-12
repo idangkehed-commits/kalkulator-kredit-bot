@@ -117,7 +117,7 @@ Ada 2 cara mudah:
 
 ### 8. Biaya BPJSTK (Khusus KUR > 100 Juta)
 - Ditanyakan setelah input biaya notaris: apakah calon debitur memiliki kartu BPJSTK (BPJS Ketenagakerjaan).
-- Jika **Tidak Punya**: ditambahkan biaya sebesar **Rp 168.000** pada poin 6 rincian biaya.
+- Jika **Tidak Punya**: ditambahkan biaya sebesar **Rp 170.000** pada poin 6 rincian biaya.
 - Jika **Punya**: **Rp 0** (bebas biaya).
 
 ---

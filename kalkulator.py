@@ -349,8 +349,8 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
 
     if base_jenis == "KUR" and limit > 100_000_000:
         if punya_bpjstk is False or biaya_bpjstk_in > 0:
-            biaya_bpjstk = 168_000.0
-            ket_bpjstk = "Rp 168.000 (Tidak punya kartu BPJSTK)"
+            biaya_bpjstk = 170_000.0
+            ket_bpjstk = "Rp 170.000 (Tidak punya kartu BPJSTK)"
         elif punya_bpjstk is True:
             biaya_bpjstk = 0.0
             ket_bpjstk = "Rp 0 (Sudah punya kartu BPJSTK)"

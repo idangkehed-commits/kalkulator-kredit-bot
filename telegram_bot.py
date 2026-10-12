@@ -606,13 +606,13 @@ async def proses_setelah_notaris(event_source, context: ContextTypes.DEFAULT_TYP
         keyboard = [
             [
                 InlineKeyboardButton("Punya (Bebas Biaya)", callback_data="BPJSTK_ADA"),
-                InlineKeyboardButton("Tidak Punya (+ Rp 168.000)", callback_data="BPJSTK_TIDAK")
+                InlineKeyboardButton("Tidak Punya (+ Rp 170.000)", callback_data="BPJSTK_TIDAK")
             ]
         ]
         reply_markup = InlineKeyboardMarkup(keyboard)
         pesan = (
             "👉 <b>Apakah calon debitur punya kartu BPJSTK (BPJS Ketenagakerjaan)?</b>\n\n"
-            "<i>(Untuk pengajuan KUR di atas 100 juta, jika calon debitur belum memiliki kartu BPJSTK akan dikenakan biaya kepesertaan sebesar Rp 168.000)</i>"
+            "<i>(Untuk pengajuan KUR di atas 100 juta, jika calon debitur belum memiliki kartu BPJSTK akan dikenakan biaya kepesertaan sebesar Rp 170.000)</i>"
         )
         if is_callback:
             await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
@@ -636,7 +636,7 @@ async def handle_bpjstk_callback(update: Update, context: ContextTypes.DEFAULT_T
         context.user_data["biaya_bpjstk"] = 0.0
     else:
         context.user_data["punya_bpjstk"] = False
-        context.user_data["biaya_bpjstk"] = 168_000.0
+        context.user_data["biaya_bpjstk"] = 170_000.0
 
     return await proses_kalkulasi_dan_kirim(query, context, is_callback=True)
 
@@ -649,7 +649,7 @@ async def handle_bpjstk_text(update: Update, context: ContextTypes.DEFAULT_TYPE)
         context.user_data["biaya_bpjstk"] = 0.0
     else:
         context.user_data["punya_bpjstk"] = False
-        context.user_data["biaya_bpjstk"] = 168_000.0
+        context.user_data["biaya_bpjstk"] = 170_000.0
 
     return await proses_kalkulasi_dan_kirim(update, context, is_callback=False)
 
