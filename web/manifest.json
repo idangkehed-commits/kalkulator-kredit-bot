@@ -1,0 +1,22 @@
+{
+  "name": "Kalkulator Kredit Mikro (KUR & KUM)",
+  "short_name": "Kredit Mikro",
+  "description": "Kalkulator Simulasi Angsuran & Rincian Biaya KUR, KUM, dan Top Up KUM",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1b2a",
+  "theme_color": "#1b4965",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192' fill='%231b4965'%3E%3Crect width='192' height='192' rx='38' fill='%231b4965'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='80' fill='%23ffffff'%3E%25%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512' fill='%231b4965'%3E%3Crect width='512' height='512' rx='100' fill='%231b4965'/%3E%3Ctext x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='220' fill='%23ffffff'%3E%25%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

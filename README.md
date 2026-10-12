@@ -122,6 +122,23 @@ Ada 2 cara mudah:
 
 ---
 
+## 📱 Aplikasi Android (PWA & APK)
+
+Tersedia aplikasi Android praktis yang dapat dipakai langsung oleh marketing/analis kredit di lapangan:
+
+### 1. Langsung Pasang di HP Android (PWA - 100% Offline Ready)
+1. Buka browser **Google Chrome** di HP Android Anda.
+2. Akses alamat web bot: `https://kalkulator-kredit-bot.onrender.com/`
+3. Ketuk tombol **"📲 Pasang App"** di bagian atas (atau ketuk menu titik tiga Chrome $\rightarrow$ pilih **"Tambahkan ke Layar Utama" / "Install Aplikasi"**).
+4. Aplikasi akan terpasang di layar utama HP Anda dengan ikon resmi, layar penuh (fullscreen), dan **dapat digunakan offline tanpa kuota internet**!
+5. Dilengkapi tombol **"Kirim WhatsApp"** untuk langsung mengirim rincian simulasi rapi ke calon debitur.
+
+### 2. Source Code Aplikasi Flutter Android
+- Source code lengkap aplikasi Flutter native berada di folder `flutter_app/`.
+- Dapat dibuka menggunakan Android Studio / VS Code untuk di-build menjadi file installer `.apk` (`flutter build apk --release`).
+
+---
+
 ## 📤 Upload File Excel Asuransi
 Letakkan file Excel kalkulator Asuransi Jiwa dan Asuransi Kerugian ke dalam folder:
 `E:\kalkulator-kredit-bot\excel_data\`

@@ -47,9 +47,47 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
+WEB_DIR = os.path.join(os.path.dirname(__file__), "web")
+
+
 class HealthCheckHandler(BaseHTTPRequestHandler):
-    """HTTP handler sederhana untuk memenuhi health check cloud server (Render/Koyeb/Railway)."""
+    """HTTP handler untuk health check cloud server sekaligus melayani Web App PWA Android."""
     def do_GET(self):
+        url_path = self.path.split("?")[0]
+        if url_path in ["/", "/index.html", "/app"]:
+            filepath = os.path.join(WEB_DIR, "index.html")
+            content_type = "text/html; charset=utf-8"
+        elif url_path == "/manifest.json":
+            filepath = os.path.join(WEB_DIR, "manifest.json")
+            content_type = "application/json; charset=utf-8"
+        elif url_path == "/sw.js":
+            filepath = os.path.join(WEB_DIR, "sw.js")
+            content_type = "application/javascript; charset=utf-8"
+        elif url_path == "/health":
+            self.send_response(200)
+            self.send_header("Content-type", "text/plain; charset=utf-8")
+            self.end_headers()
+            self.wfile.write(b"Bot Kalkulator Kredit (KUR & KUM) is LIVE 24/7!")
+            return
+        else:
+            filepath = os.path.join(WEB_DIR, url_path.lstrip("/"))
+            if not os.path.isfile(filepath):
+                filepath = os.path.join(WEB_DIR, "index.html")
+            content_type = "text/html; charset=utf-8"
+
+        if os.path.exists(filepath):
+            try:
+                with open(filepath, "rb") as f:
+                    content = f.read()
+                self.send_response(200)
+                self.send_header("Content-type", content_type)
+                self.send_header("Content-Length", str(len(content)))
+                self.end_headers()
+                self.wfile.write(content)
+                return
+            except Exception as e:
+                logger.warning(f"Error serving web file: {e}")
+
         self.send_response(200)
         self.send_header("Content-type", "text/plain; charset=utf-8")
         self.end_headers()

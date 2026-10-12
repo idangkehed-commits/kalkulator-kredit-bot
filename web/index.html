@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kalkulator Kredit Mikro (KUR & KUM)</title>
+  <meta name="theme-color" content="#0f4c81">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="/manifest.json">
+  <style>
+    :root {
+      --primary: #0f4c81;
+      --primary-dark: #092c4c;
+      --primary-light: #e8f0fe;
+      --secondary: #2b9348;
+      --accent: #f77f00;
+      --bg: #f4f6fa;
+      --card-bg: #ffffff;
+      --text: #1f2937;
+      --text-muted: #6b7280;
+      --border: #e5e7eb;
+      --radius: 14px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding-bottom: 90px;
+    }
+
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 20px 16px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+    }
+
+    .header-content {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header-title h1 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      letter-spacing: -0.2px;
+    }
+
+    .header-title p {
+      font-size: 0.75rem;
+      opacity: 0.85;
+      margin-top: 2px;
+    }
+
+    .install-btn {
+      display: none;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    main {
+      max-width: 600px;
+      margin: 16px auto;
+      padding: 0 14px;
+    }
+
+    .type-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1.2fr;
+      gap: 6px;
+      background: #e2e8f0;
+      padding: 4px;
+      border-radius: 12px;
+      margin-bottom: 16px;
+    }
+
+    .type-tab {
+      padding: 10px 6px;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: 600;
+      border-radius: 9px;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .type-tab.active {
+      background: var(--card-bg);
+      color: var(--primary);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      border: 1px solid var(--border);
+    }
+
+    .card-title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group:last-child {
+      margin-bottom: 0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .input-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .input-prefix {
+      position: absolute;
+      left: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    input[type="text"], input[type="number"], input[type="date"], select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 0.95rem;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      outline: none;
+      transition: border-color 0.2s;
+      background: #fafbfc;
+      color: var(--text);
+    }
+
+    .has-prefix {
+      padding-left: 42px !important;
+    }
+
+    input:focus, select:focus {
+      border-color: var(--primary);
+      background: white;
+    }
+
+    .chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 5px 10px;
+      border-radius: 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .chip.active, .chip:active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+
+    .radio-toggle {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .radio-card {
+      border: 1.5px solid var(--border);
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .radio-card.active {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      color: var(--primary);
+    }
+
+    /* Result Card Styles */
+    .result-hero {
+      background: linear-gradient(135deg, #092c4c, #0f4c81);
+      color: white;
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: 0 6px 18px rgba(15, 76, 129, 0.25);
+    }
+
+    .result-header {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      opacity: 0.85;
+      font-weight: 600;
+    }
+
+    .angsuran-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+      margin: 6px 0 2px;
+      letter-spacing: -0.5px;
+    }
+
+    .bunga-badge {
+      font-size: 0.8rem;
+      display: inline-block;
+      background: rgba(255,255,255,0.18);
+      padding: 3px 10px;
+      border-radius: 12px;
+      margin-top: 4px;
+    }
+
+    .breakdown-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 10px 0 6px;
+      font-size: 0.83rem;
+    }
+
+    .breakdown-table tr {
+      border-bottom: 1px dashed #f1f5f9;
+    }
+
+    .breakdown-table td {
+      padding: 9px 0;
+      vertical-align: top;
+    }
+
+    .breakdown-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .item-sub {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      font-weight: 400;
+      margin-top: 1px;
+    }
+
+    .total-row {
+      border-top: 2px solid #cbd5e1 !important;
+      border-bottom: none !important;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+
+    .total-row td {
+      padding-top: 12px;
+      color: var(--primary-dark);
+    }
+
+    .topup-cair-card {
+      background: #f0fdf4;
+      border: 1.5px solid #86efac;
+      border-radius: 12px;
+      padding: 14px;
+      margin-top: 12px;
+    }
+
+    .topup-cair-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #166534;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .topup-cair-val {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #15803d;
+      margin: 4px 0;
+    }
+
+    /* Action Toolbar Fixed Bottom */
+    .action-bar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: white;
+      padding: 12px 16px;
+      box-shadow: 0 -4px 16px rgba(0,0,0,0.08);
+      display: flex;
+      gap: 10px;
+      max-width: 600px;
+      margin: 0 auto;
+      z-index: 99;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 12px;
+      border: none;
+      font-size: 0.85rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: white;
+    }
+
+    .btn-copy {
+      background: var(--primary);
+      color: white;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(15, 23, 42, 0.92);
+      color: white;
+      padding: 10px 18px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .toast.show {
+      opacity: 1;
+    }
+
+    @media print {
+      body {
+        padding: 0;
+        background: white;
+      }
+      header, .action-bar, .type-tabs, .chips-group, .install-btn {
+        display: none !important;
+      }
+      main {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+      .card, .result-hero {
+        box-shadow: none;
+        border: 1px solid #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-content">
+      <div class="header-title">
+        <h1>Kalkulator Kredit Mikro</h1>
+        <p>Simulasi Angsuran & Biaya KUR & KUM</p>
+      </div>
+      <button id="btnInstall" class="install-btn">📲 Pasang App</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Jenis Kredit Selector -->
+    <div class="type-tabs">
+      <button class="type-tab active" data-type="KUR">KUR</button>
+      <button class="type-tab" data-type="KUM">KUM</button>
+      <button class="type-tab" data-type="TOPUP_KUM">Top Up KUM</button>
+    </div>
+
+    <!-- Result Hero Banner -->
+    <div class="result-hero">
+      <div class="result-header" id="resTitle">Pengajuan KUR</div>
+      <div class="angsuran-val" id="resAngsuran">Rp 0 / bln</div>
+      <div class="bunga-badge" id="resInfoBunga">Bunga Efektif 6.00% per tahun</div>
+    </div>
+
+    <!-- Form Input Card -->
+    <div class="card">
+      <div class="card-title">📝 Parameter Pinjaman</div>
+
+      <!-- Limit / Plafond -->
+      <div class="form-group">
+        <label>Limit Pengajuan (Plafond)</label>
+        <div class="input-wrapper">
+          <span class="input-prefix">Rp</span>
+          <input type="text" id="inpLimit" class="has-prefix" value="110.000.000" inputmode="numeric">
+        </div>
+        <div class="chips-group" id="limitChips">
+          <span class="chip" data-val="10000000">10 Jt</span>
+          <span class="chip" data-val="25000000">25 Jt</span>
+          <span class="chip" data-val="50000000">50 Jt</span>
+          <span class="chip" data-val="100000000">100 Jt</span>
+          <span class="chip active" data-val="110000000">110 Jt</span>
+          <span class="chip" data-val="200000000">200 Jt</span>
+          <span class="chip" data-val="500000000">500 Jt</span>
+        </div>
+      </div>
+
+      <!-- Sisa Pokok Hutang (Khusus Top Up KUM) -->
+      <div class="form-group" id="groupSisaBade" style="display: none;">
+        <label>Sisa Pokok Hutang / Baki Debet (Bade)</label>
+        <div class="input-wrapper">
+          <span class="input-prefix">Rp</span>
+          <input type="text" id="inpSisaBade" class="has-prefix" value="20.000.000" inputmode="numeric">
+        </div>
+        <div class="chips-group">
+          <span class="chip" data-val="10000000">10 Jt</span>
+          <span class="chip active" data-val="20000000">20 Jt</span>
+          <span class="chip" data-val="30000000">30 Jt</span>
+          <span class="chip" data-val="50000000">50 Jt</span>
+        </div>
+      </div>
+
+      <!-- Tipe & Suku Bunga -->
+      <div class="form-group" id="groupTipeBunga" style="display: none;">
+        <label>Tipe Bunga</label>
+        <div class="radio-toggle">
+          <div class="radio-card active" data-bunga-type="flat">Flat per bulan</div>
+          <div class="radio-card" data-bunga-type="efektif">Efektif per tahun</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="lblBunga">Suku Bunga</label>
+        <input type="number" id="inpBunga" value="6.0" step="0.1">
+        <div class="chips-group" id="bungaChipsKur">
+          <span class="chip active" data-val="6">6% (Pengajuan ke-1)</span>
+          <span class="chip" data-val="7">7% (Pengajuan ke-2)</span>
+        </div>
+        <div class="chips-group" id="bungaChipsKum" style="display: none;">
+          <span class="chip active" data-val="0.9">0.9%</span>
+          <span class="chip" data-val="1.0">1.0%</span>
+          <span class="chip" data-val="1.2">1.2%</span>
+          <span class="chip" data-val="12">12%</span>
+        </div>
+      </div>
+
+      <!-- Tenor -->
+      <div class="form-group">
+        <label>Tenor Pinjaman (Bulan)</label>
+        <input type="number" id="inpTenor" value="36">
+        <div class="chips-group" id="tenorChips">
+          <span class="chip" data-val="12">12 Bulan (1 Th)</span>
+          <span class="chip" data-val="24">24 Bulan (2 Th)</span>
+          <span class="chip active" data-val="36">36 Bulan (3 Th)</span>
+          <span class="chip" data-val="48">48 Bulan (4 Th)</span>
+          <span class="chip" data-val="60">60 Bulan (5 Th)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Data Calon Debitur -->
+    <div class="card">
+      <div class="card-title">👤 Data Calon Debitur</div>
+
+      <div class="form-group">
+        <label>Nama Calon Debitur</label>
+        <input type="text" id="inpNama" value="Budi Santoso">
+      </div>
+
+      <div class="form-group">
+        <label>Tanggal Lahir</label>
+        <input type="date" id="inpTglLahir" value="1988-03-15">
+        <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-top: 4px;" id="badgeUmur">Umur: 38 tahun</div>
+      </div>
+
+      <div class="form-group">
+        <label>Biaya Notaris (Opsional)</label>
+        <div class="input-wrapper">
+          <span class="input-prefix">Rp</span>
+          <input type="text" id="inpNotaris" class="has-prefix" value="1.250.000" inputmode="numeric">
+        </div>
+      </div>
+
+      <!-- Pertanyaan BPJSTK (Khusus KUR > 100 Juta) -->
+      <div class="form-group" id="groupBpjstk">
+        <label>Kepesertaan BPJSTK (Khusus KUR > 100jt)</label>
+        <div class="radio-toggle">
+          <div class="radio-card active" data-bpjstk="tidak">Belum Punya (+168rb)</div>
+          <div class="radio-card" data-bpjstk="punya">Punya Kartu (Rp 0)</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rincian Biaya Card -->
+    <div class="card">
+      <div class="card-title">📊 Rincian Biaya Calon Debitur</div>
+      <table class="breakdown-table">
+        <tbody>
+          <tr>
+            <td>
+              1. Admin & Provisi
+              <span class="item-sub" id="subAdmin">1.9% (> 100jt)</span>
+            </td>
+            <td id="resAdmin">Rp 2.090.000</td>
+          </tr>
+          <tr>
+            <td>
+              2. Asuransi Jiwa Kredit
+              <span class="item-sub" id="subJiwa">Premi Dasar (Rate: 5.90‰)</span>
+            </td>
+            <td id="resJiwa">Rp 649.000</td>
+          </tr>
+          <tr>
+            <td>
+              3. Asuransi Kerugian
+              <span class="item-sub" id="subKerugian">FLEXAS + Polis + Materai</span>
+            </td>
+            <td id="resKerugian">Rp 132.020</td>
+          </tr>
+          <tr>
+            <td>
+              4. Biaya Notaris
+              <span class="item-sub">Input kesepakatan notaris</span>
+            </td>
+            <td id="resNotaris">Rp 1.250.000</td>
+          </tr>
+          <tr>
+            <td>
+              5. Asuransi Sijitu
+              <span class="item-sub" id="subSijitu">Umur 38 th (< 50)</span>
+            </td>
+            <td id="resSijitu">Rp 600.000</td>
+          </tr>
+          <tr id="rowBpjstk">
+            <td>
+              6. BPJSTK
+              <span class="item-sub" id="subBpjstk">Biaya kepesertaan KUR > 100jt</span>
+            </td>
+            <td id="resBpjstk">Rp 168.000</td>
+          </tr>
+          <tr class="total-row">
+            <td>Total Biaya Disiapkan</td>
+            <td id="resTotalBiaya">Rp 4.889.020</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- Top Up Penerimaan Bersih -->
+      <div class="topup-cair-card" id="cardTopupCair" style="display: none;">
+        <div class="topup-cair-title">Penerimaan Bersih Calon Debitur</div>
+        <div class="topup-cair-val" id="resDanaCair">Rp 0</div>
+        <div style="font-size: 0.75rem; color: #166534;" id="subDanaCair">
+          Limit Baru - Sisa Pokok - Total Biaya
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Bottom Floating Action Toolbar -->
+  <div class="action-bar">
+    <button class="btn btn-wa" id="btnShareWa">
+      <span>💬</span> Kirim WhatsApp
+    </button>
+    <button class="btn btn-copy" id="btnCopy">
+      <span>📋</span> Salin Rincian
+    </button>
+  </div>
+
+  <div id="toast" class="toast">Rincian simulasi berhasil disalin!</div>
+
+  <script>
+    // PWA Service Worker Registration
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg error:', err));
+      });
+    }
+
+    // Install prompt handler
+    let deferredPrompt;
+    const btnInstall = document.getElementById('btnInstall');
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      btnInstall.style.display = 'block';
+    });
+    btnInstall.addEventListener('click', () => {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+          btnInstall.style.display = 'none';
+        });
+      }
+    });
+
+    // Tabel Matriks Asuransi Jiwa Kredit (Plan 1 KUM/KUR)
+    const JIWA_RATES = {
+      18: [1.78, 2.70, 3.42, 3.71, 4.25], 19: [1.78, 2.70, 3.42, 3.71, 4.25],
+      20: [1.78, 2.70, 3.42, 3.71, 4.25], 21: [1.78, 2.70, 3.42, 3.71, 4.25],
+      22: [1.78, 2.70, 3.42, 3.71, 4.25], 23: [1.78, 2.70, 3.42, 3.71, 4.25],
+      24: [1.78, 2.70, 3.42, 3.71, 4.25], 25: [1.78, 2.70, 3.42, 3.71, 4.25],
+      26: [1.78, 2.70, 3.42, 3.71, 4.25], 27: [1.78, 2.70, 3.42, 3.71, 4.25],
+      28: [1.78, 2.70, 3.42, 3.71, 4.25], 29: [1.78, 2.70, 3.42, 3.71, 4.25],
+      30: [1.78, 2.70, 3.42, 3.71, 4.25], 31: [1.83, 2.83, 3.96, 4.47, 5.24],
+      32: [1.83, 2.83, 3.96, 4.47, 5.24], 33: [1.83, 2.83, 3.96, 4.47, 5.24],
+      34: [1.83, 2.83, 3.96, 4.47, 5.24], 35: [1.83, 2.83, 3.96, 4.47, 5.24],
+      36: [2.73, 4.22, 5.90, 6.68, 7.83], 37: [2.73, 4.22, 5.90, 6.68, 7.83],
+      38: [2.73, 4.22, 5.90, 6.68, 7.83], 39: [2.73, 4.22, 5.90, 6.68, 7.83],
+      40: [2.73, 4.22, 5.90, 6.68, 7.83], 41: [4.66, 7.32, 10.26, 11.58, 13.56],
+      42: [4.66, 7.32, 10.26, 11.58, 13.56], 43: [4.66, 7.32, 10.26, 11.58, 13.56],
+      44: [4.66, 7.32, 10.26, 11.58, 13.56], 45: [4.66, 7.32, 10.26, 11.58, 13.56],
+      46: [7.11, 12.69, 17.79, 20.08, 23.52], 47: [7.11, 12.69, 17.79, 20.08, 23.52],
+      48: [7.11, 12.69, 17.79, 20.08, 23.52], 49: [7.11, 12.69, 17.79, 20.08, 23.52],
+      50: [7.11, 12.69, 17.79, 20.08, 23.52], 51: [11.21, 20.24, 28.38, 32.04, 37.53],
+      52: [11.21, 20.24, 28.38, 32.04, 37.53], 53: [11.21, 20.24, 28.38, 32.04, 37.53],
+      54: [11.21, 20.24, 28.38, 32.04, 37.53], 55: [11.21, 20.24, 28.38, 32.04, 37.53],
+      56: [15.98, 28.49, 39.95, 45.10, 52.84], 57: [15.98, 28.49, 39.95, 45.10, 52.84],
+      58: [15.98, 28.49, 39.95, 45.10, 52.84], 59: [15.98, 28.49, 39.95, 45.10, 52.84],
+      60: [15.98, 28.49, 39.95, 45.10, 52.84], 61: [20.76, 33.46, 47.84, 54.01, 63.27],
+      62: [20.76, 33.46, 47.84, 54.01, 63.27], 63: [20.76, 33.46, 47.84, 54.01, 63.27],
+      64: [20.76, 33.46, 47.84, 54.01, 63.27], 65: [20.76, 33.46, 47.84, 54.01, 63.27]
+    };
+
+    // State Aplikasi
+    let currentType = 'KUR'; // 'KUR', 'KUM', 'TOPUP_KUM'
+    let currentTipeBunga = 'efektif'; // 'flat' atau 'efektif'
+    let punyaBpjstk = false;
+
+    // Helpers
+    function parseRupiah(str) {
+      if (!str) return 0;
+      const clean = ('' + str).replace(/[^\d]/g, '');
+      return parseInt(clean, 10) || 0;
+    }
+
+    function formatRupiah(num) {
+      const val = Math.round(num || 0);
+      return 'Rp ' + val.toLocaleString('id-ID');
+    }
+
+    function hitungUmur(tglLahirStr) {
+      if (!tglLahirStr) return 30;
+      const birth = new Date(tglLahirStr);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) {
+        age--;
+      }
+      return Math.max(18, Math.min(75, age || 30));
+    }
+
+    function hitungJiwaRate(umur, tenorBulan) {
+      const effectiveAge = Math.max(18, Math.min(65, umur));
+      const rowRates = JIWA_RATES[effectiveAge] || JIWA_RATES[30];
+      const termYear = Math.floor(tenorBulan / 12);
+      const termMonth = tenorBulan % 12;
+
+      let proratedRate = 0;
+      if (termYear < 1) {
+        proratedRate = +(rowRates[0] * (tenorBulan / 12.0)).toFixed(2);
+      } else if (termYear >= 5) {
+        proratedRate = rowRates[4];
+      } else {
+        const idxCurr = termYear - 1;
+        const idxNext = termYear;
+        const rateCurr = rowRates[idxCurr];
+        const rateNext = idxNext < rowRates.length ? rowRates[idxNext] : rateCurr;
+        proratedRate = +(rateCurr + (rateNext - rateCurr) * (termMonth / 12.0)).toFixed(2);
+      }
+      return proratedRate;
+    }
+
+    // Kalkulasi Utama
+    function calculate() {
+      const limit = parseRupiah(document.getElementById('inpLimit').value);
+      const sisaBade = parseRupiah(document.getElementById('inpSisaBade').value);
+      const bungaVal = parseFloat(document.getElementById('inpBunga').value) || 0;
+      const tenorBulan = parseInt(document.getElementById('inpTenor').value, 10) || 12;
+      const tglLahir = document.getElementById('inpTglLahir').value;
+      const umur = hitungUmur(tglLahir);
+      const notaris = parseRupiah(document.getElementById('inpNotaris').value);
+      const nama = document.getElementById('inpNama').value.trim() || 'Calon Debitur';
+
+      document.getElementById('badgeUmur').textContent = `Umur: ${umur} tahun`;
+
+      const isTopUp = (currentType === 'TOPUP_KUM');
+      const isKur = (currentType === 'KUR');
+
+      // Tipe Bunga label
+      let tipeBungaAktif = isKur ? 'efektif' : currentTipeBunga;
+      let infoBunga = '';
+      let angsuran = 0;
+
+      if (tipeBungaAktif === 'flat') {
+        const pokok = limit / tenorBulan;
+        const bungaRp = limit * (bungaVal / 100);
+        angsuran = Math.round(pokok + bungaRp);
+        infoBunga = `Bunga Flat ${bungaVal.toFixed(2)}% per bulan`;
+      } else {
+        if (bungaVal <= 0) {
+          angsuran = Math.round(limit / tenorBulan);
+        } else {
+          const r = (bungaVal / 100) / 12;
+          const pmt = limit * (r * Math.pow(1 + r, tenorBulan)) / (Math.pow(1 + r, tenorBulan) - 1);
+          angsuran = Math.round(pmt);
+        }
+        infoBunga = `Bunga Efektif ${bungaVal.toFixed(2)}% per tahun`;
+      }
+
+      // 1. Admin & Provisi
+      let biayaAdmin = 0;
+      let ketAdmin = '';
+      if (isKur) {
+        if (limit < 10000000) {
+          biayaAdmin = 0;
+          ketAdmin = '0% (Bebas Biaya < 10jt)';
+        } else if (limit <= 100000000) {
+          biayaAdmin = Math.round(0.02 * limit);
+          ketAdmin = '2% (10jt s/d 100jt)';
+        } else {
+          biayaAdmin = Math.round(0.019 * limit);
+          ketAdmin = '1.9% (> 100jt)';
+        }
+      } else {
+        // KUM / Top Up KUM
+        if (limit <= 100000000) {
+          biayaAdmin = Math.round(0.01 * limit);
+          ketAdmin = '1% (s/d 100jt)';
+        } else {
+          biayaAdmin = Math.round(0.015 * limit);
+          ketAdmin = '1.5% (> 100jt)';
+        }
+      }
+
+      // 2. Asuransi Jiwa Kredit (Premi Dasar murni)
+      const jiwaRate = hitungJiwaRate(umur, tenorBulan);
+      const biayaJiwa = Math.round(jiwaRate * limit / 1000.0);
+
+      // 3. Asuransi Kerugian
+      let biayaKerugian = 0;
+      let ketKerugian = '';
+      const dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+      if (dibebankanKerugian) {
+        const rateFlexas = 0.294;
+        const tenorTahun = tenorBulan / 12.0;
+        const flexas = tenorTahun * (limit * rateFlexas / 1000.0);
+        const polis = 25000;
+        const materai = flexas >= 5000000 ? 20000 : 10000;
+        biayaKerugian = Math.round(flexas + polis + materai);
+        ketKerugian = `FLEXAS: ${formatRupiah(flexas)}, Polis: 25rb, Materai: ${formatRupiah(materai)}`;
+      } else {
+        biayaKerugian = 0;
+        ketKerugian = isKur ? 'Tidak dibebankan (KUR <= 100jt)' : 'Tidak dibebankan (KUM < 50jt)';
+      }
+
+      // 4. Notaris
+      const biayaNotaris = notaris;
+
+      // 5. Asuransi Sijitu
+      const biayaSijitu = umur >= 50 ? 50000 : 600000;
+      const ketSijitu = umur >= 50 ? 'Umur >= 50 th' : 'Umur < 50 th';
+
+      // 6. BPJSTK (Khusus KUR > 100jt)
+      let biayaBpjstk = 0;
+      let ketBpjstk = '';
+      const showBpjstk = isKur && (limit > 100000000);
+      document.getElementById('groupBpjstk').style.display = showBpjstk ? 'block' : 'none';
+      document.getElementById('rowBpjstk').style.display = showBpjstk ? 'table-row' : 'none';
+
+      if (showBpjstk) {
+        if (!punyaBpjstk) {
+          biayaBpjstk = 168000;
+          ketBpjstk = 'Belum punya kartu BPJSTK';
+        } else {
+          biayaBpjstk = 0;
+          ketBpjstk = 'Sudah punya kartu (Rp 0)';
+        }
+      }
+
+      // Total Biaya
+      const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
+
+      // Top Up Dana Cair Bersih
+      const danaCair = limit - sisaBade - totalBiaya;
+
+      // Update Tampilan DOM
+      const labelJenis = isTopUp ? 'Top Up KUM' : (isKur ? 'KUR' : 'KUM');
+      document.getElementById('resTitle').textContent = `Pengajuan ${labelJenis} • Limit ${formatRupiah(limit)} • ${tenorBulan} Bln`;
+      document.getElementById('resAngsuran').textContent = `${formatRupiah(angsuran)} / bln`;
+      document.getElementById('resInfoBunga').textContent = infoBunga;
+
+      document.getElementById('subAdmin').textContent = ketAdmin;
+      document.getElementById('resAdmin').textContent = formatRupiah(biayaAdmin);
+
+      document.getElementById('subJiwa').textContent = `Premi Dasar (Rate: ${jiwaRate.toFixed(2)}‰)`;
+      document.getElementById('resJiwa').textContent = formatRupiah(biayaJiwa);
+
+      document.getElementById('subKerugian').textContent = ketKerugian;
+      document.getElementById('resKerugian').textContent = formatRupiah(biayaKerugian);
+
+      document.getElementById('resNotaris').textContent = formatRupiah(biayaNotaris);
+
+      document.getElementById('subSijitu').textContent = `Rp ${biayaSijitu.toLocaleString('id-ID')} (${ketSijitu})`;
+      document.getElementById('resSijitu').textContent = formatRupiah(biayaSijitu);
+
+      document.getElementById('subBpjstk').textContent = ketBpjstk;
+      document.getElementById('resBpjstk').textContent = formatRupiah(biayaBpjstk);
+
+      document.getElementById('resTotalBiaya').textContent = formatRupiah(totalBiaya);
+
+      if (isTopUp) {
+        document.getElementById('cardTopupCair').style.display = 'block';
+        document.getElementById('resDanaCair').textContent = formatRupiah(danaCair);
+        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Sisa Pokok (${formatRupiah(sisaBade)}) - Biaya (${formatRupiah(totalBiaya)})`;
+      } else {
+        document.getElementById('cardTopupCair').style.display = 'none';
+      }
+
+      // Return ringkasan teks untuk WA & Copy
+      let summaryText = `*Pengajuan ${labelJenis} limit ${formatRupiah(limit)} tenor ${tenorBulan} bulan*\n`;
+      summaryText += `Angsuran: ${formatRupiah(angsuran)} / bulan (${infoBunga})\n\n`;
+      summaryText += `Rincian Biaya yang Harus Disiapkan Calon Debitur:\n`;
+      summaryText += `1. Admin & Provisi       : ${formatRupiah(biayaAdmin)} (${ketAdmin})\n`;
+      summaryText += `2. Asuransi Jiwa Kredit  : ${formatRupiah(biayaJiwa)}\n`;
+      summaryText += `3. Asuransi Kerugian     : ${formatRupiah(biayaKerugian)}\n`;
+      summaryText += `4. Biaya Notaris         : ${formatRupiah(biayaNotaris)}\n`;
+      summaryText += `5. Asuransi Sijitu       : ${formatRupiah(biayaSijitu)} (${ketSijitu})\n`;
+      if (showBpjstk) {
+        summaryText += `6. BPJSTK                : ${formatRupiah(biayaBpjstk)} (${ketBpjstk})\n`;
+      }
+      summaryText += `----------------------------------------------------------------------\n`;
+      summaryText += `Total Biaya yang Disiapkan : ${formatRupiah(totalBiaya)}*\n`;
+      summaryText += `*(Catatan: Calon Debitur: ${nama}, Umur: ${umur} tahun)\n`;
+
+      if (isTopUp) {
+        summaryText += `----------------------------------------------------------------------\n`;
+        summaryText += `Perhitungan Penerimaan Bersih (Top Up):\n`;
+        summaryText += `- Limit Pengajuan Baru      : ${formatRupiah(limit)}\n`;
+        summaryText += `- Sisa Pokok / Bade Hutang  : ${formatRupiah(sisaBade)}\n`;
+        summaryText += `- Total Biaya Disiapkan     : ${formatRupiah(totalBiaya)}\n`;
+        summaryText += `----------------------------------------------------------------------\n`;
+        summaryText += `Estimasi Dana Diterima Bersih : ${formatRupiah(danaCair)}`;
+      }
+
+      window._currentSummaryText = summaryText;
+    }
+
+    // Input Currency Masking
+    function setupCurrencyInput(input) {
+      input.addEventListener('input', (e) => {
+        const num = parseRupiah(e.target.value);
+        e.target.value = num ? num.toLocaleString('id-ID') : '';
+        calculate();
+      });
+    }
+
+    setupCurrencyInput(document.getElementById('inpLimit'));
+    setupCurrencyInput(document.getElementById('inpSisaBade'));
+    setupCurrencyInput(document.getElementById('inpNotaris'));
+
+    // Event Listeners for inputs
+    ['inpBunga', 'inpTenor', 'inpTglLahir', 'inpNama'].forEach(id => {
+      document.getElementById(id).addEventListener('input', calculate);
+    });
+
+    // Chips Handling
+    document.querySelectorAll('#limitChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#limitChips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        const val = parseInt(chip.dataset.val, 10);
+        document.getElementById('inpLimit').value = val.toLocaleString('id-ID');
+        calculate();
+      });
+    });
+
+    document.querySelectorAll('#tenorChips .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('#tenorChips .chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        document.getElementById('inpTenor').value = chip.dataset.val;
+        calculate();
+      });
+    });
+
+    document.querySelectorAll('#bungaChipsKur .chip, #bungaChipsKum .chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        chip.parentElement.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        document.getElementById('inpBunga').value = chip.dataset.val;
+        calculate();
+      });
+    });
+
+    // Tabs Jenis Kredit
+    document.querySelectorAll('.type-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        currentType = tab.dataset.type;
+
+        const isKur = (currentType === 'KUR');
+        const isTopUp = (currentType === 'TOPUP_KUM');
+
+        document.getElementById('groupSisaBade').style.display = isTopUp ? 'block' : 'none';
+        document.getElementById('groupTipeBunga').style.display = isKur ? 'none' : 'block';
+
+        if (isKur) {
+          document.getElementById('bungaChipsKur').style.display = 'flex';
+          document.getElementById('bungaChipsKum').style.display = 'none';
+          document.getElementById('inpBunga').value = '6.0';
+          document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
+        } else {
+          document.getElementById('bungaChipsKur').style.display = 'none';
+          document.getElementById('bungaChipsKum').style.display = 'flex';
+          if (currentTipeBunga === 'flat') {
+            document.getElementById('inpBunga').value = '1.0';
+            document.getElementById('lblBunga').textContent = 'Suku Bunga (% per bulan Flat)';
+          } else {
+            document.getElementById('inpBunga').value = '12.0';
+            document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
+          }
+        }
+
+        calculate();
+      });
+    });
+
+    // Radio Tipe Bunga (Flat vs Efektif untuk KUM)
+    document.querySelectorAll('#groupTipeBunga .radio-card').forEach(rc => {
+      rc.addEventListener('click', () => {
+        document.querySelectorAll('#groupTipeBunga .radio-card').forEach(c => c.classList.remove('active'));
+        rc.classList.add('active');
+        currentTipeBunga = rc.dataset.bungaType;
+        if (currentTipeBunga === 'flat') {
+          document.getElementById('inpBunga').value = '1.0';
+          document.getElementById('lblBunga').textContent = 'Suku Bunga (% per bulan Flat)';
+        } else {
+          document.getElementById('inpBunga').value = '12.0';
+          document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
+        }
+        calculate();
+      });
+    });
+
+    // Radio BPJSTK
+    document.querySelectorAll('#groupBpjstk .radio-card').forEach(rc => {
+      rc.addEventListener('click', () => {
+        document.querySelectorAll('#groupBpjstk .radio-card').forEach(c => c.classList.remove('active'));
+        rc.classList.add('active');
+        punyaBpjstk = (rc.dataset.bpjstk === 'punya');
+        calculate();
+      });
+    });
+
+    // Share WhatsApp
+    document.getElementById('btnShareWa').addEventListener('click', () => {
+      if (window._currentSummaryText) {
+        const text = encodeURIComponent(window._currentSummaryText);
+        window.open(`https://wa.me/?text=${text}`, '_blank');
+      }
+    });
+
+    // Copy to Clipboard
+    const toast = document.getElementById('toast');
+    document.getElementById('btnCopy').addEventListener('click', () => {
+      if (window._currentSummaryText) {
+        navigator.clipboard.writeText(window._currentSummaryText).then(() => {
+          toast.classList.add('show');
+          setTimeout(() => toast.classList.remove('show'), 2000);
+        });
+      }
+    });
+
+    // Initial calculation on page load
+    calculate();
+  </script>
+</body>
+</html>
