@@ -147,10 +147,11 @@ def start_health_server():
     STATE_NAMA,
     STATE_TGL_LAHIR,
     STATE_NOTARIS,
+    STATE_PROMO_ADMIN,
     STATE_KERUGIAN,
     STATE_NOMINAL_KERUGIAN,
     STATE_BPJSTK
-) = range(12)
+) = range(13)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 EXCEL_DIR = os.path.join(os.path.dirname(__file__), "excel_data")
@@ -610,7 +611,7 @@ async def handle_notaris_callback(update: Update, context: ContextTypes.DEFAULT_
     await query.answer()
 
     context.user_data["biaya_notaris"] = 0.0
-    return await proses_setelah_notaris(query, context, is_callback=True)
+    return await tanya_promo_admin(query, context, is_callback=True)
 
 
 async def handle_notaris_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -621,10 +622,49 @@ async def handle_notaris_text(update: Update, context: ContextTypes.DEFAULT_TYPE
         nom = 0.0
 
     context.user_data["biaya_notaris"] = nom
-    return await proses_setelah_notaris(update, context, is_callback=False)
+    return await tanya_promo_admin(update, context, is_callback=False)
 
 
-async def proses_setelah_notaris(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
+async def tanya_promo_admin(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
+    """Menanyakan apakah calon debitur menggunakan Promo Biaya Admin & Provisi (Rp 1)."""
+    keyboard = [
+        [
+            InlineKeyboardButton("🎉 Pakai Promo (Rp 1)", callback_data="PROMO_ADMIN_YA"),
+            InlineKeyboardButton("Tarif Normal", callback_data="PROMO_ADMIN_TIDAK")
+        ]
+    ]
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    pesan = (
+        "👉 <b>Apakah pengajuan ini menggunakan Promo Biaya Admin & Provisi?</b>\n\n"
+        "<i>(Jika menggunakan promo, biaya Admin & Provisi otomatis menjadi <b>Rp 1</b>):</i>"
+    )
+    if is_callback:
+        await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+    else:
+        await event_source.message.reply_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+    return STATE_PROMO_ADMIN
+
+
+async def handle_promo_admin_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani pemilihan tombol promo admin & provisi."""
+    query = update.callback_query
+    await query.answer()
+    data = query.data
+    context.user_data["promo_admin"] = (data == "PROMO_ADMIN_YA")
+    return await proses_setelah_promo_admin(query, context, is_callback=True)
+
+
+async def handle_promo_admin_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani input teks untuk promo admin & provisi."""
+    text = update.message.text.strip().lower()
+    if text in ["1", "ya", "y", "yes", "promo", "mau"]:
+        context.user_data["promo_admin"] = True
+    else:
+        context.user_data["promo_admin"] = False
+    return await proses_setelah_promo_admin(update, context, is_callback=False)
+
+
+async def proses_setelah_promo_admin(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
     """Mengecek apakah asuransi kerugian dibebankan (KUR > 100jt atau KUM >= 50jt)."""
     jenis = context.user_data.get("jenis_kredit", "KUR")
     limit = context.user_data.get("limit", 0.0)
@@ -897,6 +937,10 @@ def main():
             STATE_NOTARIS: [
                 CallbackQueryHandler(handle_notaris_callback, pattern="^NOTARIS_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_notaris_text)
+            ],
+            STATE_PROMO_ADMIN: [
+                CallbackQueryHandler(handle_promo_admin_callback, pattern="^PROMO_ADMIN_"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_promo_admin_text)
             ],
             STATE_KERUGIAN: [
                 CallbackQueryHandler(handle_kerugian_callback, pattern="^KERUGIAN_"),

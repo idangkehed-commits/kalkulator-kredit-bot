@@ -290,7 +290,26 @@ def jalankan_bot():
     )
     print(f"   -> Biaya Notaris: {format_rupiah(biaya_notaris)}\n")
 
-    # 8. Asuransi Kerugian (Jika memenuhi syarat plafon)
+    # 8. Promo Biaya Admin & Provisi (Rp 1)
+    def validate_promo_admin(inp: str):
+        val = inp.strip().lower()
+        if not val or val in ["1", "y", "ya", "yes", "promo"]:
+            return True
+        if val in ["2", "t", "tidak", "no", "normal"]:
+            return False
+        return None
+
+    print("👉 Mau pakai promo biaya Admin & Provisi?")
+    print("   [1] Ya, Pakai Promo (Biaya Admin & Provisi otomatis menjadi Rp 1) [Default]")
+    print("   [2] Tidak (Gunakan Tarif Normal)")
+    promo_admin = tanya_dengan_validasi(
+        "👉 Pilih (1 atau 2, tekan Enter untuk Promo Rp 1): ",
+        validate_promo_admin,
+        "Pilihan tidak valid! Ketik 1 untuk Ya, atau 2 untuk Tidak."
+    )
+    print(f"   -> Promo Admin & Provisi: {'Ya (Biaya Rp 1)' if promo_admin else 'Tidak (Tarif Normal)'}\n")
+
+    # 9. Asuransi Kerugian (Jika memenuhi syarat plafon)
     jenis_kerugian = "kebakaran"
     dibebankan_kerugian, _ = is_asuransi_kerugian_dibebankan(jenis_kredit, limit)
     if dibebankan_kerugian:
@@ -377,6 +396,7 @@ def jalankan_bot():
         "tanggal_lahir": tgl_lahir,
         "nama": nama_debitur,
         "biaya_notaris": biaya_notaris,
+        "promo_admin": promo_admin,
         "jenis_kerugian": jenis_kerugian,
         "nilai_pertanggungan": nilai_pertanggungan,
         "biaya_bpjstk": biaya_bpjstk,

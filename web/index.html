@@ -553,6 +553,15 @@
         </div>
       </div>
 
+      <!-- Promo Biaya Admin & Provisi -->
+      <div class="form-group" id="groupPromoAdmin">
+        <label>Promo Biaya Admin & Provisi</label>
+        <div class="radio-toggle">
+          <div class="radio-card active" data-promo-admin="tidak">Tarif Normal</div>
+          <div class="radio-card" data-promo-admin="ya">🎉 Promo (Rp 1)</div>
+        </div>
+      </div>
+
       <!-- Pilihan Agunan Asuransi Kerugian (Khusus KUR > 100jt atau KUM >= 50jt) -->
       <div class="form-group" id="groupKerugian">
         <label>Agunan Asuransi Kerugian (AXA MyBiz)</label>
@@ -670,7 +679,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=9').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=10').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -726,6 +735,7 @@
     let currentType = 'KUR'; // 'KUR', 'KUM', 'TOPUP_KUM'
     let currentTipeBunga = 'efektif'; // 'flat' atau 'efektif'
     let punyaBpjstk = false;
+    let promoAdmin = false;
 
     // Helpers
     function parseRupiah(str) {
@@ -817,7 +827,10 @@
       // 1. Admin & Provisi
       let biayaAdmin = 0;
       let ketAdmin = '';
-      if (isKur) {
+      if (promoAdmin) {
+        biayaAdmin = 1;
+        ketAdmin = 'Promo Admin & Provisi';
+      } else if (isKur) {
         if (limit < 10000000) {
           biayaAdmin = 0;
           ketAdmin = '0% (Bebas Biaya < 10jt)';
@@ -1116,6 +1129,16 @@
         document.querySelectorAll('#groupBpjstk .radio-card').forEach(c => c.classList.remove('active'));
         rc.classList.add('active');
         punyaBpjstk = (rc.dataset.bpjstk === 'punya');
+        calculate();
+      });
+    });
+
+    // Radio Promo Admin & Provisi
+    document.querySelectorAll('#groupPromoAdmin .radio-card').forEach(rc => {
+      rc.addEventListener('click', () => {
+        document.querySelectorAll('#groupPromoAdmin .radio-card').forEach(c => c.classList.remove('active'));
+        rc.classList.add('active');
+        promoAdmin = (rc.dataset.promoAdmin === 'ya');
         calculate();
       });
     });

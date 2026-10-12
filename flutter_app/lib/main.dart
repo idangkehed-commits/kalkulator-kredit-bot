@@ -50,6 +50,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
   String _tipeBunga = 'efektif'; // flat, efektif
   DateTime _tanggalLahir = DateTime(1988, 3, 15);
   bool _punyaBpjstk = false;
+  bool _promoAdmin = false;
   String _jenisKerugian = 'kebakaran';
 
   final NumberFormat _currencyFormat = NumberFormat.currency(
@@ -192,7 +193,10 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     // 1. Admin & Provisi
     int biayaAdmin = 0;
     String ketAdmin = '';
-    if (isKur) {
+    if (_promoAdmin) {
+      biayaAdmin = 1;
+      ketAdmin = 'Promo Admin & Provisi';
+    } else if (isKur) {
       if (limit < 10000000) {
         biayaAdmin = 0;
         ketAdmin = '0% (< 10jt)';
@@ -498,6 +502,14 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                       border: OutlineInputBorder(),
                     ),
                     onChanged: (_) => setState(() {}),
+                  ),
+                  const SizedBox(height: 12),
+                  SwitchListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: const Text('Promo Biaya Admin & Provisi?'),
+                    subtitle: Text(_promoAdmin ? '🎉 Promo Aktif: Biaya menjadi Rp 1' : 'Tarif Normal'),
+                    value: _promoAdmin,
+                    onChanged: (val) => setState(() => _promoAdmin = val),
                   ),
                   if (dibebankanKerugian) ...[
                     const SizedBox(height: 12),

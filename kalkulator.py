@@ -61,9 +61,10 @@ def hitung_angsuran_flat(limit: float, bunga_bulanan_persen: float, tenor_bulan:
     return round(pokok_per_bulan + bunga_per_bulan)
 
 
-def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
+def hitung_admin_provisi(jenis_kredit: str, limit: float, promo_admin: bool = False) -> Tuple[float, str]:
     """
     1. Admin & Provisi
+    - Promo Admin & Provisi: Jika aktif, biaya menjadi otomatis Rp 1.
     - KUR:
         Kondisi pengajuan di 10 juta s/d 100 juta: 2% dari limit pengajuan.
         Di luar itu diinformasikan atau dihitung sesuai ketentuan.
@@ -71,6 +72,9 @@ def hitung_admin_provisi(jenis_kredit: str, limit: float) -> Tuple[float, str]:
         Sampai 100 juta (<= 100 jt): 1% dari limit pengajuan.
         Di atas 100 juta (> 100 jt): 1.5% dari limit pengajuan.
     """
+    if promo_admin:
+        return 1.0, "Promo Admin & Provisi"
+
     jenis = jenis_kredit.strip().upper()
     if 0 < limit <= 500:
         limit = limit * 1_000_000.0
@@ -403,7 +407,8 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
             info_bunga = f"Bunga Efektif {bunga:.2f}% per tahun"
 
     # 1. Admin & Provisi
-    biaya_admin, ket_admin = hitung_admin_provisi(base_jenis, limit)
+    promo_admin = bool(data_pengajuan.get("promo_admin", False))
+    biaya_admin, ket_admin = hitung_admin_provisi(base_jenis, limit, promo_admin=promo_admin)
 
     # 2. Asuransi Jiwa Kredit (otomatis dari Excel)
     biaya_jiwa, ket_jiwa = excel_reader.hitung_asuransi_jiwa(umur, tenor, limit)
@@ -464,6 +469,7 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
         "angsuran": angsuran,
         "biaya_admin": biaya_admin,
         "ket_admin": ket_admin,
+        "promo_admin": promo_admin,
         "biaya_jiwa": biaya_jiwa,
         "ket_jiwa": ket_jiwa,
         "biaya_kerugian": biaya_kerugian,

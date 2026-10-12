@@ -291,5 +291,44 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertEqual(hasil_110["nilai_pertanggungan"], 150_000_000)
         self.assertEqual(hasil_110["biaya_kerugian"], 132_300)
 
+    def test_admin_provisi_promo(self):
+        biaya_kur, ket_kur = hitung_admin_provisi("KUR", 110_000_000, promo_admin=True)
+        self.assertEqual(biaya_kur, 1.0)
+        self.assertEqual(ket_kur, "Promo Admin & Provisi")
+
+        biaya_kum, ket_kum = hitung_admin_provisi("KUM", 80_000_000, promo_admin=True)
+        self.assertEqual(biaya_kum, 1.0)
+        self.assertEqual(ket_kum, "Promo Admin & Provisi")
+
+    def test_kalkulasi_lengkap_promo_admin(self):
+        data = {
+            "jenis_kredit": "KUR",
+            "limit": 110_000_000,
+            "tenor": 36,
+            "bunga": 6.0,
+            "tipe_bunga": "efektif",
+            "tanggal_lahir": date(1988, 3, 15),
+            "nama": "Budi Promo",
+            "biaya_notaris": 1_250_000,
+            "punya_bpjstk": True,
+            "promo_admin": True
+        }
+        hasil = kalkulasi_lengkap(data, self.reader)
+        self.assertTrue(hasil["promo_admin"])
+        self.assertEqual(hasil["biaya_admin"], 1.0)
+        self.assertEqual(hasil["ket_admin"], "Promo Admin & Provisi")
+        # Tanpa promo: biaya_admin = 2.090.000, total_biaya = 4.686.020
+        # Dengan promo Rp 1: total_biaya = 1 + 649.000 + 97.020 + 1.250.000 + 600.000 + 0 = 2.596.021
+        self.assertEqual(hasil["total_biaya"], 2_596_021)
+        # Dana cair: 110.000.000 - 2.596.021 - 6.692.826 = 100.711.153
+        self.assertEqual(hasil["dana_cair_bersih"], 100_711_153)
+
+        teks = generate_hasil_teks(hasil)
+        print("\n--- OUTPUT TEST PROMO ADMIN ---")
+        print(teks)
+        self.assertIn("1. Admin & Provisi       : Rp 1 (Promo Admin & Provisi)", teks)
+        self.assertIn("Total Biaya yang Disiapkan : Rp 2.596.021*", teks)
+        self.assertIn("Estimasi Dana Diterima Bersih : Rp 100.711.153", teks)
+
 if __name__ == "__main__":
     unittest.main()

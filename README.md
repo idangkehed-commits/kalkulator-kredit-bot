@@ -70,10 +70,14 @@ Ada 2 cara mudah:
    - Format `DD-MM-YYYY` (contoh: `17-08-1985`). Umur otomatis dihitung untuk dasar penentuan Asuransi Sijitu dan Asuransi Jiwa.
 8. **Biaya Notaris?**
    - Diinput manual (ketik `0` jika tidak ada, atau masukkan nominal seperti `1500000`).
-9. **Asuransi Kerugian (Jika dibebankan: KUR > 100jt atau KUM >= 50jt)**
+9. **Promo Biaya Admin & Provisi?**
+   - Ditanyakan apakah ingin memakai promo Admin & Provisi:
+     - Jika **Ya**: Biaya Admin & Provisi otomatis menjadi **Rp 1** (berlaku untuk semua jenis kredit: KUR, KUM, Top Up).
+     - Jika **Tidak**: Dihitung menggunakan tarif reguler.
+10. **Asuransi Kerugian (Jika dibebankan: KUR > 100jt atau KUM >= 50jt)**
    - Pilihan Agunan: Kebakaran (FLEXAS), Mobil Pribadi (TLO), Motor (TLO), Truk/Pick Up (TLO).
    - **Nominal yang dicover (Nilai Pertanggungan Agunan)**: Ditanyakan berapa nominal objek yang ingin dicover (bebas diisi sesuai nilai agunan, atau tekan tombol/enter untuk sama dengan limit).
-10. **Kartu BPJSTK (Khusus KUR > 100jt)**
+11. **Kartu BPJSTK (Khusus KUR > 100jt)**
    - Ditanyakan apakah calon debitur sudah memiliki kartu BPJSTK (Punya: Rp 0, Belum Punya: Rp 170.000).
 
 ---
@@ -90,13 +94,17 @@ Ada 2 cara mudah:
   $$\text{Total Angsuran} = \text{Pokok} + \text{Bunga}$$
 
 ### 2. Biaya Admin & Provisi
-- **KUR**:
-  - Limit 10 juta s/d 100 juta: **2%** dari limit pengajuan.
-  - Limit di atas 100 juta: **1.9%** dari limit pengajuan.
-  - Limit di bawah 10 juta: **0%** (bebas biaya admin/provisi).
-- **KUM**:
-  - Limit s/d 100 juta: **1%** dari limit pengajuan.
-  - Limit > 100 juta: **1.5%** dari limit pengajuan.
+- **🎉 Promo Admin & Provisi (Rp 1)**:
+  - Berlaku untuk **seluruh jenis kredit** (KUR, KUM, Top Up KUM).
+  - Jika promo aktif, Biaya Admin & Provisi otomatis menjadi **Rp 1** (Keterangan: `Promo Admin & Provisi`).
+- **Tarif Normal (Tanpa Promo)**:
+  - **KUR**:
+    - Limit 10 juta s/d 100 juta: **2%** dari limit pengajuan.
+    - Limit di atas 100 juta: **1.9%** dari limit pengajuan.
+    - Limit di bawah 10 juta: **0%** (bebas biaya admin/provisi).
+  - **KUM**:
+    - Limit s/d 100 juta: **1%** dari limit pengajuan.
+    - Limit > 100 juta: **1.5%** dari limit pengajuan.
 
 ### 3. Asuransi Jiwa Kredit
 - Dipengaruhi oleh: **Umur, Tenor, dan Limit Pengajuan**.
