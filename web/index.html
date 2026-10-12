@@ -610,12 +610,12 @@
         </tbody>
       </table>
 
-      <!-- Top Up Penerimaan Bersih -->
-      <div class="topup-cair-card" id="cardTopupCair" style="display: none;">
-        <div class="topup-cair-title">Penerimaan Bersih Calon Debitur</div>
+      <!-- Penerimaan Bersih Calon Debitur -->
+      <div class="topup-cair-card" id="cardTopupCair">
+        <div class="topup-cair-title" id="titleDanaCair">Penerimaan Bersih Calon Debitur</div>
         <div class="topup-cair-val" id="resDanaCair">Rp 0</div>
         <div style="font-size: 0.75rem; color: #166534;" id="subDanaCair">
-          Limit Baru - Sisa Pokok - Total Biaya
+          Plafond - Total Biaya
         </div>
       </div>
     </div>
@@ -847,8 +847,8 @@
       // Total Biaya
       const totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
 
-      // Top Up Dana Cair Bersih
-      const danaCair = limit - sisaBade - totalBiaya;
+      // Dana Cair Bersih
+      const danaCair = isTopUp ? (limit - sisaBade - totalBiaya) : (limit - totalBiaya);
 
       // Update Tampilan DOM
       const labelJenis = isTopUp ? 'Top Up KUM' : (isKur ? 'KUR' : 'KUM');
@@ -875,12 +875,15 @@
 
       document.getElementById('resTotalBiaya').textContent = formatRupiah(totalBiaya);
 
+      // Tampilkan Penerimaan Bersih untuk semua jenis pengajuan
+      document.getElementById('cardTopupCair').style.display = 'block';
+      document.getElementById('resDanaCair').textContent = formatRupiah(danaCair);
       if (isTopUp) {
-        document.getElementById('cardTopupCair').style.display = 'block';
-        document.getElementById('resDanaCair').textContent = formatRupiah(danaCair);
+        document.getElementById('titleDanaCair').textContent = 'Penerimaan Bersih (Top Up)';
         document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Sisa Pokok (${formatRupiah(sisaBade)}) - Biaya (${formatRupiah(totalBiaya)})`;
       } else {
-        document.getElementById('cardTopupCair').style.display = 'none';
+        document.getElementById('titleDanaCair').textContent = 'Penerimaan Bersih Calon Debitur';
+        document.getElementById('subDanaCair').textContent = `Plafond (${formatRupiah(limit)}) - Total Biaya (${formatRupiah(totalBiaya)})`;
       }
 
       // Return ringkasan teks untuk WA & Copy
@@ -904,6 +907,13 @@
         summaryText += `Perhitungan Penerimaan Bersih (Top Up):\n`;
         summaryText += `- Limit Pengajuan Baru      : ${formatRupiah(limit)}\n`;
         summaryText += `- Sisa Pokok / Bade Hutang  : ${formatRupiah(sisaBade)}\n`;
+        summaryText += `- Total Biaya Disiapkan     : ${formatRupiah(totalBiaya)}\n`;
+        summaryText += `----------------------------------------------------------------------\n`;
+        summaryText += `Estimasi Dana Diterima Bersih : ${formatRupiah(danaCair)}`;
+      } else {
+        summaryText += `----------------------------------------------------------------------\n`;
+        summaryText += `Perhitungan Penerimaan Bersih:\n`;
+        summaryText += `- Limit Pengajuan (Plafond) : ${formatRupiah(limit)}\n`;
         summaryText += `- Total Biaya Disiapkan     : ${formatRupiah(totalBiaya)}\n`;
         summaryText += `----------------------------------------------------------------------\n`;
         summaryText += `Estimasi Dana Diterima Bersih : ${formatRupiah(danaCair)}`;

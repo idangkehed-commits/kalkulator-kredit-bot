@@ -364,8 +364,10 @@ def kalkulasi_lengkap(data_pengajuan: Dict[str, Any], excel_reader: Optional[Exc
     # Total Biaya
     total_biaya = biaya_admin + biaya_jiwa + biaya_kerugian + biaya_notaris + biaya_sijitu + biaya_bpjstk
 
-    # Perhitungan Top Up (Penerimaan Bersih): Limit - Sisa Bade - Total Biaya
-    dana_cair_bersih = limit - sisa_bade - total_biaya if is_topup else 0.0
+    # Perhitungan Penerimaan Bersih:
+    # Jika Top Up: Limit - Sisa Bade - Total Biaya
+    # Jika reguler (KUR/KUM): Limit - Total Biaya
+    dana_cair_bersih = limit - sisa_bade - total_biaya if is_topup else (limit - total_biaya)
     jenis_label = f"Top Up {base_jenis}" if is_topup else base_jenis
 
     return {
@@ -459,6 +461,16 @@ def generate_hasil_teks(hasil: Dict[str, Any]) -> str:
             "Perhitungan Penerimaan Bersih (Top Up):",
             f"- Limit Pengajuan Baru      : Rp {limit_fmt}",
             f"- Sisa Pokok / Bade Hutang  : {sisa_bade_fmt}",
+            f"- Total Biaya Disiapkan     : {total_fmt}",
+            "----------------------------------------------------------------------",
+            f"Estimasi Dana Diterima Bersih : {dana_cair_fmt}"
+        ])
+    else:
+        dana_cair_fmt = format_rupiah(hasil.get("dana_cair_bersih", 0))
+        lines.extend([
+            "----------------------------------------------------------------------",
+            "Perhitungan Penerimaan Bersih:",
+            f"- Limit Pengajuan (Plafond) : Rp {limit_fmt}",
             f"- Total Biaya Disiapkan     : {total_fmt}",
             "----------------------------------------------------------------------",
             f"Estimasi Dana Diterima Bersih : {dana_cair_fmt}"

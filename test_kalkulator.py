@@ -113,9 +113,10 @@ class TestKalkulatorKredit(unittest.TestCase):
         self.assertIn("1. Admin & Provisi", teks)
         self.assertIn("Rp 2.090.000", teks)
         self.assertIn("Rp 649.000", teks)
-        self.assertIn("Rp 132.020", teks)
-        self.assertIn("5. Asuransi Sijitu", teks)
-        self.assertIn("Rp 4.721.020", teks)
+        self.assertEqual(hasil["dana_cair_bersih"], 105_278_980)
+        self.assertIn("Perhitungan Penerimaan Bersih:", teks)
+        self.assertIn("Limit Pengajuan (Plafond) : Rp 110.000.000", teks)
+        self.assertIn("Estimasi Dana Diterima Bersih : Rp 105.278.980", teks)
 
     def test_topup_kum(self):
         data = {

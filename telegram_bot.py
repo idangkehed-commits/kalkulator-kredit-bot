@@ -222,6 +222,16 @@ def generate_hasil_html(hasil: Dict[str, Any]) -> str:
             "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
             f"💰 <b>Estimasi Dana Diterima Bersih : {dana_cair_fmt}</b>"
         ])
+    else:
+        dana_cair_fmt = format_rupiah(hasil.get("dana_cair_bersih", 0))
+        lines.extend([
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            "<b>Perhitungan Penerimaan Bersih:</b>",
+            f"• Limit Pengajuan (Plafond) : <b>Rp {limit_fmt}</b>",
+            f"• Total Biaya Disiapkan     : <b>{total_fmt}</b>",
+            "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+            f"💰 <b>Estimasi Dana Diterima Bersih : {dana_cair_fmt}</b>"
+        ])
 
     return "\n".join(lines)
 

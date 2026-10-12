@@ -228,7 +228,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
 
     // Total Biaya
     final totalBiaya = biayaAdmin + biayaJiwa + biayaKerugian + biayaNotaris + biayaSijitu + biayaBpjstk;
-    final danaCairBersih = (limit - sisaBade - totalBiaya).round();
+    final danaCairBersih = isTopUp ? (limit - sisaBade - totalBiaya).round() : (limit - totalBiaya).round();
 
     return Scaffold(
       appBar: AppBar(
@@ -487,33 +487,36 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                   const Divider(),
                   _buildCostRow('Total Biaya Disiapkan', totalBiaya, isBold: true),
 
-                  if (isTopUp) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Colors.green.shade50,
-                        border: Border.all(color: Colors.green.shade300),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Penerimaan Bersih (Top Up)', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13)),
-                          const SizedBox(height: 4),
-                          Text(
-                            _currencyFormat.format(danaCairBersih),
-                            style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 20),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Plafond (${_currencyFormat.format(limit)}) - Sisa Pokok (${_currencyFormat.format(sisaBade)}) - Biaya (${_currencyFormat.format(totalBiaya)})',
-                            style: TextStyle(fontSize: 11, color: Colors.green.shade900),
-                          ),
-                        ],
-                      ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.green.shade50,
+                      border: Border.all(color: Colors.green.shade300),
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                  ],
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          isTopUp ? 'Penerimaan Bersih (Top Up)' : 'Penerimaan Bersih Calon Debitur',
+                          style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 13),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          _currencyFormat.format(danaCairBersih),
+                          style: TextStyle(color: Colors.green.shade800, fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          isTopUp
+                              ? 'Plafond (${_currencyFormat.format(limit)}) - Sisa Pokok (${_currencyFormat.format(sisaBade)}) - Biaya (${_currencyFormat.format(totalBiaya)})'
+                              : 'Plafond (${_currencyFormat.format(limit)}) - Total Biaya (${_currencyFormat.format(totalBiaya)})',
+                          style: TextStyle(fontSize: 11, color: Colors.green.shade900),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -543,7 +546,7 @@ Rincian Biaya yang Harus Disiapkan Calon Debitur:
 ${showBpjstk ? "6. BPJSTK                : ${_currencyFormat.format(biayaBpjstk)}\n" : ""}----------------------------------------------------------------------
 Total Biaya yang Disiapkan : ${_currencyFormat.format(totalBiaya)}*
 *(Catatan: Calon Debitur: ${_namaController.text}, Umur: $umur tahun)
-${isTopUp ? "\nPerhitungan Penerimaan Bersih (Top Up):\n- Limit Pengajuan Baru      : ${_currencyFormat.format(limit)}\n- Sisa Pokok / Bade Hutang  : ${_currencyFormat.format(sisaBade)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}" : ""}''';
+${isTopUp ? "\nPerhitungan Penerimaan Bersih (Top Up):\n- Limit Pengajuan Baru      : ${_currencyFormat.format(limit)}\n- Sisa Pokok / Bade Hutang  : ${_currencyFormat.format(sisaBade)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}" : "\nPerhitungan Penerimaan Bersih:\n- Limit Pengajuan (Plafond) : ${_currencyFormat.format(limit)}\n- Total Biaya Disiapkan     : ${_currencyFormat.format(totalBiaya)}\n----------------------------------------------------------------------\nEstimasi Dana Diterima Bersih : ${_currencyFormat.format(danaCairBersih)}"}''';
               Clipboard.setData(ClipboardData(text: summary));
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Rincian berhasil disalin ke clipboard!')));
             },
