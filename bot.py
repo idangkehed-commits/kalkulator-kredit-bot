@@ -266,6 +266,34 @@ def jalankan_bot():
     )
     print(f"   -> Biaya Notaris: {format_rupiah(biaya_notaris)}\n")
 
+    # 8. Asuransi Kerugian (Jika memenuhi syarat plafon)
+    jenis_kerugian = "kebakaran"
+    dibebankan_kerugian, _ = is_asuransi_kerugian_dibebankan(jenis_kredit, limit)
+    if dibebankan_kerugian:
+        def validate_kerugian(inp: str):
+            val = inp.strip().lower()
+            if not val or val in ["1", "kebakaran", "bangunan", "rumah"]:
+                return "kebakaran"
+            if val in ["2", "mobil", "roda 4", "mobil pribadi"]:
+                return "mobil"
+            if val in ["3", "motor", "roda 2", "sepeda motor"]:
+                return "motor"
+            if val in ["4", "truk", "truck", "pickup", "pick up"]:
+                return "truk"
+            return None
+
+        print("👉 Pilih Jenis Agunan untuk Asuransi Kerugian:")
+        print("   [1] Bangunan / Rumah / Tempat Usaha (Kebakaran FLEXAS) [Default]")
+        print("   [2] Kendaraan Mobil Pribadi (TLO)")
+        print("   [3] Kendaraan Sepeda Motor (TLO)")
+        print("   [4] Kendaraan Truk / Pick Up (TLO)")
+        jenis_kerugian = tanya_dengan_validasi(
+            "👉 Pilih (1 s/d 4, tekan Enter untuk default Kebakaran): ",
+            validate_kerugian,
+            "Pilihan tidak valid! Ketik 1, 2, 3, atau 4."
+        )
+        print(f"   -> Jenis Agunan Kerugian: {jenis_kerugian.title()}\n")
+
     biaya_bpjstk = 0.0
     punya_bpjstk = None
     if jenis_kredit == "KUR" and limit > 100_000_000:
@@ -308,6 +336,7 @@ def jalankan_bot():
         "tanggal_lahir": tgl_lahir,
         "nama": nama_debitur,
         "biaya_notaris": biaya_notaris,
+        "jenis_kerugian": jenis_kerugian,
         "biaya_bpjstk": biaya_bpjstk,
         "punya_bpjstk": punya_bpjstk
     }

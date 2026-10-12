@@ -546,6 +546,17 @@
         </div>
       </div>
 
+      <!-- Pilihan Agunan Asuransi Kerugian (Khusus KUR > 100jt atau KUM >= 50jt) -->
+      <div class="form-group" id="groupKerugian">
+        <label>Agunan Asuransi Kerugian (AXA MyBiz)</label>
+        <select id="selKerugian">
+          <option value="kebakaran" selected>🏠 Bangunan / Tempat Usaha (FLEXAS Kebakaran)</option>
+          <option value="mobil">🚗 Kendaraan Mobil Pribadi (TLO)</option>
+          <option value="motor">🏍️ Kendaraan Sepeda Motor (TLO)</option>
+          <option value="truk">🚚 Kendaraan Truk / Pick Up (TLO)</option>
+        </select>
+      </div>
+
       <!-- Pertanyaan BPJSTK (Khusus KUR > 100 Juta) -->
       <div class="form-group" id="groupBpjstk">
         <label>Kepesertaan BPJSTK (Khusus KUR > 100jt)</label>
@@ -575,12 +586,12 @@
             </td>
             <td id="resJiwa">Rp 649.000</td>
           </tr>
-          <tr>
+          <tr id="rowKerugian">
             <td>
               3. Asuransi Kerugian
-              <span class="item-sub" id="subKerugian">FLEXAS + Polis + Materai</span>
+              <span class="item-sub" id="subKerugian">FLEXAS Kebakaran (Rate: 0.882‰)</span>
             </td>
-            <td id="resKerugian">Rp 132.020</td>
+            <td id="resKerugian">Rp 97.020</td>
           </tr>
           <tr>
             <td>
@@ -605,7 +616,7 @@
           </tr>
           <tr class="total-row">
             <td>Total Biaya Disiapkan</td>
-            <td id="resTotalBiaya">Rp 4.891.020</td>
+            <td id="resTotalBiaya">Rp 4.856.020</td>
           </tr>
         </tbody>
       </table>
@@ -637,7 +648,7 @@
     // PWA Service Worker Registration
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js?v=5').then(reg => {
+        navigator.serviceWorker.register('/sw.js?v=6').then(reg => {
           reg.update();
         }).catch(err => console.log('SW reg error:', err));
       });
@@ -805,18 +816,40 @@
       const jiwaRate = hitungJiwaRate(umur, tenorBulan);
       const biayaJiwa = Math.round(jiwaRate * limit / 1000.0);
 
-      // 3. Asuransi Kerugian
+      // 3. Asuransi Kerugian (AXA MyBiz Mikro murni tanpa polis dan materai)
       let biayaKerugian = 0;
       let ketKerugian = '';
       const dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+      document.getElementById('groupKerugian').style.display = dibebankanKerugian ? 'block' : 'none';
+
+      const jenisKerugian = document.getElementById('selKerugian').value;
+      const tenorTahun = tenorBulan / 12.0;
+
       if (dibebankanKerugian) {
-        const rateFlexas = 0.294;
-        const tenorTahun = tenorBulan / 12.0;
-        const flexas = tenorTahun * (limit * rateFlexas / 1000.0);
-        const polis = 25000;
-        const materai = flexas >= 5000000 ? 20000 : 10000;
-        biayaKerugian = Math.round(flexas + polis + materai);
-        ketKerugian = `FLEXAS: ${formatRupiah(flexas)}, Polis: 25rb, Materai: ${formatRupiah(materai)}`;
+        if (jenisKerugian === 'motor') {
+          const rateTotal = +(1.80 * tenorTahun).toFixed(3);
+          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
+          ketKerugian = `TLO Motor (Rate: ${rateTotal.toFixed(2)}%)`;
+        } else if (jenisKerugian === 'truk') {
+          const rateTotal = +(1.68 * tenorTahun).toFixed(3);
+          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
+          ketKerugian = `TLO Truk/Pick Up (Rate: ${rateTotal.toFixed(2)}%)`;
+        } else if (jenisKerugian === 'mobil') {
+          let rateThn = 0.65;
+          if (limit <= 125000000) rateThn = 0.65;
+          else if (limit <= 200000000) rateThn = 0.44;
+          else if (limit <= 400000000) rateThn = 0.38;
+          else if (limit <= 800000000) rateThn = 0.25;
+          else rateThn = 0.20;
+          const rateTotal = +(rateThn * tenorTahun).toFixed(3);
+          biayaKerugian = Math.round(limit * (rateTotal / 100.0));
+          ketKerugian = `TLO Mobil Pribadi (Rate: ${rateTotal.toFixed(2)}%)`;
+        } else {
+          // Kebakaran FLEXAS Rumah Tinggal Kelas 1 (0.294 ‰)
+          const rateFlexas = +(0.294 * tenorTahun).toFixed(4);
+          biayaKerugian = Math.round(limit * rateFlexas / 1000.0);
+          ketKerugian = `FLEXAS Kebakaran (Rate: ${rateFlexas.toFixed(3)}‰)`;
+        }
       } else {
         biayaKerugian = 0;
         ketKerugian = isKur ? 'Tidak dibebankan (KUR <= 100jt)' : 'Tidak dibebankan (KUM < 50jt)';
@@ -943,8 +976,9 @@
     setupCurrencyInput(document.getElementById('inpNotaris'));
 
     // Event Listeners for inputs
-    ['inpBunga', 'inpTenor', 'inpTglLahir', 'inpNama'].forEach(id => {
+    ['inpBunga', 'inpTenor', 'inpTglLahir', 'inpNama', 'selKerugian'].forEach(id => {
       document.getElementById(id).addEventListener('input', calculate);
+      document.getElementById(id).addEventListener('change', calculate);
     });
 
     // Chips Handling

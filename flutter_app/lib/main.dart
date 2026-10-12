@@ -49,6 +49,7 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
   String _tipeBunga = 'efektif'; // flat, efektif
   DateTime _tanggalLahir = DateTime(1988, 3, 15);
   bool _punyaBpjstk = false;
+  String _jenisKerugian = 'kebakaran';
 
   final NumberFormat _currencyFormat = NumberFormat.currency(
     locale: 'id_ID',
@@ -207,13 +208,37 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
     final jiwaRate = _hitungJiwaRate(umur, tenorBulan);
     final biayaJiwa = (jiwaRate * limit / 1000.0).round();
 
-    // 3. Asuransi Kerugian
+    // 3. Asuransi Kerugian (AXA MyBiz Mikro tanpa polis dan materai)
     int biayaKerugian = 0;
     final dibebankanKerugian = isKur ? (limit > 100000000) : (limit >= 50000000);
+    final tenorTahun = tenorBulan / 12.0;
     if (dibebankanKerugian) {
-      final flexas = (tenorBulan / 12.0) * (limit * 0.294 / 1000.0);
-      final materai = flexas >= 5000000 ? 20000 : 10000;
-      biayaKerugian = (flexas + 25000 + materai).round();
+      if (_jenisKerugian == 'motor') {
+        final rateTotal = 1.80 * tenorTahun;
+        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+      } else if (_jenisKerugian == 'truk') {
+        final rateTotal = 1.68 * tenorTahun;
+        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+      } else if (_jenisKerugian == 'mobil') {
+        double rateThn = 0.65;
+        if (limit <= 125000000) {
+          rateThn = 0.65;
+        } else if (limit <= 200000000) {
+          rateThn = 0.44;
+        } else if (limit <= 400000000) {
+          rateThn = 0.38;
+        } else if (limit <= 800000000) {
+          rateThn = 0.25;
+        } else {
+          rateThn = 0.20;
+        }
+        final rateTotal = rateThn * tenorTahun;
+        biayaKerugian = (limit * (rateTotal / 100.0)).round();
+      } else {
+        // Kebakaran FLEXAS Rumah Tinggal Kelas 1 (0.294 ‰)
+        final rateTotal = 0.294 * tenorTahun;
+        biayaKerugian = (limit * (rateTotal / 1000.0)).round();
+      }
     }
 
     // 4. Biaya Notaris
@@ -454,6 +479,25 @@ class _KalkulatorScreenState extends State<KalkulatorScreen> with SingleTickerPr
                     ),
                     onChanged: (_) => setState(() {}),
                   ),
+                  if (dibebankanKerugian) ...[
+                    const SizedBox(height: 12),
+                    DropdownButtonFormField<String>(
+                      decoration: const InputDecoration(
+                        labelText: 'Agunan Asuransi Kerugian (AXA MyBiz)',
+                        border: OutlineInputBorder(),
+                      ),
+                      value: _jenisKerugian,
+                      items: const [
+                        DropdownMenuItem(value: 'kebakaran', child: Text('🏠 Bangunan (FLEXAS)')),
+                        DropdownMenuItem(value: 'mobil', child: Text('🚗 Mobil Pribadi (TLO)')),
+                        DropdownMenuItem(value: 'motor', child: Text('🏍️ Sepeda Motor (TLO)')),
+                        DropdownMenuItem(value: 'truk', child: Text('🚚 Truk / Pick Up (TLO)')),
+                      ],
+                      onChanged: (val) {
+                        if (val != null) setState(() => _jenisKerugian = val);
+                      },
+                    ),
+                  ],
                   if (showBpjstk) ...[
                     const SizedBox(height: 12),
                     SwitchListTile(

@@ -97,11 +97,16 @@ Ada 2 cara mudah:
 - Menggunakan perhitungan **Premi Dasar** murni (tanpa diskon 18%).
 - Siap membaca tabel rumus dari file Excel yang diunggah ke folder `E:\kalkulator-kredit-bot\excel_data\`.
 
-### 4. Asuransi Kerugian
+### 4. Asuransi Kerugian (Model AXA MyBiz Mikro)
 - Syarat pembebanan:
   - **KUR**: Dibebankan jika pengajuan **di atas 100 juta**.
   - **KUM**: Dibebankan jika pengajuan **50 juta atau lebih**.
-- Rumus akan membaca file Excel yang diunggah.
+- Pilihan Jenis Agunan Kerugian:
+  1. **Bangunan / Usaha (Kebakaran FLEXAS)**: Rate dasar `0.294‰` per tahun dikali tenor.
+  2. **Kendaraan Mobil Pribadi (TLO)**: Rate OJK Zone 2 (`0.65%` s/d `0.20%` per tahun) dikali tenor.
+  3. **Kendaraan Sepeda Motor (TLO)**: Rate OJK `1.80%` per tahun dikali tenor.
+  4. **Kendaraan Truk / Pick Up (TLO)**: Rate OJK `1.68%` per tahun dikali tenor.
+- **Biaya Polis & Materai**: Dihilangkan (Rp 0), murni menghitung premi risiko.
 
 ### 5. Biaya Notaris
 - Diinput secara manual sesuai kesepakatan notaris.

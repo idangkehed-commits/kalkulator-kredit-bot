@@ -35,6 +35,7 @@ from kalkulator import (
     hitung_umur,
     format_rupiah,
     generate_hasil_teks,
+    is_asuransi_kerugian_dibebankan,
     ExcelInsuranceReader
 )
 from bot import parse_nominal, parse_persen, parse_tanggal
@@ -122,8 +123,9 @@ def start_health_server():
     STATE_NAMA,
     STATE_TGL_LAHIR,
     STATE_NOTARIS,
+    STATE_KERUGIAN,
     STATE_BPJSTK
-) = range(10)
+) = range(11)
 
 CONFIG_PATH = os.path.join(os.path.dirname(__file__), "config.json")
 EXCEL_DIR = os.path.join(os.path.dirname(__file__), "excel_data")
@@ -598,6 +600,73 @@ async def handle_notaris_text(update: Update, context: ContextTypes.DEFAULT_TYPE
 
 
 async def proses_setelah_notaris(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
+    """Mengecek apakah asuransi kerugian dibebankan (KUR > 100jt atau KUM >= 50jt)."""
+    jenis = context.user_data.get("jenis_kredit", "KUR")
+    limit = context.user_data.get("limit", 0.0)
+
+    dibebankan, _ = is_asuransi_kerugian_dibebankan(jenis, limit)
+    if dibebankan:
+        keyboard = [
+            [
+                InlineKeyboardButton("🏠 Bangunan / Tempat Usaha (FLEXAS)", callback_data="KERUGIAN_KEBAKARAN"),
+            ],
+            [
+                InlineKeyboardButton("🚗 Mobil Pribadi (TLO)", callback_data="KERUGIAN_MOBIL"),
+                InlineKeyboardButton("🏍️ Sepeda Motor (TLO)", callback_data="KERUGIAN_MOTOR"),
+            ],
+            [
+                InlineKeyboardButton("🚚 Truk / Pick Up (TLO)", callback_data="KERUGIAN_TRUK"),
+            ]
+        ]
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        pesan = (
+            "👉 <b>Pilih Jenis Agunan untuk Asuransi Kerugian:</b>\n\n"
+            "<i>(Sesuai simulasi AXA MyBiz Mikro, silakan pilih jaminan agunan calon debitur):</i>"
+        )
+        if is_callback:
+            await event_source.edit_message_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+        else:
+            await event_source.message.reply_text(pesan, parse_mode="HTML", reply_markup=reply_markup)
+        return STATE_KERUGIAN
+    else:
+        context.user_data["jenis_kerugian"] = "kebakaran"
+        return await proses_setelah_kerugian(event_source, context, is_callback=is_callback)
+
+
+async def handle_kerugian_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani pemilihan tombol jenis agunan kerugian."""
+    query = update.callback_query
+    await query.answer()
+
+    data = query.data
+    if data == "KERUGIAN_MOBIL":
+        context.user_data["jenis_kerugian"] = "mobil"
+    elif data == "KERUGIAN_MOTOR":
+        context.user_data["jenis_kerugian"] = "motor"
+    elif data == "KERUGIAN_TRUK":
+        context.user_data["jenis_kerugian"] = "truk"
+    else:
+        context.user_data["jenis_kerugian"] = "kebakaran"
+
+    return await proses_setelah_kerugian(query, context, is_callback=True)
+
+
+async def handle_kerugian_text(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+    """Menangani input teks untuk jenis agunan kerugian."""
+    text = update.message.text.strip().lower()
+    if "mobil" in text:
+        context.user_data["jenis_kerugian"] = "mobil"
+    elif "motor" in text:
+        context.user_data["jenis_kerugian"] = "motor"
+    elif "truk" in text or "truck" in text or "pick" in text:
+        context.user_data["jenis_kerugian"] = "truk"
+    else:
+        context.user_data["jenis_kerugian"] = "kebakaran"
+
+    return await proses_setelah_kerugian(update, context, is_callback=False)
+
+
+async def proses_setelah_kerugian(event_source, context: ContextTypes.DEFAULT_TYPE, is_callback: bool = False) -> int:
     """Mengecek apakah pengajuan adalah KUR > 100jt untuk menanyakan kartu BPJSTK."""
     jenis = context.user_data.get("jenis_kredit", "KUR")
     limit = context.user_data.get("limit", 0.0)
@@ -763,6 +832,10 @@ def main():
             STATE_NOTARIS: [
                 CallbackQueryHandler(handle_notaris_callback, pattern="^NOTARIS_"),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_notaris_text)
+            ],
+            STATE_KERUGIAN: [
+                CallbackQueryHandler(handle_kerugian_callback, pattern="^KERUGIAN_"),
+                MessageHandler(filters.TEXT & ~filters.COMMAND, handle_kerugian_text)
             ],
             STATE_BPJSTK: [
                 CallbackQueryHandler(handle_bpjstk_callback, pattern="^BPJSTK_"),
