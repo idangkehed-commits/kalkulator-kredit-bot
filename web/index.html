@@ -419,6 +419,60 @@
         border: 1px solid #ccc;
       }
     }
+
+    :root { --primary:#234e80; --primary-dark:#102c51; --primary-light:#eef4fa; --bg:#f3f5f9; --text:#243247; --text-muted:#65758a; --border:#dfe5ed; --radius:18px; --shadow:0 4px 18px #102c5105; }
+    body { padding-bottom:104px; line-height:1.5; }
+    header { background:#102c51; border-bottom:3px solid #e8b54a; box-shadow:none; padding:18px 24px; }
+    .header-content { max-width:1112px; gap:16px; }
+    .header-title h1 { font-size:19px; letter-spacing:-.4px; }
+    .header-title p { color:#c6d5e8; font-size:12px; }
+    header a { background:#ffffff12!important; color:#e6edf7!important; border:1px solid #ffffff30; box-shadow:none!important; border-radius:9px!important; padding:8px 12px!important; white-space:nowrap; }
+    main { max-width:1160px; padding:0 24px; margin:28px auto; }
+    .workspace-intro { display:flex; align-items:center; justify-content:space-between; gap:12px; color:#65758a; font-size:13px; margin-bottom:16px; }
+    #btnExample { border:1px solid #d4dfec; background:#eef3fa; color:#234e80; border-radius:8px; font-size:12px; font-weight:600; padding:8px 13px; cursor:pointer; white-space:nowrap; }
+    .type-tabs { background:#e7edf5; padding:5px; margin-bottom:24px; max-width:544px; }
+    .type-tab { min-height:44px; font-size:14px; }
+    .type-tab.active { background:#102c51; color:white; box-shadow:none; }
+    .card { padding:24px; margin-bottom:20px; border-color:#dfe5ed; }
+    .card-title { font-size:14px; padding-bottom:16px; border-bottom:1px solid #edf0f4; margin-bottom:20px; letter-spacing:.02em; }
+    .form-group { margin-bottom:20px; }
+    label { font-size:13px; color:#30445c; margin-bottom:7px; }
+    input[type=text], input[type=number], input[type=date], select { min-height:46px; font-size:16px; background:white; border:1px solid #ccd6e2; border-radius:10px; }
+    input:focus, select:focus { outline:2px solid #4677ad; outline-offset:2px; }
+    .chip { border-radius:8px; padding:6px 10px; font-size:12px; font-weight:500; background:#f7f9fc; border-color:#dce4ef; }
+    .chip.active { background:#234e80; border-color:#234e80; }
+    .radio-card { border-radius:10px; min-height:44px; display:flex; align-items:center; justify-content:center; font-size:13px; }
+    .radio-card.active { color:#234e80; background:#eef4fa; border-color:#7898bc; }
+    .result-hero { background:#102c51; border-radius:18px; padding:26px; box-shadow:none; text-align:left; margin-bottom:20px; }
+    .result-header { color:#c6d5e8; font-size:13px; font-weight:500; }
+    .angsuran-val { font-size:34px; font-weight:700; line-height:1.3; margin:14px 0; letter-spacing:-.7px; font-variant-numeric:tabular-nums; }
+    .bunga-badge { font-size:12px; line-height:1.7; background:#ffffff12; color:#e0eafa; border-radius:8px; padding:8px 12px; }
+    .breakdown-table { width:100%; font-size:13px; }
+    .breakdown-table td { padding:16px 0; border-bottom:1px solid #edf0f4; vertical-align:top; }
+    .breakdown-table td:first-child { padding-right:14px; }
+    .breakdown-table td:last-child { white-space:nowrap; text-align:right; font-variant-numeric:tabular-nums; font-weight:600; color:#243b53; }
+    .item-sub { font-size:11px; line-height:1.7; color:#738298; }
+    .total-row { background:transparent; }
+    .total-row td { border-top:2px solid #dfe5ed; color:#102c51; }
+    #cardTopupCair { background:#eef4fa; border:1px solid #d6e2f0; border-radius:12px; padding:20px; margin-top:20px; }
+    #titleDanaCair { color:#355474; font-size:12px; }
+    #resDanaCair { color:#123c60; font-size:28px; font-weight:700; font-variant-numeric:tabular-nums; margin:12px 0; }
+    #subDanaCair { color:#61758a!important; font-size:12px!important; line-height:1.7; }
+    .action-bar { max-width:1160px; margin:auto; gap:12px; padding:14px 24px; border-top:1px solid #dfe5ed; box-shadow:0 -4px 18px #102c5105; }
+    .btn { border-radius:10px; min-height:46px; font-size:13px; }
+    .btn-copy { background:#243247; color:white; border-color:#243247; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    [hidden] { display:none!important; }
+    @media(min-width:960px) { .workspace-grid { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start; } .result-column { position:sticky; top:110px; } }
+    @media(max-width:480px) {
+      header { padding:14px 16px; } .header-title h1 { font-size:16px; } .header-title p { font-size:11px; }
+      header a { padding:8px!important; font-size:11px!important; }
+      main { padding:0 12px; margin:18px auto; } .card { padding:18px; }
+      .workspace-intro { font-size:12px; } .type-tabs { margin-bottom:18px; }
+      .result-hero { padding:22px; } .angsuran-val { font-size:30px; }
+      .action-bar { padding:12px; } .breakdown-table { font-size:12px; }
+    }
+    @media print { header,.input-column,.workspace-intro,.type-tabs,.action-bar { display:none!important; } .workspace-grid { display:block; } .result-column { position:static; } body { padding:0; } .card { break-inside:avoid; } }
   </style>
 </head>
 <body>
@@ -439,7 +493,7 @@
   </header>
 
   <main>
-    <p style="color:var(--text-muted);font-size:0.8rem">Mulai dengan data Anda sendiri. <button type="button" id="btnExample">Isi Contoh</button></p>
+    <p class="workspace-intro">Mulai dengan data Anda sendiri. <button type="button" id="btnExample">Isi Contoh</button></p>
     <!-- Jenis Kredit Selector -->
     <div class="type-tabs">
       <button class="type-tab" data-type="KUR">KUR</button>
@@ -447,13 +501,7 @@
       <button class="type-tab" data-type="TOPUP_KUM">Top Up KUM</button>
     </div>
 
-    <!-- Result Hero Banner -->
-    <div class="result-hero">
-      <div class="result-header" id="resTitle">Pengajuan KUR</div>
-      <div class="angsuran-val" id="resAngsuran">Rp 0 / bln</div>
-      <div class="bunga-badge" id="resInfoBunga">Bunga Efektif 6.00% per tahun</div>
-    </div>
-
+    <div class="workspace-grid"><div class="input-column">
     <!-- Form Input Card -->
     <div class="card">
       <div class="card-title">📝 Parameter Pinjaman</div>
@@ -600,6 +648,14 @@
       </div>
     </div>
 
+    </div><div class="result-column">
+    <!-- Result Hero Banner -->
+    <div class="result-hero">
+      <div class="result-header" id="resTitle">Pengajuan KUR</div>
+      <div class="angsuran-val" id="resAngsuran">Rp 0 / bln</div>
+      <div class="bunga-badge" id="resInfoBunga">Bunga Efektif 6.00% per tahun</div>
+    </div>
+
     <!-- Rincian Biaya Card -->
     <div class="card">
       <div class="card-title">📊 Rincian Biaya Calon Debitur</div>
@@ -663,6 +719,7 @@
         </div>
       </div>
     </div>
+    </div></div>
   </main>
 
   <!-- Bottom Floating Action Toolbar -->
