@@ -63,6 +63,68 @@
     .safe-bottom {
       padding-bottom: env(safe-area-inset-bottom, 16px);
     }
+
+    #resultDetailsBox { margin-top:0!important; }
+    .example-button { margin:0!important; font-size:12px!important; }
+    #tenorComparisonContainer { overflow-x:auto; }
+    #tenorComparisonContainer td, #tenorComparisonContainer th { white-space:nowrap; }
+    #tierDetectionBox .text-xs.sm\:text-sm { font-size:12px!important; }
+    :root { color-scheme: light; }
+    body { background:#f3f5f9!important; color:#243247; user-select:text; }
+    body > header { background:#102c51!important; box-shadow:none!important; border-bottom:3px solid #e8b54a; }
+    body > header > div { max-width:1160px!important; padding:18px 24px!important; }
+    header h1 { font-size:19px!important; letter-spacing:-.4px; }
+    header p { font-size:12px!important; color:#c6d5e8!important; }
+    #ksmWorkspace { max-width:1160px!important; padding:28px 24px 48px!important; }
+    #parameterCard, #resultDetailsBox > .bg-white { border:1px solid #dfe5ed!important; border-radius:18px!important; box-shadow:0 4px 18px #102c5105!important; padding:24px!important; }
+    #parameterCard > div:first-child { padding-bottom:16px!important; }
+    #parameterCard h2, #resultDetailsBox h3 { font-size:13px!important; color:#263e59!important; letter-spacing:.06em; }
+    #parameterCard label { font-size:13px!important; line-height:1.5; margin-bottom:7px; }
+    #parameterCard input:not([type=hidden]), #parameterCard select { min-height:46px; font-size:14px!important; border-radius:10px!important; border-color:#ccd6e2!important; background:#fff!important; }
+    input:focus, select:focus { outline:2px solid #4677ad!important; outline-offset:2px; }
+    #parameterCard p { font-size:11px!important; line-height:1.65; color:#65758a; }
+    #parameterCard .grid { gap:16px; }
+    .example-button { display:block; font:600 12px inherit; color:#234e80; background:#eef3fa; border:1px solid #d4dfec; border-radius:8px; padding:7px 12px; margin:0 0 10px; cursor:pointer; }
+    .example-button:hover { background:#e0eaf7; }
+    #resultDetailsBox > div:first-child { background:#102c51!important; border-radius:18px!important; box-shadow:none!important; padding:26px!important; }
+    #resMaxLimit { font-size:34px!important; font-weight:700!important; font-variant-numeric:tabular-nums; }
+    #resMonthlyInstallment, #resSimulatedPlafon { display:block; font-size:17px!important; margin-top:6px; font-variant-numeric:tabular-nums; }
+    #resultDetailsBox > div:first-child .absolute { display:none; }
+    #resultDetailsBox > .bg-white:has(#disburseNetAmount) > .space-y-2 > div { display:grid; grid-template-columns:minmax(0,1fr) auto; align-items:start; gap:14px; padding:13px 0; border-bottom:1px solid #edf0f4; font-size:13px; line-height:1.65; }
+    #resultDetailsBox > .bg-white:has(#disburseNetAmount) > .space-y-2 > div > span:last-child { white-space:nowrap; font-variant-numeric:tabular-nums; color:#243b53!important; }
+    #resultDetailsBox > .bg-white:has(#disburseNetAmount) > .space-y-2 > div > span:first-child { display:block; }
+    #resultDetailsBox small { display:block; font-size:11px; color:#738298; }
+    #disburseNetAmount { font-size:28px!important; line-height:1.3; color:#123c60!important; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    div:has(> #disburseNetAmount) { display:flex; flex-direction:column; align-items:flex-start; gap:14px; padding:20px!important; background:#eef4fa!important; border-color:#d6e2f0!important; border-radius:12px!important; }
+    div:has(> #disburseNetAmount) .uppercase { color:#355474!important; font-size:11px!important; }
+    div:has(> #disburseNetAmount) .text-emerald-600 { color:#61758a!important; font-size:12px!important; }
+    #resultErrorBox { background:#fff!important; border:1px solid #dfe5ed!important; border-radius:18px!important; padding:32px 24px!important; }
+    #resultErrorBox > div { background:#edf3fa!important; color:#42658c!important; }
+    #resultErrorMessage { font-size:13px!important; line-height:1.8; }
+    #resultDetailsBox button { min-height:44px; border-radius:10px!important; }
+    #resultDetailsBox table { font-size:12px!important; }
+    @media(min-width:960px) {
+      #ksmWorkspace { display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:24px; align-items:start; }
+      #ksmWorkspace > * { margin-top:0!important; min-width:0; }
+    }
+    @media(max-width:480px) {
+      body > header > div { padding:14px 16px!important; }
+      header h1 { font-size:16px!important; }
+      header .space-x-3 { gap:8px; }
+      header .space-x-3 > * { margin-left:0!important; }
+      header button, header a { padding:8px!important; }
+      #ksmWorkspace { padding:18px 12px 32px!important; }
+      #parameterCard, #resultDetailsBox > .bg-white { padding:18px!important; }
+      #parameterCard input:not([type=hidden]), #parameterCard select { font-size:16px!important; }
+      #resMaxLimit { font-size:30px!important; }
+      #resMonthlyInstallment, #resSimulatedPlafon { font-size:15px!important; }
+      #disburseNetAmount { font-size:26px!important; }
+    }
+    @media print {
+      body > header, #parameterCard, #resultDetailsBox button, #matrixModal { display:none!important; }
+      #ksmWorkspace { display:block!important; max-width:none!important; padding:0!important; }
+      #resultDetailsBox > div { break-inside:avoid; }
+    }
   </style>
 </head>
 <body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between antialiased">
@@ -98,16 +160,16 @@
   </header>
 
   <!-- Main Content Container (Mobile Viewport) -->
-  <main class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
+  <main id="ksmWorkspace" class="flex-1 max-w-md w-full mx-auto p-4 space-y-4">
 
     <!-- Card 1: Input Form Parameters -->
-    <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-4">
+    <div id="parameterCard" class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-4">
       
       <div class="flex items-center justify-between border-b border-slate-100 pb-2">
         <h2 class="text-xs font-bold text-slate-600 uppercase tracking-wider flex items-center gap-1.5">
           <i class="fa-solid fa-sliders text-mandiri-blue"></i> Parameter Nasabah
         </h2>
-        <span class="text-[11px] text-slate-400">Kredit Serbaguna</span>
+        <button type="button" onclick="fillKsmExample()" class="example-button">Isi Contoh</button>
       </div>
 
       <!-- 1. Kategori Instansi -->
@@ -116,7 +178,7 @@
           Kategori Instansi / Perusahaan
         </label>
         <div class="relative">
-          <button type="button" onclick="fillKsmExample()" class="text-xs text-blue-700 underline mb-2">Isi Contoh</button><select id="categorySelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
+          <select id="categorySelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
             <!-- Populated via app.js -->
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
@@ -357,7 +419,7 @@
         <div class="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mx-auto text-xl">
           <i class="fa-solid fa-ban"></i>
         </div>
-        <h3 class="font-bold text-slate-800 text-sm">Pengajuan Belum Memenuhi Syarat</h3>
+        <h3 class="font-bold text-slate-800 text-sm">Periksa parameter simulasi</h3>
         <p id="resultErrorMessage" class="text-xs text-slate-600 leading-relaxed max-w-sm mx-auto"></p>
       </div>
 
@@ -412,6 +474,63 @@
 
           </div>
         </div>
+
+        <!-- Card 4: Rincian Potongan Biaya & Dana Cair Bersih -->
+        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <i class="fa-solid fa-receipt text-mandiri-blue"></i> Estimasi Pencairan Bersih
+            </h3>
+            <span class="text-[10px] bg-blue-50 text-mandiri-blue font-bold px-2 py-0.5 rounded-full border border-blue-200">
+              Biaya Awal
+            </span>
+          </div>
+
+          <!-- Rincian Biaya List -->
+          <div class="space-y-2 text-xs">
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Plafon yang Disimulasikan</span>
+              <span id="disbursePlafon" class="font-bold text-slate-800">Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span class="flex items-center gap-1">
+                Biaya Provisi & Admin (<span id="disburseProvisiPercent">1.08%</span>)
+              </span>
+              <span id="disburseProvisiAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span class="flex items-center gap-1">
+                Biaya Asuransi Jiwa AXA (<span id="disburseInsuranceRate" class="font-semibold text-emerald-700">0 ‰</span>)
+                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]" title="Dihitung otomatis sesuai usia & tenor"></i>
+              </span>
+              <span id="disburseInsuranceAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Saldo Blokiran <small>(1× angsuran)</small></span>
+              <span id="disburseBlockedAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
+          </div>
+
+          <!-- Net Disbursed Highlight -->
+          <div class="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between">
+            <div>
+              <span class="text-[10px] text-emerald-800 uppercase font-bold tracking-wider block">Estimasi Pencairan Bersih</span>
+              <span class="text-[11px] text-emerald-600">Dana yang dapat digunakan setelah biaya dan blokiran</span>
+            </div>
+            <div id="disburseNetAmount" class="text-base sm:text-lg font-black text-emerald-700">
+              Rp 0
+            </div>
+          </div>
+
+          <!-- Info Status Asuransi Aktif -->
+          <div class="p-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-900 flex items-start gap-2">
+            <i class="fa-solid fa-shield-halved text-emerald-600 text-sm mt-0.5"></i>
+            <div>
+              <strong>Asuransi Jiwa CLP Otomatis:</strong> Tarif premi dihitung presisi berdasarkan matriks resmi <em>AXA Mandiri Consumer Loan Protection</em> sesuai usia (<span id="infoBorrowerAge" class="font-bold">30</span> thn) dan tenor pinjaman.
+            </div>
+          </div>
+        </div>
+
 
         <!-- Card 3: Analisis Rasio DBR (Debt Burden Ratio) -->
         <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3.5">
@@ -473,61 +592,6 @@
 
         </div>
 
-        <!-- Card 4: Rincian Potongan Biaya & Dana Cair Bersih -->
-        <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200/80 space-y-3">
-          <div class="flex items-center justify-between border-b border-slate-100 pb-2">
-            <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <i class="fa-solid fa-receipt text-mandiri-blue"></i> Estimasi Pencairan Bersih
-            </h3>
-            <span class="text-[10px] bg-blue-50 text-mandiri-blue font-bold px-2 py-0.5 rounded-full border border-blue-200">
-              Biaya Awal
-            </span>
-          </div>
-
-          <!-- Rincian Biaya List -->
-          <div class="space-y-2 text-xs">
-            <div class="flex justify-between items-center text-slate-600">
-              <span>Plafon Pinjaman Disetujui</span>
-              <span id="disbursePlafon" class="font-bold text-slate-800">Rp 0</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-600">
-              <span class="flex items-center gap-1">
-                Biaya Provisi & Admin (<span id="disburseProvisiPercent">1.08%</span>)
-              </span>
-              <span id="disburseProvisiAmount" class="font-semibold text-red-600">- Rp 0</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-600">
-              <span class="flex items-center gap-1">
-                Biaya Asuransi Jiwa AXA (<span id="disburseInsuranceRate" class="font-semibold text-emerald-700">0 ‰</span>)
-                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]" title="Dihitung otomatis sesuai usia & tenor"></i>
-              </span>
-              <span id="disburseInsuranceAmount" class="font-semibold text-red-600">- Rp 0</span>
-            </div>
-            <div class="flex justify-between items-center text-slate-600">
-              <span>Saldo Blokiran (1× Angsuran)</span>
-              <span id="disburseBlockedAmount" class="font-semibold text-red-600">- Rp 0</span>
-            </div>
-          </div>
-
-          <!-- Net Disbursed Highlight -->
-          <div class="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between">
-            <div>
-              <span class="text-[10px] text-emerald-800 uppercase font-bold tracking-wider block">Estimasi Pencairan Bersih</span>
-              <span class="text-[11px] text-emerald-600">Setelah dikurangi biaya dan saldo blokiran</span>
-            </div>
-            <div id="disburseNetAmount" class="text-base sm:text-lg font-black text-emerald-700">
-              Rp 0
-            </div>
-          </div>
-
-          <!-- Info Status Asuransi Aktif -->
-          <div class="p-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-900 flex items-start gap-2">
-            <i class="fa-solid fa-shield-halved text-emerald-600 text-sm mt-0.5"></i>
-            <div>
-              <strong>Asuransi Jiwa CLP Otomatis:</strong> Tarif premi dihitung presisi berdasarkan matriks resmi <em>AXA Mandiri Consumer Loan Protection</em> sesuai usia (<span id="infoBorrowerAge" class="font-bold">30</span> thn) dan tenor pinjaman.
-            </div>
-          </div>
-        </div>
 
       </div>
 
@@ -1610,3 +1674,4 @@ document.addEventListener('DOMContentLoaded', () => {
   </script>
 </body>
 </html>
+
