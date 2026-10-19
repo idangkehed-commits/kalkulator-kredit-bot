@@ -503,13 +503,17 @@
               </span>
               <span id="disburseInsuranceAmount" class="font-semibold text-red-600">- Rp 0</span>
             </div>
+            <div class="flex justify-between items-center text-slate-600">
+              <span>Saldo Blokiran (1× Angsuran)</span>
+              <span id="disburseBlockedAmount" class="font-semibold text-red-600">- Rp 0</span>
+            </div>
           </div>
 
           <!-- Net Disbursed Highlight -->
           <div class="p-3 bg-emerald-50/80 rounded-2xl border border-emerald-200 flex items-center justify-between">
             <div>
-              <span class="text-[10px] text-emerald-800 uppercase font-bold tracking-wider block">Estimasi Dana Masuk Rekening</span>
-              <span class="text-[11px] text-emerald-600">Setelah dikurangi potongan biaya</span>
+              <span class="text-[10px] text-emerald-800 uppercase font-bold tracking-wider block">Estimasi Pencairan Bersih</span>
+              <span class="text-[11px] text-emerald-600">Setelah dikurangi biaya dan saldo blokiran</span>
             </div>
             <div id="disburseNetAmount" class="text-base sm:text-lg font-black text-emerald-700">
               Rp 0
@@ -1203,7 +1207,8 @@ function calculateKsm() {
   }
   const insuranceAmount = Math.round(simulatedPlafon * (insuranceRate / 1000));
   const totalFees = provisiAdminAmount + insuranceAmount;
-  const netDisbursedAmount = Math.max(0, simulatedPlafon - totalFees);
+  const blockedBalanceAmount = Math.round(monthlyInstallment);
+  const netDisbursedAmount = Math.max(0, simulatedPlafon - totalFees - blockedBalanceAmount);
 
   // Simpan data state untuk ekspor / WA
   currentCalculation = {
@@ -1232,6 +1237,7 @@ function calculateKsm() {
     insuranceRate,
     provisiAdminAmount,
     insuranceAmount,
+    blockedBalanceAmount,
     netDisbursedAmount
   };
 
@@ -1359,6 +1365,7 @@ function renderResultSuccess(calc) {
   if (elDisburseInsuranceAmt) {
     elDisburseInsuranceAmt.textContent = calc.insuranceAmount > 0 ? `- ${formatRupiah(calc.insuranceAmount)}` : 'Rp 0';
   }
+  document.getElementById('disburseBlockedAmount').textContent = `- ${formatRupiah(calc.blockedBalanceAmount)}`;
   if (elDisburseNetAmt) elDisburseNetAmt.textContent = formatRupiah(calc.netDisbursedAmount);
   if (elInfoAge) elInfoAge.textContent = calc.borrowerAge;
 
@@ -1504,7 +1511,8 @@ function shareWhatsApp() {
 ------------------------------------
 🏷️ *Provisi & Admin (${c.provisiAdminRate}%)*: -${formatRupiah(c.provisiAdminAmount)}
 🛡️ *Asuransi Jiwa*: ${c.insuranceAmount > 0 ? '-' + formatRupiah(c.insuranceAmount) : 'Rp 0 (Sesuai Tabel)'}
-💰 *Estimasi Dana Bersih Masuk Rekening*: *${formatRupiah(c.netDisbursedAmount)}*
+🔒 *Saldo Blokiran (1× Angsuran)*: -${formatRupiah(c.blockedBalanceAmount)}
+💰 *Estimasi Pencairan Bersih*: *${formatRupiah(c.netDisbursedAmount)}*
 
 _Catatan: Simulasi ini merupakan estimasi awal. Keputusan akhir mengacu pada hasil verifikasi & ketentuan Bank Mandiri._`;
 
