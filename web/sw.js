@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kredit-kalkulator-v12';
+const CACHE_NAME = 'kredit-kalkulator-v13';
 const ASSETS = [
   '/',
   '/index.html',

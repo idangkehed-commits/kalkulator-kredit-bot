@@ -439,9 +439,10 @@
   </header>
 
   <main>
+    <p style="color:var(--text-muted);font-size:0.8rem">Mulai dengan data Anda sendiri. <button type="button" id="btnExample">Isi Contoh</button></p>
     <!-- Jenis Kredit Selector -->
     <div class="type-tabs">
-      <button class="type-tab active" data-type="KUR">KUR</button>
+      <button class="type-tab" data-type="KUR">KUR</button>
       <button class="type-tab" data-type="KUM">KUM</button>
       <button class="type-tab" data-type="TOPUP_KUM">Top Up KUM</button>
     </div>
@@ -463,7 +464,7 @@
         <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 10 untuk 10 Jt, 110 untuk 110 Jt s/d 500)</div>
         <div class="input-wrapper">
           <span class="input-prefix">Rp</span>
-          <input type="text" id="inpLimit" class="has-prefix" value="110.000.000" inputmode="numeric">
+          <input type="text" id="inpLimit" class="has-prefix" value="" inputmode="numeric">
         </div>
         <div class="chips-group" id="limitChips">
           <span class="chip" data-val="10000000">10 Jt</span>
@@ -482,7 +483,7 @@
         <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 20 untuk 20 Jt)</div>
         <div class="input-wrapper">
           <span class="input-prefix">Rp</span>
-          <input type="text" id="inpSisaBade" class="has-prefix" value="20.000.000" inputmode="numeric">
+          <input type="text" id="inpSisaBade" class="has-prefix" value="" inputmode="numeric">
         </div>
         <div class="chips-group">
           <span class="chip" data-val="10000000">10 Jt</span>
@@ -503,7 +504,7 @@
 
       <div class="form-group">
         <label id="lblBunga">Suku Bunga</label>
-        <input type="number" id="inpBunga" value="6.0" step="0.1">
+        <input type="number" id="inpBunga" value="" step="0.1">
         <div class="chips-group" id="bungaChipsKur">
           <span class="chip active" data-val="6">6% (Pengajuan ke-1)</span>
           <span class="chip" data-val="7">7% (Pengajuan ke-2)</span>
@@ -519,7 +520,7 @@
       <!-- Tenor -->
       <div class="form-group">
         <label>Tenor Pinjaman (Bulan)</label>
-        <input type="number" id="inpTenor" value="36">
+        <input type="number" id="inpTenor" value="">
         <div class="chips-group" id="tenorChips">
           <span class="chip" data-val="12">12 Bulan (1 Th)</span>
           <span class="chip" data-val="24">24 Bulan (2 Th)</span>
@@ -536,12 +537,12 @@
 
       <div class="form-group">
         <label>Nama Calon Debitur</label>
-        <input type="text" id="inpNama" value="Budi Santoso">
+        <input type="text" id="inpNama" value="">
       </div>
 
       <div class="form-group">
         <label>Tanggal Lahir</label>
-        <input type="date" id="inpTglLahir" value="1988-03-15">
+        <input type="date" id="inpTglLahir" value="">
         <div style="font-size: 0.75rem; color: var(--primary); font-weight: 600; margin-top: 4px;" id="badgeUmur">Umur: 38 tahun</div>
       </div>
 
@@ -549,7 +550,7 @@
         <label>Biaya Notaris (Opsional)</label>
         <div class="input-wrapper">
           <span class="input-prefix">Rp</span>
-          <input type="text" id="inpNotaris" class="has-prefix" value="1.250.000" inputmode="numeric">
+          <input type="text" id="inpNotaris" class="has-prefix" value="" inputmode="numeric">
         </div>
       </div>
 
@@ -576,7 +577,7 @@
           <div style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 5px;">💡 Cukup ketik angka jutanya (contoh: 150 untuk 150 Jt)</div>
           <div class="input-wrapper">
             <span class="input-prefix">Rp</span>
-            <input type="text" id="inpNominalKerugian" class="has-prefix" value="110.000.000" inputmode="numeric">
+            <input type="text" id="inpNominalKerugian" class="has-prefix" value="" inputmode="numeric">
           </div>
           <div class="chips-group" id="nominalKerugianChips">
             <span class="chip" data-val="25000000">25 Jt</span>
@@ -733,11 +734,15 @@
     };
 
     // State Aplikasi
-    let currentType = 'KUR'; // 'KUR', 'KUM', 'TOPUP_KUM'
-    let currentTipeBunga = 'efektif'; // 'flat' atau 'efektif'
+    let currentType = ''; // 'KUR', 'KUM', 'TOPUP_KUM'
+    let currentTipeBunga = ''; // 'flat' atau 'efektif'
     let punyaBpjstk = false;
     let promoAdmin = false;
 
+    const savedRates = new Map();
+    const rateKey = () => currentType + ':' + (currentType === 'KUR' ? 'efektif' : currentTipeBunga);
+    function rememberRate() { savedRates.set(rateKey(), document.getElementById('inpBunga').value); }
+    function restoreRate() { document.getElementById('inpBunga').value = savedRates.get(rateKey()) ?? ''; }
     // Helpers
     function parseRupiah(str) {
       if (!str) return 0;
@@ -785,6 +790,22 @@
 
     // Kalkulasi Utama
     function calculate() {
+      const ready = currentType && (currentType === 'KUR' || currentTipeBunga) &&
+        ['inpLimit','inpBunga','inpTenor','inpTglLahir'].every(id => document.getElementById(id).value !== '') &&
+        parseRupiah(document.getElementById('inpLimit').value) > 0 &&
+        Number(document.getElementById('inpTenor').value) > 0 &&
+        Number(document.getElementById('inpBunga').value) >= 0;
+      document.getElementById('resAdmin').closest('.card').hidden = !ready;
+      document.getElementById('btnShareWa').disabled = !ready;
+      document.getElementById('btnCopy').disabled = !ready;
+      if (!ready) {
+        window._currentSummaryText = '';
+        document.getElementById('resTitle').textContent = 'Lengkapi parameter pinjaman';
+        document.getElementById('resAngsuran').textContent = '—';
+        document.getElementById('resInfoBunga').textContent = 'Pilih jenis kredit, skema bunga, lalu isi plafon, bunga, tenor, dan tanggal lahir.';
+        document.getElementById('badgeUmur').textContent = '';
+        return;
+      }
       let limit = parseRupiah(document.getElementById('inpLimit').value);
       if (limit > 0 && limit <= 500) limit = limit * 1000000;
 
@@ -1081,7 +1102,9 @@
       tab.addEventListener('click', () => {
         document.querySelectorAll('.type-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
+        rememberRate();
         currentType = tab.dataset.type;
+        restoreRate();
 
         const isKur = (currentType === 'KUR');
         const isTopUp = (currentType === 'TOPUP_KUM');
@@ -1092,16 +1115,16 @@
         if (isKur) {
           document.getElementById('bungaChipsKur').style.display = 'flex';
           document.getElementById('bungaChipsKum').style.display = 'none';
-          document.getElementById('inpBunga').value = '6.0';
+
           document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
         } else {
           document.getElementById('bungaChipsKur').style.display = 'none';
           document.getElementById('bungaChipsKum').style.display = 'flex';
           if (currentTipeBunga === 'flat') {
-            document.getElementById('inpBunga').value = '1.0';
+
             document.getElementById('lblBunga').textContent = 'Suku Bunga (% per bulan Flat)';
           } else {
-            document.getElementById('inpBunga').value = '12.0';
+
             document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
           }
         }
@@ -1115,12 +1138,14 @@
       rc.addEventListener('click', () => {
         document.querySelectorAll('#groupTipeBunga .radio-card').forEach(c => c.classList.remove('active'));
         rc.classList.add('active');
+        rememberRate();
         currentTipeBunga = rc.dataset.bungaType;
+        restoreRate();
         if (currentTipeBunga === 'flat') {
-          document.getElementById('inpBunga').value = '1.0';
+
           document.getElementById('lblBunga').textContent = 'Suku Bunga (% per bulan Flat)';
         } else {
-          document.getElementById('inpBunga').value = '12.0';
+
           document.getElementById('lblBunga').textContent = 'Suku Bunga (% per tahun Efektif)';
         }
         calculate();
@@ -1166,6 +1191,13 @@
       }
     });
 
+    document.querySelectorAll('.chip.active, #groupTipeBunga .radio-card.active').forEach(el => el.classList.remove('active'));
+    document.getElementById('btnExample').addEventListener('click', () => {
+      document.querySelector('[data-type="KUR"]').click();
+      const values = {inpLimit:'110.000.000',inpSisaBade:'20.000.000',inpBunga:'6',inpTenor:'36',inpNama:'Contoh Debitur',inpTglLahir:'1988-03-15',inpNotaris:'1.250.000',inpNominalKerugian:'110.000.000'};
+      Object.entries(values).forEach(([id,value]) => document.getElementById(id).value=value);
+      calculate();
+    });
     // Initial calculation on page load
     calculate();
   </script>

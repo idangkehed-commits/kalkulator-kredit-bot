@@ -116,7 +116,7 @@
           Kategori Instansi / Perusahaan
         </label>
         <div class="relative">
-          <select id="categorySelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
+          <button type="button" onclick="fillKsmExample()" class="text-xs text-blue-700 underline mb-2">Isi Contoh</button><select id="categorySelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-medium rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
             <!-- Populated via app.js -->
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-slate-500">
@@ -136,7 +136,7 @@
             type="text" 
             id="incomeInput" 
             inputmode="numeric"
-            value="12.000.000"
+            value=""
             placeholder="10.000.000"
             class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-bold rounded-2xl pl-10 pr-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition"
           >
@@ -160,7 +160,7 @@
             type="text" 
             id="obligationInput" 
             inputmode="numeric"
-            value="0"
+            value=""
             placeholder="0"
             class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-sm font-semibold rounded-2xl pl-10 pr-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition"
           >
@@ -177,7 +177,7 @@
         <input 
           type="number" 
           id="contractMonthsInput" 
-          value="48"
+          value=""
           min="1"
           max="60"
           placeholder="Maks 60 bulan"
@@ -223,7 +223,7 @@
               id="tenorInput" 
               min="1" 
               max="180" 
-              value="36"
+              value=""
               placeholder="Ketik bulan (misal: 18, 30)"
               class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-12"
             >
@@ -255,7 +255,7 @@
               type="number" 
               id="interestRateInput" 
               step="0.05"
-              value="9.75"
+              value=""
               placeholder="9.75"
               class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7"
             >
@@ -277,7 +277,7 @@
               type="number" 
               id="provisiAdminRateInput" 
               step="0.01"
-              value="1.08"
+              value=""
               placeholder="1.08"
               class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-bold rounded-2xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-7"
             >
@@ -295,7 +295,7 @@
             <input 
               type="number" 
               id="borrowerAgeInput" 
-              value="30"
+              value=""
               min="18"
               max="65"
               placeholder="30"
@@ -314,7 +314,7 @@
         </label>
         <div class="relative">
           <select id="insurancePlanSelect" class="w-full bg-slate-50 border border-slate-300 text-slate-800 text-xs font-semibold rounded-2xl px-3.5 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-mandiri-blue focus:bg-white transition pr-8">
-            <option value="plan1_ksm22" selected>Plan 1 - KSM 22% (Standar AXA)</option>
+            <option value="">Pilih program asuransi...</option><option value="plan1_ksm22">Plan 1 - KSM 22% (Standar AXA)</option>
             <option value="plan1_ksm30">Plan 1 - KSM 30%</option>
             <option value="plan2_ksm22">Plan 2 - KSM 22%</option>
             <option value="none">Tanpa Asuransi (0 ‰)</option>
@@ -986,6 +986,22 @@ function setSpecialDbr(dbrVal) {
 }
 window.setSpecialDbr = setSpecialDbr;
 
+function fillKsmExample() {
+  document.getElementById('categorySelect').value = 'bumd';
+  calculateKsm();
+  const values = {incomeInput:'12.000.000',obligationInput:'0',tenorInput:'60',interestRateInput:'9.75',provisiAdminRateInput:'1.08',borrowerAgeInput:'30',insurancePlanSelect:'plan1_ksm22',requestedPlafonInput:''};
+  Object.entries(values).forEach(([id,value]) => document.getElementById(id).value=value);
+  calculateKsm();
+}
+let previousCategory = '';
+let manualInterest = '';
+function incompleteKsm(message) {
+  currentCalculation = null;
+  document.getElementById('tierDetectionBox').innerHTML = '';
+  document.getElementById('tenorWarning')?.classList.add('hidden');
+  document.getElementById('tenorYearLabel').textContent = document.getElementById('tenorInput').value ? formatTenorText(Number(document.getElementById('tenorInput').value)) : 'Pilih tenor';
+  renderResultError(message);
+}
 // Core Calculation Function
 function calculateKsm() {
   const categoryId = document.getElementById('categorySelect').value;
@@ -999,7 +1015,12 @@ function calculateKsm() {
   const requestedPlafonInput = parseRupiah(document.getElementById('requestedPlafonInput').value);
 
   const category = TIER_CATEGORIES.find(c => c.id === categoryId);
-  if (!category) return;
+  if (!category) { incompleteKsm('Pilih kategori dan lengkapi parameter untuk melihat simulasi.'); return; }
+  if (categoryId !== previousCategory) {
+    if (previousCategory !== 'special_pricing') manualInterest = document.getElementById('interestRateInput').value;
+    document.getElementById('interestRateInput').value = category.isSpecialPricing ? '8.25' : manualInterest;
+    previousCategory = categoryId;
+  }
 
   // Toggle input PPPK Sisa Kontrak
   const pppkContainer = document.getElementById('pppkContractContainer');
@@ -1035,6 +1056,15 @@ function calculateKsm() {
     interestRate = parseFloat(interestInput.value) || 0;
   }
 
+  const required = ['incomeInput','tenorInput','interestRateInput','provisiAdminRateInput','insurancePlanSelect'];
+  if (document.getElementById('insurancePlanSelect').value !== 'none') required.push('borrowerAgeInput');
+  if (category.isPppk) required.push('contractMonthsInput');
+  if (required.some(id => document.getElementById(id).value === '') || income <= 0 ||
+      !Number.isInteger(Number(tenorInputElem.value)) || Number(tenorInputElem.value) <= 0 ||
+      interestRate < 0 || Number(document.getElementById('provisiAdminRateInput').value) < 0) {
+    incompleteKsm('Lengkapi penghasilan, tenor, bunga, biaya, dan data asuransi. Input Anda tetap tersimpan saat diedit.');
+    return;
+  }
   // 1. Cek Income Tier
   let matchedTier = null;
   let isUnderMinIncome = false;
@@ -1087,10 +1117,12 @@ function calculateKsm() {
   let selectedTenor = inputTenor;
   if (selectedTenor > effectiveMaxTenor) {
     if (tenorWarning) {
-      tenorWarning.textContent = `⚠️ Melebihi batas kategori (Maks: ${effectiveMaxTenor} Bulan / ${(effectiveMaxTenor/12).toFixed(1)} Thn). Menggunakan ${effectiveMaxTenor} Bulan.`;
+      tenorWarning.textContent = `⚠️ Melebihi batas kategori (Maks: ${effectiveMaxTenor} Bulan / ${(effectiveMaxTenor/12).toFixed(1)} Thn). Silakan sesuaikan tenor Anda.`;
       tenorWarning.classList.remove('hidden');
     }
-    selectedTenor = effectiveMaxTenor;
+    currentCalculation = null;
+    renderResultError('Tenor yang Anda isi melebihi batas ' + effectiveMaxTenor + ' bulan. Silakan sesuaikan tenor; input tidak diubah otomatis.');
+    return;
   } else {
     if (tenorWarning) tenorWarning.classList.add('hidden');
   }
@@ -1159,7 +1191,7 @@ function calculateKsm() {
   const actualDbrPercent = (totalObligationNew / income) * 100;
 
   // 7. Potongan Biaya Provisi & Admin (Default 1.08% dari limit) & Asuransi Jiwa AXA Mandiri
-  const provisiAdminRate = parseFloat(document.getElementById('provisiAdminRateInput')?.value) || 1.08;
+  const provisiAdminRate = Number(document.getElementById('provisiAdminRateInput').value);
   const borrowerAge = parseInt(document.getElementById('borrowerAgeInput')?.value, 10) || 30;
   const insurancePlan = document.getElementById('insurancePlanSelect')?.value || 'plan1_ksm22';
 
@@ -1528,7 +1560,7 @@ function setupEvents() {
   }
 
   // Populate Categories
-  categorySelect.innerHTML = '';
+  categorySelect.innerHTML = '<option value="">Pilih kategori...</option>';
   TIER_CATEGORIES.forEach(cat => {
     const opt = document.createElement('option');
     opt.value = cat.id;
