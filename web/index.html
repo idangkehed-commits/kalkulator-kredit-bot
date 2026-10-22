@@ -603,6 +603,14 @@
       </div>
 
       <!-- Promo Biaya Admin & Provisi -->
+      <div class="form-group" id="groupDiskonJiwa" hidden>
+        <label for="inpDiskonJiwaKur">Asuransi Jiwa Kredit — KUR</label>
+        <label style="display:flex;align-items:center;gap:10px;font-weight:400">
+          <input type="checkbox" id="inpDiskonJiwaKur" style="width:18px;height:18px;flex-shrink:0">
+          Ajukan diskon premi 10%
+        </label>
+        <p style="font-size:12px;color:var(--text-muted)">Untuk usia di atas 40 tahun. Simulasi diskon KUR mengikuti persetujuan pengajuan.</p>
+      </div>
       <div class="form-group" id="groupPromoAdmin">
         <label>Promo Biaya Admin & Provisi</label>
         <div class="radio-toggle">
@@ -847,6 +855,9 @@
 
     // Kalkulasi Utama
     function calculate() {
+      const ageForDiscount = document.getElementById('inpTglLahir').value ? hitungUmur(document.getElementById('inpTglLahir').value) : 0;
+      document.getElementById('groupDiskonJiwa').hidden = currentType !== 'KUR' || ageForDiscount <= 40;
+      document.getElementById('inpDiskonJiwaKur').disabled = currentType !== 'KUR' || ageForDiscount <= 40;
       const ready = currentType && (currentType === 'KUR' || currentTipeBunga) &&
         ['inpLimit','inpBunga','inpTenor','inpTglLahir'].every(id => document.getElementById(id).value !== '') &&
         parseRupiah(document.getElementById('inpLimit').value) > 0 &&
@@ -934,9 +945,15 @@
         }
       }
 
-      // 2. Asuransi Jiwa Kredit (Premi Dasar murni)
+      // 2. Asuransi Jiwa Kredit: diskon 10% usia > 40, KUR sesuai pilihan pengajuan.
       const jiwaRate = hitungJiwaRate(umur, tenorBulan);
-      const biayaJiwa = Math.round(jiwaRate * limit / 1000.0);
+      const premiJiwaDasar = Math.round(jiwaRate * limit / 1000.0);
+      const pakaiDiskonJiwa = umur > 40 && (!isKur || document.getElementById('inpDiskonJiwaKur').checked);
+      const biayaJiwa = pakaiDiskonJiwa ? Math.round(premiJiwaDasar * 0.9) : premiJiwaDasar;
+      const diskonJiwa = premiJiwaDasar - biayaJiwa;
+      const ketJiwa = pakaiDiskonJiwa
+        ? 'Premi dasar ' + formatRupiah(premiJiwaDasar) + ' − diskon 10% (' + formatRupiah(diskonJiwa) + ')' + (isKur ? ' • Simulasi pengajuan diskon' : ' • Otomatis untuk usia > 40 tahun')
+        : 'Premi dasar tanpa diskon (Rate: ' + jiwaRate.toFixed(2) + '‰)';
 
       // 3. Asuransi Kerugian (AXA MyBiz Mikro murni tanpa polis dan materai)
       let biayaKerugian = 0;
@@ -1022,7 +1039,7 @@
       document.getElementById('subAdmin').textContent = ketAdmin;
       document.getElementById('resAdmin').textContent = formatRupiah(biayaAdmin);
 
-      document.getElementById('subJiwa').textContent = `Premi Dasar (Rate: ${jiwaRate.toFixed(2)}‰)`;
+      document.getElementById('subJiwa').textContent = ketJiwa;
       document.getElementById('resJiwa').textContent = formatRupiah(biayaJiwa);
 
       document.getElementById('subKerugian').textContent = ketKerugian;
@@ -1054,7 +1071,7 @@
       summaryText += `Angsuran: ${formatRupiah(angsuran)} / bulan (${infoBunga})\n\n`;
       summaryText += `Rincian Biaya yang Harus Disiapkan Calon Debitur:\n`;
       summaryText += `1. Admin & Provisi       : ${formatRupiah(biayaAdmin)} (${ketAdmin})\n`;
-      summaryText += `2. Asuransi Jiwa Kredit  : ${formatRupiah(biayaJiwa)}\n`;
+      summaryText += `2. Asuransi Jiwa Kredit  : ${formatRupiah(biayaJiwa)} (${ketJiwa})\n`;
       summaryText += `3. Asuransi Kerugian     : ${formatRupiah(biayaKerugian)}\n`;
       summaryText += `4. Biaya Notaris         : ${formatRupiah(biayaNotaris)}\n`;
       summaryText += `5. Asuransi Sijitu       : ${formatRupiah(biayaSijitu)} (${ketSijitu})\n`;
@@ -1109,6 +1126,7 @@
     setupCurrencyInput(document.getElementById('inpNotaris'));
     setupCurrencyInput(document.getElementById('inpNominalKerugian'));
 
+    document.getElementById('inpDiskonJiwaKur').addEventListener('change', calculate);
     // Event Listeners for inputs
     ['inpBunga', 'inpTenor', 'inpTglLahir', 'inpNama', 'selKerugian'].forEach(id => {
       document.getElementById(id).addEventListener('input', calculate);
