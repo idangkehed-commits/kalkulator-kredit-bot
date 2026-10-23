@@ -501,7 +501,7 @@
             <div class="flex justify-between items-center text-slate-600">
               <span class="flex items-center gap-1">
                 Biaya Asuransi Jiwa AXA (<span id="disburseInsuranceRate" class="font-semibold text-emerald-700">0 ‰</span>)
-                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]" title="Dihitung otomatis sesuai usia & tenor"></i>
+                <i class="fa-solid fa-circle-check text-emerald-500 text-[10px]" title="Dihitung otomatis sesuai usia & tenor"></i><small id="insuranceDiscountNote" class="block text-slate-500 mt-1"></small>
               </span>
               <span id="disburseInsuranceAmount" class="font-semibold text-red-600">- Rp 0</span>
             </div>
@@ -526,7 +526,7 @@
           <div class="p-2.5 bg-emerald-50/70 border border-emerald-200/80 rounded-xl text-[11px] text-emerald-900 flex items-start gap-2">
             <i class="fa-solid fa-shield-halved text-emerald-600 text-sm mt-0.5"></i>
             <div>
-              <strong>Asuransi Jiwa CLP Otomatis:</strong> Tarif premi dihitung presisi berdasarkan matriks resmi <em>AXA Mandiri Consumer Loan Protection</em> sesuai usia (<span id="infoBorrowerAge" class="font-bold">30</span> thn) dan tenor pinjaman.
+              <strong>Asuransi Jiwa CLP Otomatis:</strong> Tarif premi dihitung presisi berdasarkan matriks resmi <em>AXA Mandiri Consumer Loan Protection</em> dengan diskon premi otomatis 10% untuk usia di atas 40 tahun, sesuai usia (<span id="infoBorrowerAge" class="font-bold">30</span> thn) dan tenor pinjaman.
             </div>
           </div>
         </div>
@@ -1269,7 +1269,10 @@ function calculateKsm() {
   if (insurancePlan !== 'none') {
     insuranceRate = getAxaInsuranceRate(insurancePlan, borrowerAge, selectedTenor);
   }
-  const insuranceAmount = Math.round(simulatedPlafon * (insuranceRate / 1000));
+  const insuranceBaseAmount = Math.round(simulatedPlafon * (insuranceRate / 1000));
+  const insuranceDiscountPercent = borrowerAge > 40 && insurancePlan !== 'none' ? 10 : 0;
+  const insuranceAmount = insuranceDiscountPercent ? Math.round(insuranceBaseAmount * 0.9) : insuranceBaseAmount;
+  const insuranceDiscountAmount = insuranceBaseAmount - insuranceAmount;
   const totalFees = provisiAdminAmount + insuranceAmount;
   const blockedBalanceAmount = Math.round(monthlyInstallment);
   const netDisbursedAmount = Math.max(0, simulatedPlafon - totalFees - blockedBalanceAmount);
@@ -1300,6 +1303,9 @@ function calculateKsm() {
     insurancePlan,
     insuranceRate,
     provisiAdminAmount,
+    insuranceBaseAmount,
+    insuranceDiscountPercent,
+    insuranceDiscountAmount,
     insuranceAmount,
     blockedBalanceAmount,
     netDisbursedAmount
@@ -1425,6 +1431,9 @@ function renderResultSuccess(calc) {
   if (elDisbursePlafon) elDisbursePlafon.textContent = formatRupiah(calc.simulatedPlafon);
   if (elDisburseProvisiPct) elDisburseProvisiPct.textContent = `${calc.provisiAdminRate}%`;
   if (elDisburseProvisiAmt) elDisburseProvisiAmt.textContent = `- ${formatRupiah(calc.provisiAdminAmount)}`;
+  document.getElementById('insuranceDiscountNote').textContent = calc.insuranceDiscountPercent
+    ? 'Premi dasar ' + formatRupiah(calc.insuranceBaseAmount) + ' − diskon 10% (' + formatRupiah(calc.insuranceDiscountAmount) + ') • Otomatis untuk usia > 40 tahun'
+    : (calc.insurancePlan === 'none' ? 'Tanpa asuransi jiwa' : 'Premi tanpa diskon');
   if (elDisburseInsuranceRate) elDisburseInsuranceRate.textContent = `${calc.insuranceRate.toFixed(2)} ‰`;
   if (elDisburseInsuranceAmt) {
     elDisburseInsuranceAmt.textContent = calc.insuranceAmount > 0 ? `- ${formatRupiah(calc.insuranceAmount)}` : 'Rp 0';
@@ -1574,7 +1583,7 @@ function shareWhatsApp() {
 📑 *RINCIAN BIAYA & PENCAIRAN BERSIH*
 ------------------------------------
 🏷️ *Provisi & Admin (${c.provisiAdminRate}%)*: -${formatRupiah(c.provisiAdminAmount)}
-🛡️ *Asuransi Jiwa*: ${c.insuranceAmount > 0 ? '-' + formatRupiah(c.insuranceAmount) : 'Rp 0 (Sesuai Tabel)'}
+🛡️ *Asuransi Jiwa*: ${c.insuranceAmount > 0 ? '-' + formatRupiah(c.insuranceAmount) : 'Rp 0 (Sesuai Tabel)'}${c.insuranceDiscountPercent ? ' (diskon otomatis 10%; premi dasar ' + formatRupiah(c.insuranceBaseAmount) + ')' : ''}
 🔒 *Saldo Blokiran (1× Angsuran)*: -${formatRupiah(c.blockedBalanceAmount)}
 💰 *Estimasi Pencairan Bersih*: *${formatRupiah(c.netDisbursedAmount)}*
 
