@@ -1,7 +1,11 @@
-const CACHE_NAME = 'kredit-kalkulator-v19';
+const CACHE_NAME = 'kredit-kalkulator-v23';
 const ASSETS = [
   '/',
   '/index.html',
+  '/analisis.html',
+  '/analisis.css',
+  '/analisis.js',
+  '/usaha-engine.js',
   '/ksm',
   '/manifest.json',
   '/ksm-manifest.json',
@@ -40,7 +44,7 @@ self.addEventListener('fetch', (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
-        .catch(() => caches.match(event.request).then((res) => res || caches.match('/index.html')))
+        .catch(() => caches.match(event.request, { ignoreSearch: true }).then((res) => res || caches.match('/index.html')))
     );
     return;
   }

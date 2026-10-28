@@ -494,6 +494,8 @@
 
   <main>
     <p class="workspace-intro">Mulai dengan data Anda sendiri. <button type="button" id="btnExample">Isi Contoh</button></p>
+    <a id="openAnalysis" href="/analisis.html" style="display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;margin:0 0 18px;border:1px solid #d4dfec;border-radius:10px;background:#eef4fa;color:#234e80;text-decoration:none;font-size:13px;font-weight:600">Analisis usaha & kemampuan bayar <span aria-hidden="true">↗</span></a>
+    <p id="analysisOrigin" hidden style="font-size:12px;color:#426080;margin-bottom:14px">Parameter pengajuan ini berasal dari simulasi analisis usaha. Lengkapi data nasabah untuk rincian biaya pencairan.</p>
     <!-- Jenis Kredit Selector -->
     <div class="type-tabs">
       <button class="type-tab" data-type="KUR">KUR</button>
@@ -855,6 +857,18 @@
 
     // Kalkulasi Utama
     function calculate() {
+      const analysisParams = new URLSearchParams();
+      if (['KUR','KUM'].includes(currentType)) {
+        analysisParams.set('produk',currentType);
+        analysisParams.set('skema',currentType==='KUR'?'efektif':currentTipeBunga);
+        const amount=parseRupiah(document.getElementById('inpLimit').value);
+        if(amount>0)analysisParams.set('plafon',String(amount<=500?amount*1000000:amount));
+        for(const [key,id] of [['tenor','inpTenor'],['bunga','inpBunga']]) {
+          const val=document.getElementById(id).value;
+          if(val!=='' && Number.isFinite(Number(val)) && Number(val)>=0)analysisParams.set(key,val);
+        }
+      }
+      document.getElementById('openAnalysis').href='/analisis.html'+(analysisParams.size?'?'+analysisParams:'');
       const ageForDiscount = document.getElementById('inpTglLahir').value ? hitungUmur(document.getElementById('inpTglLahir').value) : 0;
       document.getElementById('groupDiskonJiwa').hidden = currentType !== 'KUR' || ageForDiscount <= 40;
       document.getElementById('inpDiskonJiwaKur').disabled = currentType !== 'KUR' || ageForDiscount <= 40;
@@ -1273,6 +1287,17 @@
       Object.entries(values).forEach(([id,value]) => document.getElementById(id).value=value);
       calculate();
     });
+    const fromAnalysis = new URLSearchParams(location.search);
+    if (fromAnalysis.get('analisis')==='1' && ['KUR','KUM'].includes(fromAnalysis.get('produk'))) {
+      const product=fromAnalysis.get('produk');
+      document.querySelector('[data-type="'+product+'"]').click();
+      if(product==='KUM')document.querySelector('[data-bunga-type="'+(fromAnalysis.get('skema')==='flat'?'flat':'efektif')+'"]').click();
+      for(const [key,id] of [['plafon','inpLimit'],['tenor','inpTenor'],['bunga','inpBunga']]) {
+        const value=fromAnalysis.get(key);
+        if(value!==null && value!=='' && Number.isFinite(Number(value)) && Number(value)>=0)document.getElementById(id).value=key==='plafon'?Math.round(Number(value)).toLocaleString('id-ID'):value;
+      }
+      document.getElementById('analysisOrigin').hidden=false;
+    }
     // Initial calculation on page load
     calculate();
   </script>

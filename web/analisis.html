@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#102c51"><title>Analisis Usaha · Kredit Mikro</title>
+  <link rel="stylesheet" href="/analisis.css">
+  <script src="/usaha-engine.js" defer></script><script src="/analisis.js" defer></script>
+</head>
+<body>
+<header><div class="topbar"><a href="/" class="brand"><span class="brand-mark">M</span><span>Kredit Mikro<small>Analisis usaha & kemampuan angsuran</small></span></a><a class="back" href="/">Kalkulator biaya <span aria-hidden="true">↗</span></a></div></header>
+<main>
+  <div class="intro"><div><div class="eyebrow">KUR / KUM</div><h1>Analisis usaha KUR & KUM</h1><p>Hitung data usaha atau terapkan simulasi langsung ke input.</p></div><button id="example" class="button secondary">Isi contoh Excel</button></div>
+  <div class="layout">
+  <form id="inputs" novalidate>
+    <section class="card">
+      <div class="section-head"><div><span class="step">01</span><h2>Rencana pengajuan</h2></div><span class="tag" data-state-label>DATA AKTUAL</span></div>
+      <div class="grid two">
+        <label>Produk kredit<select id="product"><option value="">Pilih produk</option><option value="KUR">KUR</option><option value="KUM">KUM</option></select></label>
+        <label>Plafon pengajuan <span class="unit">Rp</span><input id="principal" type="text" inputmode="numeric" autocomplete="off" placeholder="Contoh: 100.000.000" data-money></label>
+        <label>Tenor <span class="unit">bulan</span><input id="months" type="number" min="1" max="600" step="1" placeholder="36"></label>
+        <label>Skema bunga<select id="scheme"><option value="efektif">Efektif per tahun</option><option value="flat">Flat per bulan</option></select></label>
+        <label>Bunga <span class="unit" id="rateUnit">% per tahun</span><input id="rate" type="number" min="0" step="any" placeholder="Contoh: 6"></label>
+      </div>
+      <p class="hint">KUR memakai anuitas efektif. KUM mengikuti skema bunga yang Anda pilih.</p>
+    </section>
+    <section class="card">
+      <div class="section-head"><div><span class="step">02</span><h2>Penjualan & pembelian</h2></div></div>
+      <div class="grid two"><label>Jenis usaha<select id="sector"><option value="">Pilih jenis usaha</option><option value="jasa">Jasa</option><option value="makan">Warung makan</option><option value="pakaian">Pakaian jadi</option><option value="grosir">Grosir</option><option value="sembako">Kelontong / sembako</option><option value="produksi">Produksi</option></select></label>
+      <label>Hari usaha <span class="unit">hari / bulan</span><input id="days" type="number" min="1" max="31" step="1" value="25"></label></div>
+      <div id="sectorNote" class="notice">Pilih jenis usaha untuk melihat rentang laba acuannya.</div>
+      <p class="hint">Banyaknya terjual adalah jumlah unit per hari. Angka 25 pada contoh Excel berarti 25 hari usaha per bulan.</p>
+      <div id="items" class="rows"></div>
+      <button type="button" class="button secondary add" id="addItem">+ Tambah barang / jasa</button>
+      <details class="explain"><summary>Cara menghitung laba barang</summary><p>Penjualan = harga jual × banyaknya terjual per hari × hari usaha. Pembelian memakai harga beli dengan banyaknya yang sama. Persentase laba = (harga jual − harga beli) ÷ harga beli. Untuk jasa, harga beli diisi biaya langsung per unit layanan.</p></details>
+    </section>
+    <section class="card">
+      <div class="section-head"><div><span class="step">03</span><h2>Biaya & pendapatan lain</h2></div><span class="tag">Per bulan</span></div>
+      <div id="expenses" class="rows compact"></div>
+      <button type="button" class="button secondary add" id="addExpense">+ Tambah pengeluaran</button>
+      <label class="income-field">Pendapatan tambahan sebelum pengakuan <span class="unit">Rp / bulan</span><input id="otherIncome" type="text" inputmode="numeric" value="0" data-money></label>
+      <p class="hint">Pendapatan tambahan diakui 50% secara otomatis. Biaya pada contoh Excel adalah biaya usaha; pengeluaran lain dapat ditambahkan dengan keterangannya.</p>
+    </section>
+    <section class="card">
+      <div class="section-head"><div><span class="step">04</span><h2>Angsuran di luar Mandiri</h2></div></div>
+      <p class="hint">Isi kewajiban angsuran bulanan di bank lain maupun nonbank, bukan saldo pokok utangnya. Biarkan daftar kosong jika tidak ada.</p>
+      <div id="debts" class="rows compact"></div>
+      <button type="button" class="button secondary add" id="addDebt">+ Tambah angsuran lain</button>
+    </section>
+  </form>
+  <div class="outputs">
+    <section class="card blank" id="emptyState"><span class="empty-icon" aria-hidden="true">∑</span><h2>Mulai dari data usaha.</h2><p>Lengkapi rencana pengajuan, barang yang dijual, dan pengeluaran. Hasil aktual muncul di sini.</p><ul id="validation"></ul></section>
+    <div id="actual" hidden aria-live="polite">
+      <section class="hero">
+        <div class="hero-top"><span data-state-label>DATA AKTUAL</span><span id="status" class="status"></span></div>
+        <h2 id="resultTitle"></h2><p id="resultReason"></p>
+        <div class="hero-metrics"><div><span>Kapasitas angsuran Mandiri</span><strong id="capacity"></strong><small>35% pendapatan − angsuran lain</small></div><div><span>Cicilan pengajuan</span><strong id="installment"></strong><small id="coverage"></small></div></div>
+      </section>
+      <section class="card">
+        <div class="section-head"><div><h2>Ringkasan per bulan</h2></div><span class="tag" data-state-label>DATA AKTUAL</span></div>
+        <dl class="ledger" id="ledger"></dl>
+        <div class="range-box"><span>Rentang kapasitas agar REKOM OK</span><strong id="targetRange"></strong><small>125–140% dari cicilan, sesuai sheet Hitungan</small></div>
+        <div id="marginNote" class="notice"></div>
+        <details class="explain"><summary>Lihat rincian barang & laba</summary><div class="table-scroll"><table><thead><tr><th>Barang / jasa</th><th>Unit/hari</th><th>Penjualan/bln</th><th>Laba harga</th></tr></thead><tbody id="itemResults"></tbody></table></div></details>
+        <details class="explain"><summary>Dasar perhitungan & limit</summary><div id="method"></div><p>Rentang laba usaha ditampilkan sebagai pemeriksaan terpisah. Status REKOM OK mengikuti rasio pada template. Perhitungan agunan dan sheet LKN/Sheet3 tidak digunakan.</p></details>
+      </section>
+    </div>
+    <section class="card alternatives" id="alternativesCard">
+      <div class="section-head"><div><span class="step">05</span><h2>Simulasi alternatif</h2></div><span class="tag">Langsung mengisi input</span></div>
+      <p>Generate langsung mengganti input dengan alternatif pertama yang memenuhi rentang rekomendasi. Memilih alternatif lain juga langsung mengisi ulang input.</p>
+      <button class="button primary full" id="generate" disabled>Generate & terapkan REKOM OK</button>
+      <p class="hint">Harga dan jumlah hasil simulasi adalah target asumsi, bukan transaksi aktual. Gunakan batas penjualan tiap barang jika kapasitas usaha terbatas.</p>
+      <div id="simulation" hidden><label>Alternatif yang diterapkan<select id="candidate"></select></label><div id="scenarioDetail"></div></div>
+      <button id="restore" class="button secondary full" hidden>Kembalikan data awal</button><div id="scenarioNotes"></div>
+    </section>
+    <div class="actions"><button id="copy" class="button secondary" disabled>Salin analisis</button><button id="print" class="button secondary" disabled>Cetak / simpan PDF</button></div>
+    <p id="feedback" role="status"></p>
+    <p class="source-note">Acuan: Perhitungan Master Manpin, sheet Hitungan dan LIMIT MAX. DSR 35%; pendapatan tambahan diakui 50%. Hasil adalah simulasi kriteria template.</p>
+  </div>
+  </div>
+</main>
+</body></html>
