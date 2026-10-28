@@ -71,8 +71,8 @@
         it.qty=Math.ceil(it.qty);
         if(it.sell!==s.items[i].sell||it.buy!==s.items[i].buy){
           const roundedSell=Math.ceil(it.sell/1000)*1000;
-          // Keep unit profit when rounding other price alternatives; validate markup again below.
-          it.buy=Math.round(it.buy+roundedSell-it.sell);
+          // Adjust for selling-price rounding, then round purchase costs up to Rp100 and revalidate.
+          it.buy=Math.ceil((it.buy+roundedSell-it.sell)/100)*100;
           it.sell=roundedSell;
         }
       });
@@ -82,7 +82,7 @@
     }
     // Round selling prices first, adjust purchase prices to sector markup, then solve daily quantities.
     let both=copy(s),markup=(sec.min+sec.max)/2;
-    both.items.forEach(it=>{it.sell=Math.ceil(it.buy*(1+markup)/1000)*1000;it.buy=Math.round(it.sell/(1+markup));});
+    both.items.forEach(it=>{it.sell=Math.ceil(it.buy*(1+markup)/1000)*1000;it.buy=Math.ceil(it.sell/(1+markup)/100)*100;});
     const neededGross=targetProfit+a.expense;
     const grossAt=scale=>both.items.reduce((t,it)=>t+(it.sell-it.buy)*Math.min((it.qty||1)*scale,it.maxQty??Infinity)*s.days,0);
     if(neededGross>0) {
@@ -91,7 +91,7 @@
       if(grossAt(high)>=neededGross) {
         let low=0;for(let i=0;i<70;i++){const mid=(low+high)/2;if(grossAt(mid)<neededGross)low=mid;else high=mid;}
         both.items.forEach(it=>{it.qty=Math.ceil((it.qty||1)*high);});
-        add('Harga jual & penjualan harian','Harga jual dibulatkan ke atas ke ribuan rupiah; harga beli menyesuaikan rentang laba usaha. Jumlah terjual per hari dibulatkan ke atas.',both);
+        add('Harga jual & penjualan harian','Harga jual dibulatkan ke atas ke ribuan rupiah; harga beli menyesuaikan rentang laba usaha dan dibulatkan ke atas ke ratusan rupiah. Jumlah terjual per hari dibulatkan ke atas.',both);
       } else notes.push('Harga jual & penjualan: kapasitas penjualan maksimum yang diisi belum cukup untuk target pengajuan.');
     } else notes.push('Harga jual & penjualan: target laba tidak membutuhkan penjualan positif pada asumsi pendapatan tambahan saat ini.');
     // Required selling prices for unchanged quantities and purchase prices.

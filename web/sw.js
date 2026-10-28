@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kredit-kalkulator-v23';
+const CACHE_NAME = 'kredit-kalkulator-v28';
 const ASSETS = [
   '/',
   '/index.html',
@@ -6,6 +6,7 @@ const ASSETS = [
   '/analisis.css',
   '/analisis.js',
   '/usaha-engine.js',
+  '/lkn.js',
   '/ksm',
   '/manifest.json',
   '/ksm-manifest.json',

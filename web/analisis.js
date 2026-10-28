@@ -32,6 +32,7 @@
     const sec=Usaha.sectors[$('sector').value];
     $('sectorNote').textContent=sec?`${sec.name}: laba harga ${percent(sec.min)}–${percent(sec.max)} dari harga beli. Rentang ini dipakai untuk alternatif harga.`:'Pilih jenis usaha untuk melihat rentang laba acuannya.';
     actualState=state();actualResult=Usaha.analyze(actualState);
+    document.dispatchEvent(new CustomEvent("usaha:change",{detail:actualState}));
     const a=actualResult;
     $('emptyState').hidden=a.valid;$('actual').hidden=!a.valid;
     $('generate').disabled=!a.valid;$('copy').disabled=!a.valid;$('print').disabled=!a.valid;
@@ -123,6 +124,7 @@
     for(const [key,id] of [['plafon','principal'],['tenor','months'],['bunga','rate']])if(q.has(key)&&Number.isFinite(Number(q.get(key)))&&Number(q.get(key))>=0)$(id).value=id==='principal'?number(Number(q.get(key))):q.get(key);
     $('scheme').value=q.get('produk')==='KUR'?'efektif':q.get('skema')==='flat'?'flat':'efektif';$('scheme').disabled=q.get('produk')==='KUR';$('rateUnit').textContent=$('scheme').value==='flat'?'% per bulan':'% per tahun';
   }
+  document.addEventListener("lkn:request",()=>document.dispatchEvent(new CustomEvent("usaha:change",{detail:state()})));
   renderRows();update();
   if('serviceWorker' in navigator)navigator.serviceWorker.register('/sw.js').catch(()=>{});
 })();

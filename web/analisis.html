@@ -4,7 +4,7 @@
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#102c51"><title>Analisis Usaha · Kredit Mikro</title>
   <link rel="stylesheet" href="/analisis.css">
-  <script src="/usaha-engine.js" defer></script><script src="/analisis.js" defer></script>
+  <script src="/usaha-engine.js" defer></script><script src="/analisis.js" defer></script><script src="/lkn.js" defer></script>
 </head>
 <body>
 <header><div class="topbar"><a href="/" class="brand"><span class="brand-mark">M</span><span>Kredit Mikro<small>Analisis usaha & kemampuan angsuran</small></span></a><a class="back" href="/">Kalkulator biaya <span aria-hidden="true">↗</span></a></div></header>
@@ -72,6 +72,16 @@
       <div id="simulation" hidden><label>Alternatif yang diterapkan<select id="candidate"></select></label><div id="scenarioDetail"></div></div>
       <button id="restore" class="button secondary full" hidden>Kembalikan data awal</button><div id="scenarioNotes"></div>
     </section>
+<section class="card" id="lknCard">
+<div class="section-head"><div><span class="step">06</span><h2>LKN Manpin Phase 4</h2></div><span class="tag">Catatan per tanggal</span></div>
+<p>Isi daftar pembelian terlebih dahulu (tanggal 1, 3, 5, 7, 9, 11, 13), lalu daftar penjualan (tanggal 2, 4, 6, 8, 10, 12, 14). Tanggal dapat diedit.</p>
+<button type="button" class="button secondary full" id="lknFill">Isi dari hitungan barang saat ini</button>
+<p class="hint">Pengisian otomatis membuat variasi pembelian dan penjualan per tanggal dengan rata-rata tiap daftar sesuai hitungan barang. Sesuaikan tanggal dan nominal dengan catatan usaha. Setelah input utama berubah, klik tombol ini lagi jika ingin memperbarui tabel.</p>
+<details class="explain" open><summary>Input pembelian & penjualan</summary><div id="lknRows" class="rows"></div></details>
+<p id="lknMessage" class="notice" role="status"></p>
+<div id="lknSummary" hidden><span id="lknStatus" class="status"></span><dl id="lknLedger" class="ledger"></dl>
+<p class="hint">Rumus LKN: rata-rata pembelian (total ÷ 7) dan rata-rata penjualan (total ÷ 7) masing-masing dikalikan hari usaha/bulan. Laba bersih = penjualan − pembelian − biaya usaha. Kapasitas = laba bersih × 35% − angsuran lain. REKOM LIMIT jika kapasitas lebih besar dari cicilan. Pendapatan tambahan tidak dimasukkan, mengikuti rumus sheet LKN.</p></div>
+</section>
     <div class="actions"><button id="copy" class="button secondary" disabled>Salin analisis</button><button id="print" class="button secondary" disabled>Cetak / simpan PDF</button></div>
     <p id="feedback" role="status"></p>
     <p class="source-note">Acuan: Perhitungan Master Manpin, sheet Hitungan dan LIMIT MAX. DSR 35%; pendapatan tambahan diakui 50%. Hasil adalah simulasi kriteria template.</p>
